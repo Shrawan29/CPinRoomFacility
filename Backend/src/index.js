@@ -34,12 +34,13 @@ const corsOptions = {
       "http://localhost:5173",
       "http://localhost:5174",
       "http://127.0.0.1:5173",
-      "http://127.0.0.1:5174",
-      "https://cpinroomfacility.vercel.app",
-      "https://c-pin-room-facility.vercel.app",
-      "https://c-pin-room-facility-rahl.vercel.app"
+      "http://127.0.0.1:5174"
     ];
-    if (!origin || allowedOrigins.includes(origin)) {
+    
+    // Allow all vercel.app domains (handles preview, production, and all variants)
+    const isVercelApp = origin && origin.includes(".vercel.app");
+    
+    if (!origin || allowedOrigins.includes(origin) || isVercelApp) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
