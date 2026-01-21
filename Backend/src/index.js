@@ -29,11 +29,18 @@ connectDB();
 const app = express();
 
 const corsOptions = {
-  origin: "*",
-  credentials: false,
+  origin: [
+    "https://c-pin-room-facility.vercel.app",
+    "http://localhost:5173"
+  ],
+  credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 };
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 
 app.use(cors(corsOptions));
 app.use(express.json());
