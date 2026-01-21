@@ -36,7 +36,8 @@ const corsOptions = {
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
       "https://cpinroomfacility.vercel.app",
-      "https://c-pin-room-facility.vercel.app"
+      "https://c-pin-room-facility.vercel.app",
+      "https://c-pin-room-facility-rahl.vercel.app"
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
