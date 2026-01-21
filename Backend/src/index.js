@@ -29,10 +29,17 @@ connectDB();
 const app = express();
 
 const corsOptions = {
-  origin: [
-    "https://c-pin-room-facility.vercel.app",
-    "http://localhost:5173"
-  ],
+  origin: (origin, callback) => {
+    // Allow localhost and all vercel.app domains
+    const isLocalhost = origin && origin.includes("localhost");
+    const isVercel = origin && origin.includes(".vercel.app");
+    
+    if (!origin || isLocalhost || isVercel) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
