@@ -29,11 +29,8 @@ connectDB();
 const app = express();
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow all origins in production (will be restricted by auth middleware)
-    callback(null, true);
-  },
-  credentials: true,
+  origin: "*",
+  credentials: false,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 };
