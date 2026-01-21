@@ -10,7 +10,7 @@ export const adminLogin = async (email, password) => {
 };
 
 export const createAdmin = async (adminData) => {
-  const res = await api.post("/admin/create", adminData);
+  const res = await api.post("/admin/manage/create", adminData);
 
   return res.data;
 };
