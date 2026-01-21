@@ -4,30 +4,27 @@ import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
 
 export default function KitchenDashboard() {
-  const { token } = useAdminAuth();
+  const { token, loading: authLoading } = useAdminAuth();
   const [orders, setOrders] = useState([]);
   const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
-    if (!token) return;
+    if (authLoading || !token) return;
 
     const fetchOrders = async () => {
-      const res = await api.get("/admin/kitchen/orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get("/admin/kitchen/orders");
       setOrders(res.data || []);
     };
 
     fetchOrders();
-  }, [token]);
+  }, [token, authLoading]);
 
   const updateStatus = async (orderId, status) => {
     setUpdating(orderId);
 
     const res = await api.patch(
       `/admin/kitchen/orders/${orderId}/status`,
-      { status },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { status }
     );
 
     setOrders((prev) =>

@@ -4,7 +4,7 @@ import { useAdminAuth } from "../../context/AdminAuthContext";
 import api from "../../services/api";
 
 export default function CheckOut() {
-  const { token } = useAdminAuth();
+  const { token, loading: authLoading } = useAdminAuth();
 
   const [stays, setStays] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,15 +13,14 @@ export default function CheckOut() {
 
   /* 🔹 Fetch ACTIVE stays */
   useEffect(() => {
-    if (!token) return;
+    if (authLoading || !token) {
+      setLoading(authLoading);
+      return;
+    }
 
     const fetchStays = async () => {
       try {
-        const res = await api.get("/admin/stay/active", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get("/admin/stay/active");
 
         setStays(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
@@ -32,7 +31,7 @@ export default function CheckOut() {
     };
 
     fetchStays();
-  }, [token]);
+  }, [token, authLoading]);
 
   /* 🔹 Handle checkout */
   const handleCheckout = async (roomNumber) => {

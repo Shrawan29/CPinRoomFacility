@@ -10,6 +10,11 @@ import CheckOut from "./pages/admin/CheckOut";
 import Reports from "./pages/admin/Reports";
 import KitchenDashboard from "./pages/admin/kitchen/KitchenDashboard";
 import KitchenMenu from "./pages/admin/kitchen/KitchenMenu";
+import QRCodeManager from "./pages/admin/QRCodeManager";
+import GuestLogin from "./pages/guest/GuestLogin";
+import GuestAccessFallback from "./pages/guest/GuestAccessFallback";
+import GuestDashboard from "./pages/guest/GuestDashboard";
+import GuestProtectedRoute from "./components/GuestProtectedRoute";
 
 
 
@@ -99,8 +104,25 @@ function App() {
         }
       />
 
-
-
+      <Route
+        path="/admin/qr-codes"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+            <QRCodeManager />
+          </ProtectedRoute>
+        }
+      />
+      {/* GUEST ROUTES */}
+      <Route path="/guest/login" element={<GuestLogin />} />
+      <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
+      <Route
+        path="/guest/dashboard"
+        element={
+          <GuestProtectedRoute>
+            <GuestDashboard />
+          </GuestProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

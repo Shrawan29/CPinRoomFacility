@@ -18,8 +18,8 @@ export default function MenuFormModal({ item, onClose, onSaved }) {
 
   const handleSubmit = async () => {
     const res = item
-      ? await updateMenuItem(item._id, form, token)
-      : await createMenuItem(form, token);
+      ? await updateMenuItem(item._id, form)
+      : await createMenuItem(form);
 
     onSaved(res.data.item);
   };

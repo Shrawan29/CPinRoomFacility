@@ -13,7 +13,7 @@ import { useAdminAuth } from "../../../context/AdminAuthContext";
 
 export default function AdminList() {
 
-  const { token } = useAdminAuth();
+  const { token, loading: authLoading } = useAdminAuth();
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -23,11 +23,14 @@ export default function AdminList() {
   // 🔹 Fetch admins
 
     useEffect(() => {
-      if (!token) return; // ⛔ wait for token
+      if (authLoading || !token) {
+        setLoading(authLoading);
+        return;
+      }
 
       const fetchAdmins = async () => {
         try {
-          const data = await getAllAdmins(token);
+          const data = await getAllAdmins();
           setAdmins(Array.isArray(data) ? data : []);
         } catch (err) {
           setError(
@@ -40,7 +43,7 @@ export default function AdminList() {
       };
 
       fetchAdmins();
-    }, [token]);
+    }, [token, authLoading]);
 
 
 
@@ -55,7 +58,7 @@ export default function AdminList() {
       setUpdatingId(adminId);
 
       try {
-        const updatedAdmin = await toggleAdminStatus(adminId, token);
+        const updatedAdmin = await toggleAdminStatus(adminId);
 
         if (!updatedAdmin || !updatedAdmin._id) {
           throw new Error("Invalid admin response");
@@ -95,8 +98,7 @@ export default function AdminList() {
           {
             role: editingAdmin.role,
             phone: editingAdmin.phone,
-          },
-          token
+          }
         );
 
         setAdmins((prev) =>
@@ -121,7 +123,7 @@ export default function AdminList() {
       if (!confirmDelete) return;
 
       try {
-        const deleted = await deleteAdmin(adminId, token);
+        const deleted = await deleteAdmin(adminId);
 
         setAdmins((prev) =>
           prev.map((a) =>

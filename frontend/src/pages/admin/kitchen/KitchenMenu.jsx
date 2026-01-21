@@ -9,7 +9,7 @@ import {
 import MenuFormModal from "./MenuFormModal";
 
 export default function KitchenMenu() {
-    const { token } = useAdminAuth();
+    const { token, loading: authLoading } = useAdminAuth();
     const [selectedCategory, setSelectedCategory] = useState("ALL");
     const [menu, setMenu] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,16 +17,19 @@ export default function KitchenMenu() {
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        if (!token) return;
+        if (authLoading || !token) {
+            setLoading(authLoading);
+            return;
+        }
 
         const fetchMenu = async () => {
-            const res = await getKitchenMenu(token);
+            const res = await getKitchenMenu();
             setMenu(res.data || []);
             setLoading(false);
         };
 
         fetchMenu();
-    }, [token]);
+    }, [token, authLoading]);
 
     const categories = [
         "ALL",
@@ -41,8 +44,7 @@ export default function KitchenMenu() {
     const toggleAvailability = async (item) => {
         const res = await updateMenuItem(
             item._id,
-            { isAvailable: !item.isAvailable },
-            token
+            { isAvailable: !item.isAvailable }
         );
 
         setMenu((prev) =>
@@ -53,7 +55,7 @@ export default function KitchenMenu() {
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this menu item?")) return;
 
-        await deleteMenuItem(id, token);
+        await deleteMenuItem(id);
         setMenu((prev) => prev.filter((i) => i._id !== id));
     };
 

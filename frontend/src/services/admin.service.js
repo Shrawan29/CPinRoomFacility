@@ -9,23 +9,15 @@ export const adminLogin = async (email, password) => {
   return res.data;
 };
 
-export const createAdmin = async (adminData, token) => {
-  const res = await api.post("/admin/create", adminData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const createAdmin = async (adminData) => {
+  const res = await api.post("/admin/create", adminData);
 
   return res.data;
 };
 
 /* GET ADMINS */
-export const getAllAdmins = async (token) => {
-  const res = await api.get("/admin/manage/admins", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getAllAdmins = async () => {
+  const res = await api.get("/admin/manage/admins");
 
   // ✅ Normalize response safely
   if (Array.isArray(res.data)) {
@@ -40,35 +32,22 @@ export const getAllAdmins = async (token) => {
 };
 
 /* TOGGLE ACTIVE */
-export const toggleAdminStatus = async (adminId, token) => {
+export const toggleAdminStatus = async (adminId) => {
   const res = await api.patch(
     `/admin/manage/deactivate/${adminId}`,
     {},
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
   );
   return res.data.admin;
 };
 
 /* UPDATE ADMIN */
-export const updateAdmin = async (adminId, payload, token) => {
-  const res = await api.patch(`/admin/manage/update/${adminId}`, payload, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const updateAdmin = async (adminId, payload) => {
+  const res = await api.patch(`/admin/manage/update/${adminId}`, payload);
   return res.data.admin;
 };
 
 /* DELETE ADMIN */
-export const deleteAdmin = async (adminId, token) => {
-  const res = await api.delete(`/admin/manage/delete/${adminId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const deleteAdmin = async (adminId) => {
+  const res = await api.delete(`/admin/manage/delete/${adminId}`);
   return res.data.admin;
 };

@@ -13,6 +13,7 @@ export function AdminAuthProvider({ children }) {
     const storedAdmin = localStorage.getItem("admin_data");
 
     if (storedToken && storedAdmin) {
+      console.log("✅ Restoring admin auth from localStorage");
       setToken(storedToken);
       setAdmin(JSON.parse(storedAdmin));
     }
@@ -21,6 +22,7 @@ export function AdminAuthProvider({ children }) {
   }, []);
 
   const login = (token, admin) => {
+    console.log("🔐 Logging in admin:", admin.email);
     setToken(token);
     setAdmin(admin);
 
@@ -29,6 +31,7 @@ export function AdminAuthProvider({ children }) {
   };
 
   const logout = () => {
+    console.log("🚪 Logging out admin");
     setToken(null);
     setAdmin(null);
 

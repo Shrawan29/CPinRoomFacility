@@ -4,7 +4,7 @@ import { useAdminAuth } from "../../context/AdminAuthContext";
 import api from "../../services/api";
 
 export default function CheckIn() {
-  const { token } = useAdminAuth();
+  const { token, loading: authLoading } = useAdminAuth();
 
   const [rooms, setRooms] = useState([]);
   const [roomNumber, setRoomNumber] = useState("");
@@ -16,15 +16,11 @@ export default function CheckIn() {
 
   /* 🔹 Fetch AVAILABLE rooms */
   useEffect(() => {
-    if (!token) return;
+    if (authLoading || !token) return;
 
     const fetchRooms = async () => {
       try {
-        const res = await api.get("/rooms/available", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get("/rooms/available");
         setRooms(res.data || []);
       } catch (err) {
         setError("Failed to load rooms");
@@ -32,7 +28,7 @@ export default function CheckIn() {
     };
 
     fetchRooms();
-  }, [token]);
+  }, [token, authLoading]);
 
   /* 🔹 Handle check-in */
   const handleCheckIn = async (e) => {

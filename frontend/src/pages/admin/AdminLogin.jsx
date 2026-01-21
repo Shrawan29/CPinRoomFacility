@@ -21,7 +21,12 @@ export default function AdminLogin() {
 
     try {
       const data = await adminLogin(email, password);
+      console.log("✅ Login successful, storing token...", data.admin.role);
       login(data.token, data.admin);
+      
+      // Verify token was stored
+      const storedToken = localStorage.getItem("admin_token");
+      console.log("Token stored in localStorage:", storedToken ? "✅ Yes" : "❌ No");
 
       if (data.admin.role === "SUPER_ADMIN") {
         navigate("/admin/super/dashboard");
@@ -31,6 +36,7 @@ export default function AdminLogin() {
         navigate("/admin/kitchen/dashboard");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);

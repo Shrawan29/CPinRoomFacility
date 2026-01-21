@@ -37,10 +37,9 @@ export const scanRoomQR = async (req, res) => {
       expiresAt: new Date(Date.now() + 5 * 60 * 1000)
     });
 
-    res.json({
-      message: "QR verified",
-      qrToken: token
-    });
+    // 5. Redirect to guest login with token
+    const guestLoginURL = `http://localhost:5173/guest/login?token=${token}&room=${roomNumber}`;
+    res.redirect(guestLoginURL);
   } catch (error) {
     res.status(500).json({
       message: error.message

@@ -4,22 +4,19 @@ import { useAdminAuth } from "../../context/AdminAuthContext";
 import api from "../../services/api";
 
 export default function Reports() {
-  const { token } = useAdminAuth();
+  const { token, loading: authLoading } = useAdminAuth();
   const [daily, setDaily] = useState(null);
   const [monthly, setMonthly] = useState(null);
 
   useEffect(() => {
-    if (!token) return;
+    if (authLoading || !token) return;
 
     const fetchReports = async () => {
-      const dailyRes = await api.get("/admin/reports/daily", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const dailyRes = await api.get("/admin/reports/daily");
 
       const now = new Date();
       const monthlyRes = await api.get(
-        `/admin/reports/monthly?year=${now.getFullYear()}&month=${now.getMonth() + 1}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `/admin/reports/monthly?year=${now.getFullYear()}&month=${now.getMonth() + 1}`
       );
 
       setDaily(dailyRes.data);
@@ -27,7 +24,7 @@ export default function Reports() {
     };
 
     fetchReports();
-  }, [token]);
+  }, [token, authLoading]);
 
   return (
     <AdminLayout>

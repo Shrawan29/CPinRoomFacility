@@ -6,6 +6,7 @@ const adminAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.error("❌ No authorization header:", authHeader);
       return res.status(401).json({
         message: "Authorization token missing"
       });
@@ -18,6 +19,7 @@ const adminAuth = async (req, res, next) => {
     const admin = await Admin.findById(decoded.adminId);
 
     if (!admin || !admin.isActive) {
+      console.error("❌ Admin not found or inactive:", decoded.adminId);
       return res.status(401).json({
         message: "Invalid or inactive admin"
       });
@@ -30,8 +32,10 @@ const adminAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.error("❌ Auth error:", error.message);
     return res.status(401).json({
-      message: "Invalid or expired token"
+      message: "Invalid or expired token",
+      error: error.message
     });
   }
 };

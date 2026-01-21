@@ -4,7 +4,7 @@ import { createAdmin } from "../../../services/admin.service";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 
 export default function CreateAdmin() {
-  const { token } = useAdminAuth();
+  const { token, loading: authLoading } = useAdminAuth();
 
   const [form, setForm] = useState({
     name: "",
@@ -29,7 +29,7 @@ export default function CreateAdmin() {
     setLoading(true);
 
     try {
-      await createAdmin(form, token);
+      await createAdmin(form);
       setSuccess("Admin created successfully");
       setForm({
         name: "",
