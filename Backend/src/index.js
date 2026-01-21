@@ -30,21 +30,8 @@ const app = express();
 
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://127.0.0.1:5173",
-      "http://127.0.0.1:5174"
-    ];
-    
-    // Allow all vercel.app domains (handles preview, production, and all variants)
-    const isVercelApp = origin && origin.includes(".vercel.app");
-    
-    if (!origin || allowedOrigins.includes(origin) || isVercelApp) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
+    // Allow all origins in production (will be restricted by auth middleware)
+    callback(null, true);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
