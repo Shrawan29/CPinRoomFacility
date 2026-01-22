@@ -4,19 +4,21 @@ import QRCode from "qrcode";
 /**
  * Component to generate and display QR codes for each room
  * QR codes contain room-specific URLs that redirect to guest login
- * Usage: Pass roomNumber and baseURL as props
+ * Usage: Pass roomNumber as prop
  */
-export default function QRCodeGenerator({ roomNumber, baseURL = "http://localhost:5173" }) {
+export default function QRCodeGenerator({ roomNumber }) {
   const canvasRef = useRef(null);
   const [qrGenerated, setQrGenerated] = useState(false);
+  const [qrURL, setQrURL] = useState("");
 
   useEffect(() => {
     if (!roomNumber || !canvasRef.current) return;
 
-    // QR code points to the backend endpoint that generates a token
-    // Backend: /qr/scan/:roomNumber will generate a token and the guest will be redirected to /guest/login?token=XXX&room=101
-    const apiBaseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    // QR code points to the backend endpoint that generates a token for each room
+    // Backend: /qr/scan/:roomNumber will generate a token and redirect to /guest/login?token=XXX&room=ROOMNUMBER
+    const apiBaseURL = import.meta.env.VITE_API_URL || "https://cpinroomfacility-production.up.railway.app/";
     const qrCodeURL = `${apiBaseURL}qr/scan/${roomNumber}`;
+    setQrURL(qrCodeURL);
 
     // Generate QR code
     QRCode.toCanvas(canvasRef.current, qrCodeURL, {
@@ -115,7 +117,7 @@ export default function QRCodeGenerator({ roomNumber, baseURL = "http://localhos
             <strong>Generated URL:</strong>
           </p>
           <p className="text-xs text-blue-600 break-all font-mono">
-            http://localhost:5173/guest/login?token=room_{roomNumber}...
+            {qrURL}
           </p>
         </div>
       </div>
