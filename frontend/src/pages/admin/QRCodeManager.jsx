@@ -4,7 +4,7 @@ import QRCodeGenerator from "../../components/guest/QRCodeGenerator";
 export default function QRCodeManager() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [baseURL, setBaseURL] = useState("https://c-pin-room-facility.vercel.app");
+  const [baseURL, setBaseURL] = useState("https://cpinroomfacility-production.up.railway.app");
 
   useEffect(() => {
     // In production, fetch rooms from backend
