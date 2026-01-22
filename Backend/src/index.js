@@ -89,9 +89,15 @@ app.use("/admin/orders", orderAdminRoutes);
 app.use("/admin/kitchen/orders", orderKitchenRoutes);
 
 // guest
+// guest (PUBLIC)
 app.use("/guest/auth", guestAuthRoutes);
-app.use("/guest", guestProtectedRoutes);
+
+// guest orders (protected internally)
 app.use("/guest/orders", orderGuestRoutes);
+
+// guest protected routes (MUST BE LAST)
+app.use("/guest", guestProtectedRoutes);
+
 
 // common
 app.use("/rooms", roomRoutes);

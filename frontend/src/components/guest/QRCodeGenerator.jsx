@@ -1,40 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 
-/**
- * Component to generate and display QR codes for each room
- * QR codes contain room-specific URLs that redirect to guest login
- * Usage: Pass roomNumber as prop
- */
 export default function QRCodeGenerator({ roomNumber }) {
   const canvasRef = useRef(null);
-  const [qrGenerated, setQrGenerated] = useState(false);
   const [qrURL, setQrURL] = useState("");
+  const [qrGenerated, setQrGenerated] = useState(false);
 
   useEffect(() => {
     if (!roomNumber || !canvasRef.current) return;
 
-    // QR code points to the backend endpoint that generates a token for each room
-    // Backend: /qr/scan/:roomNumber will generate a token and redirect to /guest/login?token=XXX&room=ROOMNUMBER
-    const apiBaseURL = import.meta.env.VITE_API_URL || "https://cpinroomfacility-production.up.railway.app/";
-    const qrCodeURL = `${apiBaseURL}guest/login?token=ROOM_TOKEN_PLACEHOLDER&room=${roomNumber}`;
+    // reset state when room changes
+    setQrGenerated(false);
+
+    // IMPORTANT: backend base URL (no trailing slash)
+    const API_BASE =
+      (import.meta.env.VITE_API_URL ||
+        "https://cpinroomfacility-production.up.railway.app")
+        .replace(/\/$/, "");
+
+    // QR MUST point to backend, not frontend
+    const qrCodeURL = `${API_BASE}/qr/scan/${roomNumber}`;
     setQrURL(qrCodeURL);
 
-    // Generate QR code
     QRCode.toCanvas(canvasRef.current, qrCodeURL, {
-      width: 300,
+      width: 280,
       margin: 2,
       color: {
         dark: "#000000",
         light: "#FFFFFF",
       },
     })
-      .then(() => {
-        setQrGenerated(true);
-      })
-      .catch((err) => {
-        console.error("Error generating QR code:", err);
-      });
+      .then(() => setQrGenerated(true))
+      .catch((err) => console.error("QR Error:", err));
+
   }, [roomNumber]);
 
   const downloadQRCode = () => {
@@ -49,77 +47,73 @@ export default function QRCodeGenerator({ roomNumber }) {
   const printQRCode = () => {
     if (!canvasRef.current) return;
 
-    const printWindow = window.open("", "", "width=400,height=500");
+    const win = window.open("", "", "width=400,height=500");
+    if (!win) {
+      alert("Please allow popups to print QR");
+      return;
+    }
+
     const img = canvasRef.current.toDataURL("image/png");
 
-    printWindow.document.write(`
+    win.document.write(`
       <html>
         <head>
-          <title>QR Code - Room ${roomNumber}</title>
-          <style>
-            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f5f5f5; }
-            div { text-align: center; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-            img { max-width: 400px; margin: 20px 0; }
-            h2 { margin: 0 0 10px; color: #333; }
-            p { margin: 5px 0; color: #666; font-size: 14px; }
-          </style>
+          <title>Room ${roomNumber}</title>
         </head>
-        <body>
-          <div>
-            <h2>Room ${roomNumber}</h2>
-            <p>Scan this QR code to access room service</p>
-            <img src="${img}" />
-            <p style="margin-top: 30px; font-size: 12px; color: #999;">Guest Room Service Portal</p>
-          </div>
+        <body style="text-align:center;font-family:sans-serif">
+          <h2>Room ${roomNumber}</h2>
+          <p>Scan to access room services</p>
+          <img src="${img}" style="width:260px" />
         </body>
       </html>
     `);
-    printWindow.document.close();
-    printWindow.print();
+
+    win.document.close();
+    win.print();
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-6">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-4 text-center">Room #{roomNumber}</h2>
-        <p className="text-gray-600 mb-6 text-center text-sm">
-          Scan this QR code with Google Lens to access room service
+    <div className="flex justify-center p-6">
+      <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+
+        <h2 className="text-xl font-bold mb-2">
+          Room #{roomNumber}
+        </h2>
+
+        <p className="text-sm text-gray-600 mb-4">
+          Scan with phone camera to access services
         </p>
 
         {qrGenerated && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-600 text-sm">✓ QR Code Generated Successfully</p>
-          </div>
+          <p className="text-green-600 text-sm mb-2">
+            ✓ QR Generated
+          </p>
         )}
 
         <canvas
           ref={canvasRef}
-          className="mx-auto mb-6 border-2 border-gray-200 rounded"
+          className="mx-auto mb-4 border rounded"
         />
 
         <div className="flex gap-3 justify-center">
           <button
             onClick={downloadQRCode}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
+            className="bg-blue-600 text-white px-4 py-2 rounded"
           >
-            ⬇️ Download
+            Download
           </button>
+
           <button
             onClick={printQRCode}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition"
+            className="bg-green-600 text-white px-4 py-2 rounded"
           >
-            🖨️ Print
+            Print
           </button>
         </div>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-600 mb-2">
-            <strong>Generated URL:</strong>
-          </p>
-          <p className="text-xs text-blue-600 break-all font-mono">
-            {qrURL}
-          </p>
-        </div>
+        <p className="text-xs mt-4 break-all text-gray-500">
+          {qrURL}
+        </p>
       </div>
     </div>
   );

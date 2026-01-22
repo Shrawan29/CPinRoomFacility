@@ -8,7 +8,7 @@ export default function GuestLogin() {
   const { login } = useGuestAuth();
   const [searchParams] = useSearchParams();
 
-  const [step, setStep] = useState("phone"); // phone, otp
+  const [step, setStep] = useState("phone");
   const [formData, setFormData] = useState({
     qrToken: "",
     phone: "",
@@ -17,33 +17,55 @@ export default function GuestLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [roomNumber, setRoomNumber] = useState("");
-  const [deviceId] = useState(() => `device_${Date.now()}_${Math.random()}`);
 
-  // 🔄 Auto-populate from URL params when QR is scanned
+  // persistent device id
+  const deviceId = (() => {
+    const existing = localStorage.getItem("guest_device_id");
+    if (existing) return existing;
+    const id = `device_${crypto.randomUUID()}`;
+    localStorage.setItem("guest_device_id", id);
+    return id;
+  })();
+
+  /* ============================
+     INIT FROM QR TOKEN
+     ============================ */
   useEffect(() => {
     const qrToken = searchParams.get("token");
-    const room = searchParams.get("room");
 
-    if (qrToken) {
-      setFormData((prev) => ({ ...prev, qrToken }));
-      room && setRoomNumber(room);
-      setStep("phone");
+    if (!qrToken) {
+      navigate("/guest/access-fallback");
+      return;
     }
-  }, [searchParams]);
 
+    setFormData((prev) => ({ ...prev, qrToken }));
+  }, [searchParams, navigate]);
+
+  /* ============================
+     SEND OTP
+     ============================ */
   const handleSendOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    if (!formData.phone) {
+      setError("Please enter your phone number");
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (!formData.phone) {
-        setError("Please enter your phone number");
-        setLoading(false);
-        return;
+      const response = await sendGuestOTP(
+        formData.qrToken,
+        formData.phone
+      );
+
+      // backend should return roomNumber
+      if (response?.roomNumber) {
+        setRoomNumber(response.roomNumber);
       }
 
-      await sendGuestOTP(formData.qrToken, formData.phone);
       setStep("otp");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to send OTP");
@@ -52,18 +74,21 @@ export default function GuestLogin() {
     }
   };
 
+  /* ============================
+     VERIFY OTP
+     ============================ */
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      if (!formData.otp) {
-        setError("Please enter the OTP");
-        setLoading(false);
-        return;
-      }
+    if (!formData.otp) {
+      setError("Please enter the OTP");
+      setLoading(false);
+      return;
+    }
 
+    try {
       const response = await verifyGuestOTP(
         formData.qrToken,
         formData.phone,
@@ -71,7 +96,7 @@ export default function GuestLogin() {
         deviceId
       );
 
-      if (response.token && response.guest) {
+      if (response?.token && response?.guest) {
         login(response.token, response.guest);
         navigate("/guest/dashboard");
       } else {
@@ -90,6 +115,7 @@ export default function GuestLogin() {
         <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
           🏨 Room Service
         </h1>
+
         {roomNumber && (
           <p className="text-center text-blue-600 font-semibold mb-6">
             Room #{roomNumber}
@@ -102,88 +128,55 @@ export default function GuestLogin() {
           </div>
         )}
 
-        {/* STEP 1: PHONE NUMBER */}
         {step === "phone" && (
           <form onSubmit={handleSendOTP} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📱 Enter Your Phone Number
-              </label>
-              <input
-                type="tel"
-                placeholder="+91 XXXXX XXXXX"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                autoFocus
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                We'll send an OTP to verify your booking
-              </p>
-            </div>
+            <input
+              type="tel"
+              placeholder="+91 XXXXX XXXXX"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg"
+              autoFocus
+            />
 
             <button
-              type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg"
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </form>
         )}
 
-        {/* STEP 2: OTP VERIFICATION */}
         {step === "otp" && (
           <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <div className="text-center mb-6">
-              <p className="text-gray-600 mb-2">
-                We've sent an OTP to{" "}
-                <span className="font-semibold">{formData.phone}</span>
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                🔐 Enter 6-Digit OTP
-              </label>
-              <input
-                type="text"
-                placeholder="000000"
-                maxLength="6"
-                value={formData.otp}
-                onChange={(e) =>
-                  setFormData({ ...formData, otp: e.target.value.replace(/\D/g, "") })
-                }
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-center text-2xl tracking-widest"
-                autoFocus
-              />
-            </div>
+            <input
+              type="text"
+              maxLength="6"
+              value={formData.otp}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  otp: e.target.value.replace(/\D/g, ""),
+                })
+              }
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-center text-2xl"
+              autoFocus
+            />
 
             <button
-              type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition"
+              className="w-full bg-green-600 text-white py-3 rounded-lg"
             >
-              {loading ? "Verifying..." : "✓ Verify & Login"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setStep("phone");
-                setFormData({ ...formData, otp: "" });
-              }}
-              className="w-full text-blue-600 hover:text-blue-700 font-medium py-2"
-            >
-              ← Back to Phone Number
+              {loading ? "Verifying..." : "Verify & Login"}
             </button>
           </form>
         )}
 
         <p className="text-center text-gray-500 text-xs mt-6">
-          🔒 Your session is secure and encrypted
+          🔒 Secure guest session
         </p>
       </div>
     </div>

@@ -7,42 +7,60 @@ export const scanRoomQR = async (req, res) => {
   try {
     const { roomNumber } = req.params;
 
-    // 1. Validate room
+    const FRONTEND_URL =
+      process.env.FRONTEND_URL || "http://localhost:5173";
+
+    /* ============================
+       1. Validate room
+       ============================ */
     const room = await Room.findOne({ roomNumber });
     if (!room) {
-      return res.status(404).json({
-        message: "Invalid room QR"
-      });
+      return res.redirect(
+        `${FRONTEND_URL}/guest/access-fallback?reason=invalid-room`
+      );
     }
 
-    // 2. Check active stay
+    /* ============================
+       2. Check active stay
+       ============================ */
     const stay = await ActiveStay.findOne({
       roomNumber,
       status: "ACTIVE"
     });
 
     if (!stay) {
-      return res.status(403).json({
-        message: "No active stay for this room"
-      });
+      return res.redirect(
+        `${FRONTEND_URL}/guest/access-fallback?reason=no-active-stay`
+      );
     }
 
-    // 3. Generate secure token
+    /* ============================
+       3. Generate secure token
+       ============================ */
     const token = crypto.randomBytes(32).toString("hex");
 
-    // 4. Save token (5 minutes expiry)
+    /* ============================
+       4. Save token (5 min expiry)
+       ============================ */
     await QRToken.create({
       token,
       roomNumber,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      used: false
     });
 
-    // 5. Redirect to guest login with token
-    const guestLoginURL = `http://localhost:5173/guest/login?token=${token}&room=${roomNumber}`;
-    res.redirect(guestLoginURL);
+    /* ============================
+       5. Redirect to guest login
+       ============================ */
+    return res.redirect(
+      `${FRONTEND_URL}/guest/login?token=${token}`
+    );
+
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    console.error("QR Scan Error:", error);
+
+    return res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/guest/access-fallback?reason=server-error`
+    );
   }
 };

@@ -1,34 +1,41 @@
 import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
+
+// Super Admin
 import SuperAdminDashboard from "./pages/admin/super/SuperAdminDashboard";
 import CreateAdmin from "./pages/admin/super/CreateAdmin";
 import AdminList from "./pages/admin/super/AdminList";
-import ProtectedRoute from "./routes/ProtectedRoute";
+
+// Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CheckIn from "./pages/admin/CheckIn";
 import CheckOut from "./pages/admin/CheckOut";
 import Reports from "./pages/admin/Reports";
+
+// Kitchen
 import KitchenDashboard from "./pages/admin/kitchen/KitchenDashboard";
 import KitchenMenu from "./pages/admin/kitchen/KitchenMenu";
+
+// QR
 import QRCodeManager from "./pages/admin/QRCodeManager";
+
+// Guest
 import GuestLogin from "./pages/guest/GuestLogin";
 import GuestAccessFallback from "./pages/guest/GuestAccessFallback";
 import GuestDashboard from "./pages/guest/GuestDashboard";
+
+// Routes
+import ProtectedRoute from "./routes/ProtectedRoute";
 import GuestProtectedRoute from "./components/GuestProtectedRoute";
-
-
-
-
-
 
 function App() {
   return (
     <Routes>
 
-      {/* Login */}
+      {/* LOGIN */}
       <Route path="/" element={<LoginWrapper />} />
 
-      {/* SUPER ADMIN ROUTES */}
+      {/* SUPER ADMIN */}
       <Route
         path="/admin/super/dashboard"
         element={
@@ -55,6 +62,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* ADMIN */}
       <Route
         path="/admin/dashboard"
         element={
@@ -63,6 +72,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/checkin"
         element={
@@ -71,6 +81,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/checkout"
         element={
@@ -79,6 +90,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/reports"
         element={
@@ -87,6 +99,8 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* KITCHEN */}
       <Route
         path="/admin/kitchen/dashboard"
         element={
@@ -95,6 +109,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/kitchen/menu"
         element={
@@ -104,6 +119,7 @@ function App() {
         }
       />
 
+      {/* QR MANAGER */}
       <Route
         path="/admin/qr-codes"
         element={
@@ -112,9 +128,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* GUEST ROUTES */}
-      <Route path="/guest/login" element={<ProtectedRoute><GuestLogin /></ProtectedRoute>} />
+
+      {/* ✅ GUEST ROUTES */}
+      {/* PUBLIC — MUST NOT BE PROTECTED */}
+      <Route path="/guest/login" element={<GuestLogin />} />
+
       <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
+
+      {/* PROTECTED AFTER LOGIN */}
       <Route
         path="/guest/dashboard"
         element={
@@ -123,6 +144,7 @@ function App() {
           </GuestProtectedRoute>
         }
       />
+
     </Routes>
   );
 }
