@@ -113,7 +113,7 @@ function App() {
         }
       />
       {/* GUEST ROUTES */}
-      <Route path="/guest/login" element={<GuestLogin />} />
+      <Route path="/guest/login" element={<ProtectedRoute><GuestLogin /></ProtectedRoute>} />
       <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
       <Route
         path="/guest/dashboard"
