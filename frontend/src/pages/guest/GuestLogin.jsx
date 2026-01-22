@@ -69,6 +69,7 @@ export default function GuestLogin() {
       setStep("otp");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to send OTP");
+      
     } finally {
       setLoading(false);
     }
