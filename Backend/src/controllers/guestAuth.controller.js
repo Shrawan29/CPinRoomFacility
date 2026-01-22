@@ -105,8 +105,11 @@ export const verifyGuestOTP = async (req, res) => {
     });
 
     res.json({
-      message: "Login successful",
-      sessionId,
+      token: sessionId,
+      guest: {
+        phone,
+        roomNumber: tokenDoc.roomNumber,
+      },
     });
   } catch (err) {
     console.error("Verify OTP error:", err);

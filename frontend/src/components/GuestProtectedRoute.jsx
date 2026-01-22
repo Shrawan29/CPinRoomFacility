@@ -16,7 +16,7 @@ export default function GuestProtectedRoute({ children }) {
   }
 
   if (!token) {
-    return <Navigate to="/guest/login" replace />;
+    return <Navigate to="/guest/access-fallback" replace />;
   }
 
   return children;
