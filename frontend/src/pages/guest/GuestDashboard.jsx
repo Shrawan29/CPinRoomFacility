@@ -10,23 +10,42 @@ export default function GuestDashboard() {
 
   const handleLogout = () => {
     logout();
-    navigate("/guest/login");
+    navigate("/guest/access-fallback");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-primary)" }}
+    >
       {/* HEADER */}
-      <header className="bg-white shadow-md">
+      <header
+        className="shadow-md"
+        style={{ backgroundColor: "var(--bg-secondary)" }}
+      >
         <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Room Service</h1>
-            <p className="text-gray-600 text-sm">
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              🏨 Room Service
+            </h1>
+            <p
+              className="text-sm"
+              style={{ color: "var(--text-muted)" }}
+            >
               Room {guest?.roomNumber} • {guest?.phone}
             </p>
           </div>
+
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition"
+            className="px-4 py-2 rounded-lg font-semibold transition"
+            style={{
+              backgroundColor: "var(--brand)",
+              color: "white",
+            }}
           >
             Logout
           </button>
@@ -36,24 +55,41 @@ export default function GuestDashboard() {
       {/* MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* TAB NAVIGATION */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-4 mb-8 flex-wrap">
           <button
             onClick={() => setActiveTab("menu")}
-            className={`px-6 py-3 rounded-lg font-semibold transition ${
-              activeTab === "menu"
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-600"
-            }`}
+            className="px-6 py-3 rounded-lg font-semibold transition border-2"
+            style={{
+              backgroundColor:
+                activeTab === "menu" ? "var(--brand)" : "white",
+              color:
+                activeTab === "menu"
+                  ? "white"
+                  : "var(--text-primary)",
+              borderColor:
+                activeTab === "menu"
+                  ? "var(--brand)"
+                  : "var(--bg-secondary)",
+            }}
           >
             🍽️ Browse Menu
           </button>
+
           <button
             onClick={() => setActiveTab("orders")}
-            className={`px-6 py-3 rounded-lg font-semibold transition ${
-              activeTab === "orders"
-                ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-600"
-            }`}
+            className="px-6 py-3 rounded-lg font-semibold transition border-2"
+            style={{
+              backgroundColor:
+                activeTab === "orders" ? "var(--brand)" : "white",
+              color:
+                activeTab === "orders"
+                  ? "white"
+                  : "var(--text-primary)",
+              borderColor:
+                activeTab === "orders"
+                  ? "var(--brand)"
+                  : "var(--bg-secondary)",
+            }}
           >
             📦 My Orders
           </button>
@@ -61,9 +97,15 @@ export default function GuestDashboard() {
 
         {/* TAB CONTENT */}
         {activeTab === "menu" && <MenuBrowse />}
+
         {activeTab === "orders" && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Order history coming soon...</p>
+          <div
+            className="text-center py-16 rounded-xl"
+            style={{ backgroundColor: "white" }}
+          >
+            <p style={{ color: "var(--text-muted)" }}>
+              Order history coming soon...
+            </p>
           </div>
         )}
       </main>

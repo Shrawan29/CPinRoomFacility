@@ -27,23 +27,15 @@ export default function GuestLogin() {
     return id;
   })();
 
-  /* ============================
-     INIT FROM QR TOKEN
-     ============================ */
   useEffect(() => {
     const qrToken = searchParams.get("token");
-
     if (!qrToken) {
       navigate("/guest/access-fallback");
       return;
     }
-
     setFormData((prev) => ({ ...prev, qrToken }));
   }, [searchParams, navigate]);
 
-  /* ============================
-     SEND OTP
-     ============================ */
   const handleSendOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -56,28 +48,16 @@ export default function GuestLogin() {
     }
 
     try {
-      const response = await sendGuestOTP(
-        formData.qrToken,
-        formData.phone
-      );
-
-      // backend should return roomNumber
-      if (response?.roomNumber) {
-        setRoomNumber(response.roomNumber);
-      }
-
+      const response = await sendGuestOTP(formData.qrToken, formData.phone);
+      if (response?.roomNumber) setRoomNumber(response.roomNumber);
       setStep("otp");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to send OTP");
-      
     } finally {
       setLoading(false);
     }
   };
 
-  /* ============================
-     VERIFY OTP
-     ============================ */
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -111,20 +91,31 @@ export default function GuestLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+      }}
+    >
+      <div className="w-full max-w-md rounded-2xl shadow-2xl p-8 bg-white">
+        <h1
+          className="text-3xl font-bold text-center mb-2"
+          style={{ color: "var(--text-primary)" }}
+        >
           🏨 Room Service
         </h1>
 
         {roomNumber && (
-          <p className="text-center text-blue-600 font-semibold mb-6">
+          <p
+            className="text-center font-semibold mb-6"
+            style={{ color: "var(--brand)" }}
+          >
             Room #{roomNumber}
           </p>
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          <div className="mb-6 p-4 rounded-lg text-sm border border-red-200 bg-red-50 text-red-600">
             {error}
           </div>
         )}
@@ -138,13 +129,21 @@ export default function GuestLogin() {
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg"
+              className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+              style={{
+                borderColor: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+              }}
               autoFocus
             />
 
             <button
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg"
+              className="w-full py-3 rounded-lg font-semibold text-white transition"
+              style={{
+                backgroundColor: "var(--brand)",
+                opacity: loading ? 0.6 : 1,
+              }}
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -163,20 +162,31 @@ export default function GuestLogin() {
                   otp: e.target.value.replace(/\D/g, ""),
                 })
               }
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-center text-2xl"
+              className="w-full px-4 py-3 border-2 rounded-lg text-center text-2xl tracking-widest focus:outline-none"
+              style={{
+                borderColor: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+              }}
               autoFocus
             />
 
             <button
               disabled={loading}
-              className="w-full bg-green-600 text-white py-3 rounded-lg"
+              className="w-full py-3 rounded-lg font-semibold text-white transition"
+              style={{
+                backgroundColor: "var(--brand-soft)",
+                opacity: loading ? 0.6 : 1,
+              }}
             >
               {loading ? "Verifying..." : "Verify & Login"}
             </button>
           </form>
         )}
 
-        <p className="text-center text-gray-500 text-xs mt-6">
+        <p
+          className="text-center text-xs mt-6"
+          style={{ color: "var(--text-muted)" }}
+        >
           🔒 Secure guest session
         </p>
       </div>
