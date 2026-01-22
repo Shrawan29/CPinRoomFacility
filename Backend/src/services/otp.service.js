@@ -1,27 +1,43 @@
-const otpStore = new Map(); // phone → { otp, expiresAt }
+import crypto from "crypto";
 
-export const sendOTP = (phone) => {
+// key → `${qrToken}_${phone}`
+const otpStore = new Map();
+
+export const sendOTP = (qrToken, phone) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  otpStore.set(phone, {
-    otp,
-    expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+  const hashedOTP = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
+
+  otpStore.set(`${qrToken}_${phone}`, {
+    otp: hashedOTP,
+    expiresAt: Date.now() + 5 * 60 * 1000
   });
 
-  console.log(`📩 OTP for ${phone}: ${otp}`); // TEMP (console)
+  // TEMP: replace with SMS / WhatsApp provider
+  console.log(`📩 OTP for ${phone}: ${otp}`);
 };
 
-export const verifyOTP = (phone, otp) => {
-  const data = otpStore.get(phone);
+export const verifyOTP = (qrToken, phone, otp) => {
+  const key = `${qrToken}_${phone}`;
+  const data = otpStore.get(key);
+
   if (!data) return false;
 
   if (Date.now() > data.expiresAt) {
-    otpStore.delete(phone);
+    otpStore.delete(key);
     return false;
   }
 
-  if (data.otp !== otp) return false;
+  const hashedOTP = crypto
+    .createHash("sha256")
+    .update(otp)
+    .digest("hex");
 
-  otpStore.delete(phone);
+  if (data.otp !== hashedOTP) return false;
+
+  otpStore.delete(key);
   return true;
 };
