@@ -18,7 +18,7 @@ export const sendGuestOTP = async (req, res) => {
     const tokenDoc = await QRToken.findOne({
       token: qrToken,
       used: false,
-      expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: new Date() },
     });
 
     if (!tokenDoc) {
@@ -28,12 +28,12 @@ export const sendGuestOTP = async (req, res) => {
     const stay = await ActiveStay.findOne({
       roomNumber: tokenDoc.roomNumber,
       phone,
-      status: "ACTIVE"
+      status: "ACTIVE",
     });
 
     if (!stay) {
       return res.status(403).json({
-        message: "Phone number does not match active stay"
+        message: "Phone number does not match active stay",
       });
     }
 
@@ -42,9 +42,8 @@ export const sendGuestOTP = async (req, res) => {
 
     res.json({
       message: "OTP sent successfully",
-      roomNumber: tokenDoc.roomNumber
+      roomNumber: tokenDoc.roomNumber,
     });
-
   } catch (err) {
     console.error("Send OTP error:", err);
     res.status(500).json({ message: "Failed to send OTP" });
@@ -65,7 +64,7 @@ export const verifyGuestOTP = async (req, res) => {
     const tokenDoc = await QRToken.findOne({
       token: qrToken,
       used: false,
-      expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: new Date() },
     });
 
     if (!tokenDoc) {
@@ -75,12 +74,12 @@ export const verifyGuestOTP = async (req, res) => {
     const stay = await ActiveStay.findOne({
       roomNumber: tokenDoc.roomNumber,
       phone,
-      status: "ACTIVE"
+      status: "ACTIVE",
     });
 
     if (!stay) {
       return res.status(403).json({
-        message: "No active stay found"
+        message: "No active stay found",
       });
     }
 
@@ -102,18 +101,13 @@ export const verifyGuestOTP = async (req, res) => {
       phone,
       roomNumber: tokenDoc.roomNumber,
       deviceId,
-      expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+      expiresAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
     });
 
     res.json({
       message: "Login successful",
       sessionId,
-      guest: {
-        phone,
-        roomNumber: tokenDoc.roomNumber
-      }
     });
-
   } catch (err) {
     console.error("Verify OTP error:", err);
     res.status(500).json({ message: "OTP verification failed" });
