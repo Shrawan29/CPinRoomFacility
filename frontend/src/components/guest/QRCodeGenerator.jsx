@@ -16,7 +16,7 @@ export default function QRCodeGenerator({ roomNumber, baseURL = "http://localhos
     // QR code points to the backend endpoint that generates a token
     // Backend: /qr/scan/:roomNumber will generate a token and the guest will be redirected to /guest/login?token=XXX&room=101
     const apiBaseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    const qrCodeURL = `${apiBaseURL}/qr/scan/${roomNumber}`;
+    const qrCodeURL = `${apiBaseURL}qr/scan/${roomNumber}`;
 
     // Generate QR code
     QRCode.toCanvas(canvasRef.current, qrCodeURL, {
