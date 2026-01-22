@@ -14,7 +14,9 @@ export default function QRCodeGenerator({ roomNumber }) {
 
     // IMPORTANT: backend base URL (no trailing slash)
     const API_BASE =
-      ("https://c-pin-room-facility.vercel.app").replace(/\/$/, "");
+      (import.meta.env.VITE_API_URL ||
+        "https://c-pin-room-facility.vercel.app")
+        .replace(/\/$/, "");
 
     // QR MUST point to backend, not frontend
     const qrCodeURL = `${API_BASE}/qr/scan/${roomNumber}`;
