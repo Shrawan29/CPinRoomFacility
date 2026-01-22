@@ -17,7 +17,7 @@ export default function QRCodeGenerator({ roomNumber }) {
     // QR code points to the backend endpoint that generates a token for each room
     // Backend: /qr/scan/:roomNumber will generate a token and redirect to /guest/login?token=XXX&room=ROOMNUMBER
     const apiBaseURL = import.meta.env.VITE_API_URL || "https://cpinroomfacility-production.up.railway.app/";
-    const qrCodeURL = `${apiBaseURL}qr/scan/${roomNumber}`;
+    const qrCodeURL = `${apiBaseURL}guest/login?token=ROOM_TOKEN_PLACEHOLDER&room=${roomNumber}`;
     setQrURL(qrCodeURL);
 
     // Generate QR code
