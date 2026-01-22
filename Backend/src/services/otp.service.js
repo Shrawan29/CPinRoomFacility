@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import GuestOTP from "../models/GuestOTP.js";
+import GuestOTP from "../models/GuestOtp.js";
 
 export const sendOTP = async (qrToken, phone) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
