@@ -1,43 +1,44 @@
 import crypto from "crypto";
+import GuestOTP from "../models/GuestOTP.js";
 
-// key → `${qrToken}_${phone}`
-const otpStore = new Map();
-
-export const sendOTP = (qrToken, phone) => {
+export const sendOTP = async (qrToken, phone) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const hashedOTP = crypto
+  const otpHash = crypto
     .createHash("sha256")
     .update(otp)
     .digest("hex");
 
-  otpStore.set(`${qrToken}_${phone}`, {
-    otp: hashedOTP,
-    expiresAt: Date.now() + 5 * 60 * 1000
+  // remove old OTPs
+  await GuestOTP.deleteMany({ qrToken, phone });
+
+  await GuestOTP.create({
+    qrToken,
+    phone,
+    otpHash,
+    expiresAt: new Date(Date.now() + 5 * 60 * 1000)
   });
 
-  // TEMP: replace with SMS / WhatsApp provider
+  // TEMP: replace with SMS/WhatsApp
   console.log(`📩 OTP for ${phone}: ${otp}`);
 };
 
-export const verifyOTP = (qrToken, phone, otp) => {
-  const key = `${qrToken}_${phone}`;
-  const data = otpStore.get(key);
+export const verifyOTP = async (qrToken, phone, otp) => {
+  const record = await GuestOTP.findOne({ qrToken, phone });
+  if (!record) return false;
 
-  if (!data) return false;
-
-  if (Date.now() > data.expiresAt) {
-    otpStore.delete(key);
+  if (record.expiresAt < new Date()) {
+    await record.deleteOne();
     return false;
   }
 
-  const hashedOTP = crypto
+  const otpHash = crypto
     .createHash("sha256")
     .update(otp)
     .digest("hex");
 
-  if (data.otp !== hashedOTP) return false;
+  if (record.otpHash !== otpHash) return false;
 
-  otpStore.delete(key);
+  await record.deleteOne();
   return true;
 };
