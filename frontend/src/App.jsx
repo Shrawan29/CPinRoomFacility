@@ -26,8 +26,8 @@ import GuestDashboard from "./pages/guest/GuestDashboard";
 
 // Guest pages
 import MenuBrowse from "./components/guest/MenuBrowse";
-// import GuestCart from "./pages/guest/GuestCart";
-// import GuestOrders from "./pages/guest/GuestOrders";
+import GuestCart from "./pages/guest/GuestCart";
+import GuestOrders from "./pages/guest/GuestOrders";
 // import HotelInfo from "./pages/guest/HotelInfo";
 
 
@@ -175,7 +175,7 @@ function App() {
         }
       />
 
-      {/* <Route
+       <Route
         path="/guest/cart"
         element={
           <GuestProtectedRoute>
@@ -193,14 +193,14 @@ function App() {
         }
       />
 
-      <Route
+      {/* <Route
         path="/guest/hotel-info"
         element={
           <GuestProtectedRoute>
             <HotelInfo />
           </GuestProtectedRoute>
         }
-      /> */}
+      />  */}
 
 
     </Routes>
