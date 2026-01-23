@@ -43,20 +43,32 @@ export default function MenuBrowse() {
        CART LOGIC
        ============================ */
     const addToCart = (item) => {
-        const existing =
-            JSON.parse(localStorage.getItem("guest_cart")) || [];
+        const existing = JSON.parse(localStorage.getItem("guest_cart")) || [];
 
-        const index = existing.findIndex((i) => i._id === item._id);
+        const index = existing.findIndex((i) => i._id.toString() === item._id);
 
         if (index >= 0) {
+            // If the item is already in the cart, increment the quantity
             existing[index].qty += 1;
         } else {
+            // If the item is not in the cart, add it with a quantity of 1
             existing.push({ ...item, qty: 1 });
         }
 
         localStorage.setItem("guest_cart", JSON.stringify(existing));
     };
 
+    const updateQty = (index, delta) => {
+        const updated = [...cart];
+        updated[index].qty += delta;
+
+        if (updated[index].qty <= 0) {
+            updated.splice(index, 1);
+        }
+
+        setCart(updated);
+        localStorage.setItem("guest_cart", JSON.stringify(updated));
+    };
 
     return (
         <div

@@ -95,3 +95,29 @@ export const listAvailableMenuItems = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * GUEST → Add to cart
+ */
+export const addToCart = async (req, res) => {
+  try {
+    const { itemId } = req.body;
+
+    // Check if the item is already in the cart
+    const existingItem = req.session.cart.find(
+      (item) => item._id.toString() === itemId,
+    );
+
+    if (existingItem) {
+      // If the item is already in the cart, increment the quantity
+      existingItem.qty += 1;
+    } else {
+      // If the item is not in the cart, add it with a quantity of 1
+      req.session.cart.push({ _id: itemId, qty: 1 });
+    }
+
+    res.json({ message: "Item added to cart" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
