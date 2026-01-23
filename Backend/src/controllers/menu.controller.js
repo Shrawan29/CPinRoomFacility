@@ -17,7 +17,7 @@ export const createMenuItem = async (req, res) => {
       price,
       description,
       isVeg,
-      isAvailable: true
+      isAvailable: true,
     });
 
     res.status(201).json({
@@ -34,11 +34,9 @@ export const createMenuItem = async (req, res) => {
  */
 export const updateMenuItem = async (req, res) => {
   try {
-    const item = await MenuItem.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
 
     if (!item) {
       return res.status(404).json({ message: "Menu item not found" });
@@ -89,12 +87,11 @@ export const listAllMenuItems = async (req, res) => {
  */
 export const listAvailableMenuItems = async (req, res) => {
   try {
-    const items = await MenuItem.find({ isAvailable: true }).sort({ category: 1 });
-
-    res.json({
-      success: true,
-      data: items,
+    const items = await MenuItem.find({ isAvailable: true }).sort({
+      category: 1,
     });
+
+    res.json(items); // ✅ array
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
