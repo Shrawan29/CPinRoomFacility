@@ -16,25 +16,27 @@ export default function MenuBrowse() {
      LOAD MENU FROM API
      ============================ */
   useEffect(() => {
-    const loadMenu = async () => {
-      try {
-        const items = await getGuestMenu(); // 👈 /menu/guest
-        setMenuItems(items);
+  const loadMenu = async () => {
+    try {
+      const response = await getGuestMenu(); // axios response
+      const items = response.data;           // ✅ extract data
 
-        const uniqueCategories = [
-          "All",
-          ...new Set(items.map((item) => item.category)),
-        ];
-        setCategories(uniqueCategories);
-      } catch (err) {
-        setError("Failed to load menu");
-      } finally {
-        setLoading(false);
-      }
-    };
+      setMenuItems(items);
 
-    loadMenu();
-  }, []);
+      const uniqueCategories = [
+        "All",
+        ...new Set(items.map((item) => item.category)),
+      ];
+      setCategories(uniqueCategories);
+    } catch (err) {
+      setError("Failed to load menu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadMenu();
+}, []);
 
   /* ============================
      FILTER BY CATEGORY
