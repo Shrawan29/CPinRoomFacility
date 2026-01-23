@@ -4,6 +4,7 @@ import { useGuestAuth } from "../context/GuestAuthContext";
 export default function GuestProtectedRoute({ children }) {
   const { token, loading } = useGuestAuth();
 
+  // Loading screen
   if (loading) {
     return (
       <div
@@ -15,29 +16,37 @@ export default function GuestProtectedRoute({ children }) {
         }}
       >
         <div className="text-center">
-          {/* Spinner */}
           <div
             className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
             style={{
-              borderWidth: "3px",
-              borderStyle: "solid",
-              borderColor: "var(--brand-soft)",
+              border: "3px solid var(--brand-soft)",
               borderTopColor: "transparent",
             }}
-          ></div>
-
-          {/* Text */}
+          />
           <p style={{ color: "var(--text-muted)" }}>
-            Loading your experience…
+            Loading…
           </p>
         </div>
       </div>
     );
   }
 
+  // Not logged in
   if (!token) {
     return <Navigate to="/guest/access-fallback" replace />;
   }
 
-  return children;
+  // ✅ THE IMPORTANT PART (THIS WAS MISSING)
+  return (
+    <div
+      className="min-h-screen"
+      style={{
+        background:
+          "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+        color: "var(--text-primary)",
+      }}
+    >
+      {children}
+    </div>
+  );
 }
