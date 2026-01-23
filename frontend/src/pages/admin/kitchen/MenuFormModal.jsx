@@ -17,12 +17,19 @@ export default function MenuFormModal({ item, onClose, onSaved }) {
   });
 
   const handleSubmit = async () => {
-    const res = item
-      ? await updateMenuItem(item._id, form)
-      : await createMenuItem(form);
+    try {
+      const res = item
+        ? await updateMenuItem(item._id, form)
+        : await createMenuItem(form);
 
-    onSaved(res.data.item);
+      onSaved(res.item);
+      onClose();
+    } catch (err) {
+      alert("Failed to save menu item");
+      console.error(err);
+    }
   };
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
