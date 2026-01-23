@@ -90,8 +90,7 @@ export const listAvailableMenuItems = async (req, res) => {
     const items = await MenuItem.find({ isAvailable: true }).sort({
       category: 1,
     });
-
-    res.json(items); // ✅ array
+    res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
