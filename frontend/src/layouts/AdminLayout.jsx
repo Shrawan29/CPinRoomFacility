@@ -7,8 +7,10 @@ export default function AdminLayout({ children }) {
   const role = admin?.role;
 
   return (
-    <div className="flex bg-[var(--bg-primary)] min-h-screen">
-
+    <div
+      className="flex min-h-screen"
+      style={{ backgroundColor: "var(--bg-primary)" }}
+    >
       {/* Sidebar */}
       <AdminSidebar />
 
@@ -19,9 +21,13 @@ export default function AdminLayout({ children }) {
         <AdminNavbar />
 
         {/* Page Content */}
-        <main className="flex-1 p-6 bg-[var(--bg-primary)]">
+        <main
+          className="flex-1 p-6"
+          style={{ backgroundColor: "var(--bg-primary)" }}
+        >
           {children}
         </main>
+
       </div>
     </div>
   );
