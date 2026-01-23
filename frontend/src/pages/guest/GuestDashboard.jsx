@@ -5,6 +5,10 @@ export default function GuestDashboard() {
   const { guest, logout } = useGuestAuth();
   const navigate = useNavigate();
 
+  const guestFirstName = guest?.name
+    ? guest.name.split(" ")[0]
+    : "Guest";
+
   const handleLogout = () => {
     logout();
     navigate("/guest/access-fallback");
@@ -15,22 +19,24 @@ export default function GuestDashboard() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      {/* HEADER */}
+      {/* HEADER WITH LOGO + HOTEL NAME */}
       <header
-        className="px-4 py-4 flex justify-between items-center shadow"
+        className="px-4 py-4 flex items-center justify-between shadow"
         style={{ backgroundColor: "var(--bg-secondary)" }}
       >
-        <div>
-          <h1
-            className="text-lg font-bold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            🏨 Room Service
-          </h1>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Room {guest?.roomNumber}
-          </p>
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow">
+          {/* LOGO PLACEHOLDER */}
+          <span className="font-bold" style={{ color: "var(--brand)" }}>
+            H
+          </span>
         </div>
+
+        <h1
+          className="text-lg font-bold text-center flex-1"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Centre Point Hotel
+        </h1>
 
         <button
           onClick={handleLogout}
@@ -44,9 +50,9 @@ export default function GuestDashboard() {
         </button>
       </header>
 
-      {/* HERO (MOBILE RATIO) */}
+      {/* HERO / WELCOME */}
       <section
-        className="relative h-48"
+        className="relative h-44"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb')",
@@ -57,20 +63,23 @@ export default function GuestDashboard() {
         <div className="absolute inset-0 bg-black/40" />
 
         <div className="absolute bottom-4 left-4 right-4 text-white">
-          <h2 className="text-xl font-semibold mb-1">
-            Welcome 👋
+          <p className="text-sm opacity-90">
+            Welcome, {guestFirstName} 👋
+          </p>
+          <h2 className="text-xl font-semibold">
+            Make yourself comfortable
           </h2>
-          <p className="text-sm text-white/90">
-            Enjoy your stay with comfort & care
+          <p className="text-xs opacity-90">
+            Room {guest?.roomNumber}
           </p>
         </div>
       </section>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN ACTION CARDS */}
       <main className="flex-1 px-4 py-6">
         <div className="grid grid-cols-1 gap-4">
 
-          {/* MENU CARD */}
+          {/* MENU */}
           <div
             onClick={() => navigate("/guest/menu")}
             className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
@@ -90,27 +99,27 @@ export default function GuestDashboard() {
             </div>
           </div>
 
-          {/* CART CARD */}
+          {/* HOTEL INFO */}
           <div
-            onClick={() => navigate("/guest/cart")}
+            onClick={() => navigate("/guest/hotel-info")}
             className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
             style={{ backgroundColor: "white" }}
           >
-            <div className="text-3xl">🛒</div>
+            <div className="text-3xl">🏨</div>
             <div>
               <h3
                 className="text-lg font-semibold"
                 style={{ color: "var(--text-primary)" }}
               >
-                Your Cart
+                Hotel Information
               </h3>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Review before placing order
+                Amenities, Wi-Fi & house rules
               </p>
             </div>
           </div>
 
-          {/* ORDERS CARD */}
+          {/* ORDERS */}
           <div
             onClick={() => navigate("/guest/orders")}
             className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
@@ -125,7 +134,7 @@ export default function GuestDashboard() {
                 My Orders
               </h3>
               <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                Track order status
+                Track your orders
               </p>
             </div>
           </div>
@@ -133,7 +142,7 @@ export default function GuestDashboard() {
         </div>
       </main>
 
-      {/* FOOTER SAFE SPACE (THUMB FRIENDLY) */}
+      {/* SAFE BOTTOM SPACE */}
       <div className="h-6" />
     </div>
   );
