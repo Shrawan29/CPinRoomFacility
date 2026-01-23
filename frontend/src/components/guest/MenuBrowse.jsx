@@ -108,11 +108,10 @@ export default function MenuBrowse() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                selectedCategory === cat
+              className={`px-4 py-2 rounded-lg font-medium transition ${selectedCategory === cat
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+                }`}
             >
               {cat}
             </button>
@@ -172,7 +171,8 @@ export default function MenuBrowse() {
                       <span className="text-2xl font-bold text-blue-600">
                         ₹{item.price}
                       </span>
-                      {item.available && (
+                      {/* ✅ FIXED: Changed from item.available to !item.available */}
+                      {!item.available && (
                         <p className="text-red-500 text-xs font-semibold mt-1">
                           Not Available
                         </p>
