@@ -1,16 +1,26 @@
 import api from "./api";
 
-export const getKitchenMenu = () =>
-  api.get("/menu/kitchen");
+export const getKitchenMenu = async () => {
+  const res = await api.get("/menu/kitchen");
+  return res.data;
+};
 
-export const createMenuItem = (data) =>
-  api.post("/menu/kitchen", data);
+export const createMenuItem = async (data) => {
+  const res = await api.post("/menu/kitchen", data);
+  return res.data;
+};
 
-export const updateMenuItem = (id, data) =>
-  api.put(`/menu/kitchen/${id}`, data);
+export const updateMenuItem = async (id, data) => {
+  const res = await api.put(`/menu/kitchen/${id}`, data);
+  return res.data;
+};
 
-export const deleteMenuItem = (id) =>
-  api.delete(`/menu/kitchen/${id}`);
+export const deleteMenuItem = async (id) => {
+  const res = await api.delete(`/menu/kitchen/${id}`);
+  return res.data;
+};
 
-export const getGuestMenu = () =>
-  api.get("/menu/guest");
+export const getGuestMenu = async () => {
+  const res = await api.get("/menu/guest");
+  return res.data;
+};
