@@ -7,31 +7,31 @@ const api = axios.create({
 // ✅ SAFE INTERCEPTOR
 api.interceptors.request.use(
   (config) => {
-    // Guard: build / SSR / node
-    if (typeof window === "undefined") {
-      return config;
-    }
+    if (typeof window === "undefined") return config;
 
-    // Public guest APIs (NO AUTH)
+    // Public routes
     const isPublic =
       config.url?.startsWith("/menu/guest") ||
-      config.url?.startsWith("/hotel-info");
+      config.url?.startsWith("/hotel-info") ||
+      config.url?.includes("/guest/auth");
 
-    if (isPublic) {
-      return config;
+    if (isPublic) return config;
+
+    // 🔑 Guest session header
+    const guestSession = localStorage.getItem("guest_session");
+    if (guestSession) {
+      config.headers["x-guest-session"] = guestSession;
     }
 
-    const adminToken = window.localStorage.getItem("admin_token");
-    const guestToken = window.localStorage.getItem("guest_token");
-    const token = adminToken || guestToken;
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Admin JWT (separate system)
+    const adminToken = localStorage.getItem("admin_token");
+    if (adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 export default api;

@@ -77,6 +77,7 @@ export default function MenuBrowse() {
                     price: item.price,
                 })),
             });
+
             setCart([]);
             setShowCart(false);
             setSuccessMessage("✅ Order placed successfully");
