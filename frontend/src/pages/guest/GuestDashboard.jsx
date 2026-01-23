@@ -12,125 +12,129 @@ export default function GuestDashboard() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       {/* HEADER */}
       <header
-        className="shadow-md"
+        className="px-4 py-4 flex justify-between items-center shadow"
         style={{ backgroundColor: "var(--bg-secondary)" }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
-          <div>
-            <h1
-              className="text-2xl font-bold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              🏨 Room Service
-            </h1>
-            <p
-              className="text-sm"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Room {guest?.roomNumber} • {guest?.phone}
-            </p>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 rounded-lg font-semibold transition"
-            style={{
-              backgroundColor: "var(--brand)",
-              color: "white",
-            }}
+        <div>
+          <h1
+            className="text-lg font-bold"
+            style={{ color: "var(--text-primary)" }}
           >
-            Logout
-          </button>
+            🏨 Room Service
+          </h1>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Room {guest?.roomNumber}
+          </p>
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="text-sm px-3 py-2 rounded-md"
+          style={{
+            backgroundColor: "var(--brand)",
+            color: "white",
+          }}
+        >
+          Logout
+        </button>
       </header>
 
-      {/* HERO SECTION */}
+      {/* HERO (MOBILE RATIO) */}
       <section
-        className="relative h-64 flex items-center"
+        className="relative h-48"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1501117716987-c8e1ecb210a4')",
+            "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/40" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Welcome to your stay
+        <div className="absolute bottom-4 left-4 right-4 text-white">
+          <h2 className="text-xl font-semibold mb-1">
+            Welcome 👋
           </h2>
-          <p className="text-white/90">
-            Experience comfort and service at your fingertips
+          <p className="text-sm text-white/90">
+            Enjoy your stay with comfort & care
           </p>
         </div>
       </section>
 
-      {/* DASHBOARD CARDS */}
-      <main className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* MAIN CONTENT */}
+      <main className="flex-1 px-4 py-6">
+        <div className="grid grid-cols-1 gap-4">
 
           {/* MENU CARD */}
           <div
             onClick={() => navigate("/guest/menu")}
-            className="cursor-pointer rounded-2xl shadow-lg p-6 transition hover:scale-[1.02]"
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
             style={{ backgroundColor: "white" }}
           >
-            <div className="text-4xl mb-4">🍽️</div>
-            <h3
-              className="text-xl font-semibold mb-2"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Browse Menu
-            </h3>
-            <p style={{ color: "var(--text-muted)" }}>
-              Explore dishes and place your order
-            </p>
+            <div className="text-3xl">🍽️</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Browse Menu
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Food & beverages available
+              </p>
+            </div>
           </div>
 
           {/* CART CARD */}
           <div
             onClick={() => navigate("/guest/cart")}
-            className="cursor-pointer rounded-2xl shadow-lg p-6 transition hover:scale-[1.02]"
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
             style={{ backgroundColor: "white" }}
           >
-            <div className="text-4xl mb-4">🛒</div>
-            <h3
-              className="text-xl font-semibold mb-2"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Your Cart
-            </h3>
-            <p style={{ color: "var(--text-muted)" }}>
-              Review items before ordering
-            </p>
+            <div className="text-3xl">🛒</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Your Cart
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Review before placing order
+              </p>
+            </div>
           </div>
 
           {/* ORDERS CARD */}
           <div
             onClick={() => navigate("/guest/orders")}
-            className="cursor-pointer rounded-2xl shadow-lg p-6 transition hover:scale-[1.02]"
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
             style={{ backgroundColor: "white" }}
           >
-            <div className="text-4xl mb-4">📦</div>
-            <h3
-              className="text-xl font-semibold mb-2"
-              style={{ color: "var(--text-primary)" }}
-            >
-              My Orders
-            </h3>
-            <p style={{ color: "var(--text-muted)" }}>
-              Track your current and past orders
-            </p>
+            <div className="text-3xl">📦</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                My Orders
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Track order status
+              </p>
+            </div>
           </div>
 
         </div>
       </main>
+
+      {/* FOOTER SAFE SPACE (THUMB FRIENDLY) */}
+      <div className="h-6" />
     </div>
   );
 }
