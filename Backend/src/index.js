@@ -42,10 +42,8 @@ const app = express();
    ========================================================= */
 const corsOptions = {
   origin: (origin, callback) => {
-    // allow server-to-server, Postman, curl
     if (!origin) return callback(null, true);
 
-    // allow localhost + all vercel preview & prod domains
     if (
       origin.startsWith("http://localhost") ||
       origin.endsWith(".vercel.app")
@@ -53,12 +51,11 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    // silently block (DO NOT throw error)
     return callback(null, false);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "x-guest-session"],
 };
 
 app.use(cors(corsOptions));
@@ -98,7 +95,6 @@ app.use("/guest/orders", orderGuestRoutes);
 // guest protected routes (MUST BE LAST)
 app.use("/guest", guestProtectedRoutes);
 
-
 // common
 app.use("/rooms", roomRoutes);
 app.use("/menu", menuRoutes);
@@ -117,7 +113,7 @@ app.get("/health", (req, res) => {
 app.get("/admin/protected-test", adminAuth, (req, res) => {
   res.json({
     message: "Admin access granted",
-    admin: req.admin
+    admin: req.admin,
   });
 });
 
@@ -132,7 +128,7 @@ app.post("/debug/create-test-stay", async (req, res) => {
     phone: "9999999999",
     roomNumber: "101",
     status: "ACTIVE",
-    checkInAt: new Date()
+    checkInAt: new Date(),
   });
   res.json({ message: "Test stay created", stay });
 });
