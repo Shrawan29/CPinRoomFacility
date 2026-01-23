@@ -1,12 +1,9 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
-import MenuBrowse from "../../components/guest/MenuBrowse";
 
 export default function GuestDashboard() {
   const { guest, logout } = useGuestAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("menu");
 
   const handleLogout = () => {
     logout();
@@ -52,62 +49,87 @@ export default function GuestDashboard() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* TAB NAVIGATION */}
-        <div className="flex gap-4 mb-8 flex-wrap">
-          <button
-            onClick={() => setActiveTab("menu")}
-            className="px-6 py-3 rounded-lg font-semibold transition border-2"
-            style={{
-              backgroundColor:
-                activeTab === "menu" ? "var(--brand)" : "white",
-              color:
-                activeTab === "menu"
-                  ? "white"
-                  : "var(--text-primary)",
-              borderColor:
-                activeTab === "menu"
-                  ? "var(--brand)"
-                  : "var(--bg-secondary)",
-            }}
-          >
-            🍽️ Browse Menu
-          </button>
+      {/* HERO SECTION */}
+      <section
+        className="relative h-64 flex items-center"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1501117716987-c8e1ecb210a4')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
 
-          <button
-            onClick={() => setActiveTab("orders")}
-            className="px-6 py-3 rounded-lg font-semibold transition border-2"
-            style={{
-              backgroundColor:
-                activeTab === "orders" ? "var(--brand)" : "white",
-              color:
-                activeTab === "orders"
-                  ? "white"
-                  : "var(--text-primary)",
-              borderColor:
-                activeTab === "orders"
-                  ? "var(--brand)"
-                  : "var(--bg-secondary)",
-            }}
-          >
-            📦 My Orders
-          </button>
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Welcome to your stay
+          </h2>
+          <p className="text-white/90">
+            Experience comfort and service at your fingertips
+          </p>
         </div>
+      </section>
 
-        {/* TAB CONTENT */}
-        {activeTab === "menu" && <MenuBrowse />}
+      {/* DASHBOARD CARDS */}
+      <main className="max-w-7xl mx-auto px-4 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {activeTab === "orders" && (
+          {/* MENU CARD */}
           <div
-            className="text-center py-16 rounded-xl"
+            onClick={() => navigate("/guest/menu")}
+            className="cursor-pointer rounded-2xl shadow-lg p-6 transition hover:scale-[1.02]"
             style={{ backgroundColor: "white" }}
           >
+            <div className="text-4xl mb-4">🍽️</div>
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Browse Menu
+            </h3>
             <p style={{ color: "var(--text-muted)" }}>
-              Order history coming soon...
+              Explore dishes and place your order
             </p>
           </div>
-        )}
+
+          {/* CART CARD */}
+          <div
+            onClick={() => navigate("/guest/cart")}
+            className="cursor-pointer rounded-2xl shadow-lg p-6 transition hover:scale-[1.02]"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="text-4xl mb-4">🛒</div>
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Your Cart
+            </h3>
+            <p style={{ color: "var(--text-muted)" }}>
+              Review items before ordering
+            </p>
+          </div>
+
+          {/* ORDERS CARD */}
+          <div
+            onClick={() => navigate("/guest/orders")}
+            className="cursor-pointer rounded-2xl shadow-lg p-6 transition hover:scale-[1.02]"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="text-4xl mb-4">📦</div>
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{ color: "var(--text-primary)" }}
+            >
+              My Orders
+            </h3>
+            <p style={{ color: "var(--text-muted)" }}>
+              Track your current and past orders
+            </p>
+          </div>
+
+        </div>
       </main>
     </div>
   );
