@@ -1,23 +1,28 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000"
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
 });
 
-// Add Authorization header interceptor
+// ✅ SAFE INTERCEPTOR
 api.interceptors.request.use(
   (config) => {
-    // Do NOT attach token for public guest menu
-    const isPublicGuestAPI =
+    // Guard: build / SSR / node
+    if (typeof window === "undefined") {
+      return config;
+    }
+
+    // Public guest APIs (NO AUTH)
+    const isPublic =
       config.url?.startsWith("/menu/guest") ||
       config.url?.startsWith("/hotel-info");
 
-    if (isPublicGuestAPI) {
-      return config; // 🚫 no Authorization header
+    if (isPublic) {
+      return config;
     }
 
-    const adminToken = localStorage.getItem("admin_token");
-    const guestToken = localStorage.getItem("guest_token");
+    const adminToken = window.localStorage.getItem("admin_token");
+    const guestToken = window.localStorage.getItem("guest_token");
     const token = adminToken || guestToken;
 
     if (token) {
@@ -29,3 +34,4 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+export default api;
