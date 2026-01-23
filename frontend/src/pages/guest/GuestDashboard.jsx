@@ -40,7 +40,7 @@ export default function GuestDashboard() {
             className="text-sm font-bold leading-tight"
             style={{ color: "var(--text-primary)" }}
           >
-            Centre Point Hotel
+            Hotel Centre Point
           </h1>
         </div>
 
