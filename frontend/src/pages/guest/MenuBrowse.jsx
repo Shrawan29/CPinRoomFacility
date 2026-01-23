@@ -98,6 +98,7 @@ export default function MenuBrowse() {
       style={{
         background:
           "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+        color: "var(--text-primary)",
       }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -105,7 +106,7 @@ export default function MenuBrowse() {
         {/* MENU */}
         <div className="lg:col-span-3">
           {/* CATEGORIES */}
-          <div className="sticky top-0 z-10 pb-4 mb-6 flex gap-3 flex-wrap">
+          <div className="sticky top-0 z-10 mb-6 flex gap-3 flex-wrap">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -141,9 +142,9 @@ export default function MenuBrowse() {
             </div>
           )}
 
-          {/* MENU GRID */}
+          {/* MENU ITEMS */}
           {loading ? (
-            <p className="text-center py-20 text-[var(--text-muted)] animate-pulse">
+            <p className="text-center py-20 animate-pulse" style={{ color: "var(--text-muted)" }}>
               Loading menu...
             </p>
           ) : (
@@ -151,7 +152,7 @@ export default function MenuBrowse() {
               {filteredItems.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden transition hover:shadow-xl"
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden"
                 >
                   {item.image && (
                     <img
@@ -166,7 +167,7 @@ export default function MenuBrowse() {
                       {item.name}
                     </h3>
 
-                    <p className="text-sm mb-4 text-[var(--text-muted)]">
+                    <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
                       {item.description}
                     </p>
 
@@ -206,12 +207,8 @@ export default function MenuBrowse() {
             </h2>
 
             {cart.length === 0 ? (
-              <p className="text-center py-10 text-[var(--text-muted)]">
+              <p className="text-center py-10" style={{ color: "var(--text-muted)" }}>
                 Your cart is empty
-                <br />
-                <span className="text-sm">
-                  Add items from the menu
-                </span>
               </p>
             ) : (
               <>
@@ -223,10 +220,7 @@ export default function MenuBrowse() {
                           <p className="font-semibold text-sm">
                             {item.name}
                           </p>
-                          <p
-                            className="font-semibold"
-                            style={{ color: "var(--brand)" }}
-                          >
+                          <p style={{ color: "var(--brand)" }}>
                             ₹{item.price}
                           </p>
                         </div>
@@ -241,36 +235,17 @@ export default function MenuBrowse() {
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3 mt-2 bg-[var(--bg-secondary)] rounded-xl px-2 py-1 w-fit">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1)
-                          }
-                          className="w-8 h-8 font-bold"
-                        >
-                          −
-                        </button>
+                      <div className="flex items-center gap-3 mt-2 rounded-xl px-2 py-1 w-fit"
+                        style={{ backgroundColor: "var(--bg-secondary)" }}
+                      >
+                        <button onClick={() => updateQuantity(item._id, item.quantity - 1)}>−</button>
                         <span className="w-6 text-center font-semibold">
                           {item.quantity}
                         </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="w-8 h-8 font-bold"
-                        >
-                          +
-                        </button>
+                        <button onClick={() => updateQuantity(item._id, item.quantity + 1)}>+</button>
                       </div>
                     </div>
                   ))}
-                </div>
-
-                <div className="border-t pt-4 mb-4 flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span style={{ color: "var(--brand)" }}>
-                    ₹{cartTotal}
-                  </span>
                 </div>
 
                 <button
