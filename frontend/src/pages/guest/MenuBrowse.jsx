@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getGuestMenu } from "../../services/menu.service";
+import { getGuestMenu } from "../../services/menu.service.js";
 import { useNavigate } from "react-router-dom";
 
 export default function MenuBrowse() {
