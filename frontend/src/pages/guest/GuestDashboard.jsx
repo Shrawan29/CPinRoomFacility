@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
+import logo from "../../assets/logo.png";
+import {hotelbg} from "../../assets/hotel-bg.jpg";
 
 export default function GuestDashboard() {
   const { guest, logout } = useGuestAuth();
@@ -21,26 +23,31 @@ export default function GuestDashboard() {
     >
       {/* HEADER WITH LOGO + HOTEL NAME */}
       <header
-        className="px-4 py-4 flex items-center justify-between shadow"
+        className="px-4 py-4 shadow flex items-center justify-between"
         style={{ backgroundColor: "var(--bg-secondary)" }}
       >
-        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow">
-          {/* LOGO PLACEHOLDER */}
-          <span className="font-bold" style={{ color: "var(--brand)" }}>
-            H
-          </span>
+        {/* LEFT: LOGO ABOVE + NAME BELOW */}
+        <div className="flex flex-col items-start">
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow mb-1">
+            <img
+              src={logo}
+              alt="Hotel Logo"
+              className="w-6 h-6 object-contain"
+            />
+          </div>
+
+          <h1
+            className="text-sm font-bold leading-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Centre Point Hotel
+          </h1>
         </div>
 
-        <h1
-          className="text-lg font-bold text-center flex-1"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Centre Point Hotel
-        </h1>
-
+        {/* RIGHT: LOGOUT */}
         <button
           onClick={handleLogout}
-          className="text-sm px-3 py-2 rounded-md"
+          className="text-sm px-3 py-2 rounded-md font-medium"
           style={{
             backgroundColor: "var(--brand)",
             color: "white",
@@ -50,12 +57,12 @@ export default function GuestDashboard() {
         </button>
       </header>
 
+
       {/* HERO / WELCOME */}
       <section
         className="relative h-44"
         style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb')",
+          backgroundImage: `url(${hotelbg})`, // Use the same image as the logo {hotel-bg},
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
