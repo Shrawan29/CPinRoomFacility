@@ -18,20 +18,8 @@ export default function MenuBrowse() {
     useEffect(() => {
         const loadMenu = async () => {
             try {
-                const items = await getGuestMenu();
-
+                const items = await getGuestMenu(); // now PURE array
                 setMenuItems(items);
-
-                const uniqueCategories = [
-                    ...new Set(items.map((item) => item.category)),
-                ];
-
-                setCategories(uniqueCategories);
-
-                // ✅ Auto-select first category
-                if (uniqueCategories.length > 0) {
-                    setActiveCategory(uniqueCategories[0]);
-                }
             } catch (err) {
                 console.error(err);
                 setError("Failed to load menu");
@@ -42,6 +30,7 @@ export default function MenuBrowse() {
 
         loadMenu();
     }, []);
+
 
     /* ============================
        FILTER BY CATEGORY
