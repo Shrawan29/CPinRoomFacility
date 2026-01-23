@@ -25,7 +25,7 @@ import GuestAccessFallback from "./pages/guest/GuestAccessFallback";
 import GuestDashboard from "./pages/guest/GuestDashboard";
 
 // Guest pages
-import MenuBrowse from "./components/guest/MenuBrowse";
+import MenuBrowse from "./pages/guest/MenuBrowse";
 import GuestCart from "./pages/guest/GuestCart";
 import GuestOrders from "./pages/guest/GuestOrders";
 // import HotelInfo from "./pages/guest/HotelInfo";
