@@ -20,8 +20,8 @@ export default function MenuBrowse() {
   const fetchMenu = async () => {
     try {
       setLoading(true);
-      const response = await getGuestMenu();
-      setMenuItems(Array.isArray(response) ? response : response.items || []);
+      const res = await getGuestMenu();
+      setMenuItems(Array.isArray(res) ? res : res.items || []);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load menu");
     } finally {
@@ -49,13 +49,9 @@ export default function MenuBrowse() {
     }
   };
 
-  const removeFromCart = (id) => {
-    setCart(cart.filter((c) => c._id !== id));
-  };
-
   const updateQuantity = (id, qty) => {
     if (qty <= 0) {
-      removeFromCart(id);
+      setCart(cart.filter((c) => c._id !== id));
     } else {
       setCart(cart.map((c) => (c._id === id ? { ...c, quantity: qty } : c)));
     }
@@ -78,19 +74,16 @@ export default function MenuBrowse() {
       setSubmitting(true);
       setError("");
 
-      const orderData = {
+      await placeOrder({
         items: cart.map((item) => ({
           menuItemId: item._id,
           quantity: item.quantity,
           price: item.price,
         })),
-      };
-
-      await placeOrder(orderData);
+      });
 
       setSuccessMessage("✅ Order placed successfully");
       setCart([]);
-
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to place order");
@@ -100,23 +93,34 @@ export default function MenuBrowse() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-6">
+    <div
+      className="min-h-screen p-6"
+      style={{
+        background:
+          "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+      }}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
         {/* MENU */}
         <div className="lg:col-span-3">
           {/* CATEGORIES */}
-          <div className="sticky top-0 z-10 bg-[var(--bg-primary)] py-4 mb-6 flex gap-3 flex-wrap">
+          <div className="sticky top-0 z-10 pb-4 mb-6 flex gap-3 flex-wrap">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition
-                  ${
+                className="px-5 py-2 rounded-full text-sm font-semibold transition"
+                style={{
+                  backgroundColor:
                     selectedCategory === cat
-                      ? "bg-[var(--brand)] text-white shadow"
-                      : "bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--brand-soft)] hover:text-white"
-                  }`}
+                      ? "var(--brand)"
+                      : "var(--bg-secondary)",
+                  color:
+                    selectedCategory === cat
+                      ? "#fff"
+                      : "var(--text-primary)",
+                }}
               >
                 {cat}
               </button>
@@ -125,33 +129,29 @@ export default function MenuBrowse() {
 
           {/* ERROR */}
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-100 text-red-700 border border-red-300">
+            <div className="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-600">
               {error}
             </div>
           )}
 
           {/* SUCCESS */}
           {successMessage && (
-            <div className="mb-6 p-4 rounded-lg bg-green-100 text-green-700 border border-green-300">
+            <div className="mb-6 p-4 rounded-lg border border-green-200 bg-green-50 text-green-600">
               {successMessage}
             </div>
           )}
 
-          {/* MENU ITEMS */}
+          {/* MENU GRID */}
           {loading ? (
             <p className="text-center py-20 text-[var(--text-muted)] animate-pulse">
               Loading menu...
-            </p>
-          ) : filteredItems.length === 0 ? (
-            <p className="text-center py-20 text-[var(--text-muted)]">
-              No items available in this category
             </p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredItems.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden"
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden transition hover:shadow-xl"
                 >
                   {item.image && (
                     <img
@@ -166,26 +166,27 @@ export default function MenuBrowse() {
                       {item.name}
                     </h3>
 
-                    <p className="text-sm text-[var(--text-muted)] mb-4">
+                    <p className="text-sm mb-4 text-[var(--text-muted)]">
                       {item.description}
                     </p>
 
                     <div className="flex justify-between items-center">
-                      <div>
-                        <span className="text-2xl font-bold text-[var(--brand)]">
-                          ₹{item.price}
-                        </span>
-                        {!item.isAvailable && (
-                          <p className="text-xs text-red-600 mt-1">
-                            Not Available
-                          </p>
-                        )}
-                      </div>
+                      <span
+                        className="text-2xl font-bold"
+                        style={{ color: "var(--brand)" }}
+                      >
+                        ₹{item.price}
+                      </span>
 
                       <button
                         onClick={() => addToCart(item)}
                         disabled={!item.isAvailable}
-                        className="px-4 py-2 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-soft)] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold transition active:scale-95"
+                        className="px-4 py-2 rounded-lg text-white font-semibold transition active:scale-95"
+                        style={{
+                          backgroundColor: item.isAvailable
+                            ? "var(--brand)"
+                            : "#ccc",
+                        }}
                       >
                         Add +
                       </button>
@@ -199,7 +200,7 @@ export default function MenuBrowse() {
 
         {/* CART */}
         <div className="lg:col-span-1">
-          <div className="bg-[var(--bg-secondary)] rounded-xl shadow-lg p-6 sticky top-6">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 sticky top-6">
             <h2 className="text-xl font-bold mb-4">
               🛒 Cart ({cartItemCount})
             </h2>
@@ -217,29 +218,35 @@ export default function MenuBrowse() {
                 <div className="space-y-4 max-h-80 overflow-y-auto mb-6">
                   {cart.map((item) => (
                     <div key={item._id} className="border-b pb-3">
-                      <div className="flex justify-between items-start">
+                      <div className="flex justify-between">
                         <div>
                           <p className="font-semibold text-sm">
                             {item.name}
                           </p>
-                          <p className="text-[var(--brand)] font-semibold">
+                          <p
+                            className="font-semibold"
+                            style={{ color: "var(--brand)" }}
+                          >
                             ₹{item.price}
                           </p>
                         </div>
+
                         <button
-                          onClick={() => removeFromCart(item._id)}
-                          className="text-red-600 hover:text-red-800 text-lg"
+                          onClick={() =>
+                            setCart(cart.filter((c) => c._id !== item._id))
+                          }
+                          className="text-red-500"
                         >
                           ✕
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-3 mt-2 bg-white rounded-xl px-2 py-1 shadow-sm w-fit">
+                      <div className="flex items-center gap-3 mt-2 bg-[var(--bg-secondary)] rounded-xl px-2 py-1 w-fit">
                         <button
                           onClick={() =>
                             updateQuantity(item._id, item.quantity - 1)
                           }
-                          className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] hover:bg-gray-200 font-bold"
+                          className="w-8 h-8 font-bold"
                         >
                           −
                         </button>
@@ -250,7 +257,7 @@ export default function MenuBrowse() {
                           onClick={() =>
                             updateQuantity(item._id, item.quantity + 1)
                           }
-                          className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] hover:bg-gray-200 font-bold"
+                          className="w-8 h-8 font-bold"
                         >
                           +
                         </button>
@@ -259,20 +266,21 @@ export default function MenuBrowse() {
                   ))}
                 </div>
 
-                <div className="border-t pt-4 mb-4">
-                  <div className="flex justify-between text-lg font-semibold">
-                    <span>Total</span>
-                    <span className="text-[var(--brand)]">
-                      ₹{cartTotal}
-                    </span>
-                  </div>
+                <div className="border-t pt-4 mb-4 flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span style={{ color: "var(--brand)" }}>
+                    ₹{cartTotal}
+                  </span>
                 </div>
 
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={submitting || cart.length === 0}
-                  title={cart.length === 0 ? "Add items to cart first" : ""}
-                  className="w-full py-3 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-soft)] disabled:bg-gray-400 text-white font-bold transition"
+                  disabled={submitting}
+                  className="w-full py-3 rounded-lg text-white font-bold transition"
+                  style={{
+                    backgroundColor: "var(--brand-soft)",
+                    opacity: submitting ? 0.6 : 1,
+                  }}
                 >
                   {submitting ? "Placing Order..." : "Place Order"}
                 </button>

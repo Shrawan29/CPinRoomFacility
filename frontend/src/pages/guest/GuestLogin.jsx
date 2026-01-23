@@ -1,294 +1,194 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
-import { getGuestMenu, placeOrder } from "../../services/guest.service";
+import { sendGuestOTP, verifyGuestOTP } from "../../services/guest.service";
 
-export default function MenuBrowse() {
-  const { token } = useGuestAuth();
+export default function GuestLogin() {
+  const navigate = useNavigate();
+  const { login } = useGuestAuth();
+  const [searchParams] = useSearchParams();
 
-  const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [step, setStep] = useState("phone");
+  const [formData, setFormData] = useState({
+    qrToken: "",
+    phone: "",
+    otp: "",
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [cart, setCart] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
+  const [roomNumber, setRoomNumber] = useState("");
+
+  // persistent device id
+  const deviceId = (() => {
+    const existing = localStorage.getItem("guest_device_id");
+    if (existing) return existing;
+    const id = `device_${crypto.randomUUID()}`;
+    localStorage.setItem("guest_device_id", id);
+    return id;
+  })();
 
   useEffect(() => {
-    fetchMenu();
-  }, []);
+    const qrToken = searchParams.get("token");
+    if (!qrToken) {
+      navigate("/guest/access-fallback");
+      return;
+    }
+    setFormData((prev) => ({ ...prev, qrToken }));
+  }, [searchParams, navigate]);
 
-  const fetchMenu = async () => {
+  const handleSendOTP = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (!formData.phone) {
+      setError("Please enter your phone number");
+      setLoading(false);
+      return;
+    }
+
     try {
-      setLoading(true);
-      const res = await getGuestMenu();
-      setMenuItems(Array.isArray(res) ? res : res.items || []);
+      const response = await sendGuestOTP(formData.qrToken, formData.phone);
+      if (response?.roomNumber) setRoomNumber(response.roomNumber);
+      setStep("otp");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load menu");
+      setError(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  const categories = ["ALL", ...new Set(menuItems.map((i) => i.category))];
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  const filteredItems =
-    selectedCategory === "ALL"
-      ? menuItems
-      : menuItems.filter((i) => i.category === selectedCategory);
-
-  const addToCart = (item) => {
-    const existing = cart.find((c) => c._id === item._id);
-    if (existing) {
-      setCart(
-        cart.map((c) =>
-          c._id === item._id ? { ...c, quantity: c.quantity + 1 } : c
-        )
-      );
-    } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
-    }
-  };
-
-  const updateQuantity = (id, qty) => {
-    if (qty <= 0) {
-      setCart(cart.filter((c) => c._id !== id));
-    } else {
-      setCart(cart.map((c) => (c._id === id ? { ...c, quantity: qty } : c)));
-    }
-  };
-
-  const cartTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handlePlaceOrder = async () => {
-    if (cart.length === 0) {
-      setError("Please add items to your cart");
+    if (!formData.otp) {
+      setError("Please enter the OTP");
+      setLoading(false);
       return;
     }
 
     try {
-      setSubmitting(true);
-      setError("");
+      const response = await verifyGuestOTP(
+        formData.qrToken,
+        formData.phone,
+        formData.otp,
+        deviceId
+      );
 
-      await placeOrder({
-        items: cart.map((item) => ({
-          menuItemId: item._id,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      });
-
-      setSuccessMessage("✅ Order placed successfully");
-      setCart([]);
-      setTimeout(() => setSuccessMessage(""), 3000);
+      if (response?.token && response?.guest) {
+        login(response.token, response.guest);
+        navigate("/guest/dashboard");
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to place order");
+      setError(err.response?.data?.message || "Failed to verify OTP");
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
     <div
-      className="min-h-screen p-6"
+      className="min-h-screen flex items-center justify-center p-4"
       style={{
-        background:
-          "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+        background: "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
       }}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="w-full max-w-md rounded-2xl shadow-2xl p-8 bg-white">
+        <h1
+          className="text-3xl font-bold text-center mb-2"
+          style={{ color: "var(--text-primary)" }}
+        >
+          🏨 Room Service
+        </h1>
 
-        {/* MENU */}
-        <div className="lg:col-span-3">
-          {/* CATEGORIES */}
-          <div className="sticky top-0 z-10 pb-4 mb-6 flex gap-3 flex-wrap">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className="px-5 py-2 rounded-full text-sm font-semibold transition"
-                style={{
-                  backgroundColor:
-                    selectedCategory === cat
-                      ? "var(--brand)"
-                      : "var(--bg-secondary)",
-                  color:
-                    selectedCategory === cat
-                      ? "#fff"
-                      : "var(--text-primary)",
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+        {roomNumber && (
+          <p
+            className="text-center font-semibold mb-6"
+            style={{ color: "var(--brand)" }}
+          >
+            Room #{roomNumber}
+          </p>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 rounded-lg text-sm border border-red-200 bg-red-50 text-red-600">
+            {error}
           </div>
+        )}
 
-          {/* ERROR */}
-          {error && (
-            <div className="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-600">
-              {error}
-            </div>
-          )}
+        {step === "phone" && (
+          <form onSubmit={handleSendOTP} className="space-y-4">
+            <input
+              type="tel"
+              placeholder="+91 XXXXX XXXXX"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+              style={{
+                borderColor: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+              }}
+              autoFocus
+            />
 
-          {/* SUCCESS */}
-          {successMessage && (
-            <div className="mb-6 p-4 rounded-lg border border-green-200 bg-green-50 text-green-600">
-              {successMessage}
-            </div>
-          )}
+            <button
+              disabled={loading}
+              className="w-full py-3 rounded-lg font-semibold text-white transition"
+              style={{
+                backgroundColor: "var(--brand)",
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {loading ? "Sending OTP..." : "Send OTP"}
+            </button>
+          </form>
+        )}
 
-          {/* MENU GRID */}
-          {loading ? (
-            <p className="text-center py-20 text-[var(--text-muted)] animate-pulse">
-              Loading menu...
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredItems.map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden transition hover:shadow-xl"
-                >
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-44 object-cover"
-                    />
-                  )}
+        {step === "otp" && (
+          <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <input
+              type="text"
+              maxLength="6"
+              value={formData.otp}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  otp: e.target.value.replace(/\D/g, ""),
+                })
+              }
+              className="w-full px-4 py-3 border-2 rounded-lg text-center text-2xl tracking-widest focus:outline-none"
+              style={{
+                borderColor: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+              }}
+              autoFocus
+            />
 
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold mb-1">
-                      {item.name}
-                    </h3>
+            <button
+              disabled={loading}
+              className="w-full py-3 rounded-lg font-semibold text-white transition"
+              style={{
+                backgroundColor: "var(--brand-soft)",
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {loading ? "Verifying..." : "Verify & Login"}
+            </button>
+          </form>
+        )}
 
-                    <p className="text-sm mb-4 text-[var(--text-muted)]">
-                      {item.description}
-                    </p>
-
-                    <div className="flex justify-between items-center">
-                      <span
-                        className="text-2xl font-bold"
-                        style={{ color: "var(--brand)" }}
-                      >
-                        ₹{item.price}
-                      </span>
-
-                      <button
-                        onClick={() => addToCart(item)}
-                        disabled={!item.isAvailable}
-                        className="px-4 py-2 rounded-lg text-white font-semibold transition active:scale-95"
-                        style={{
-                          backgroundColor: item.isAvailable
-                            ? "var(--brand)"
-                            : "#ccc",
-                        }}
-                      >
-                        Add +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* CART */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 sticky top-6">
-            <h2 className="text-xl font-bold mb-4">
-              🛒 Cart ({cartItemCount})
-            </h2>
-
-            {cart.length === 0 ? (
-              <p className="text-center py-10 text-[var(--text-muted)]">
-                Your cart is empty
-                <br />
-                <span className="text-sm">
-                  Add items from the menu
-                </span>
-              </p>
-            ) : (
-              <>
-                <div className="space-y-4 max-h-80 overflow-y-auto mb-6">
-                  {cart.map((item) => (
-                    <div key={item._id} className="border-b pb-3">
-                      <div className="flex justify-between">
-                        <div>
-                          <p className="font-semibold text-sm">
-                            {item.name}
-                          </p>
-                          <p
-                            className="font-semibold"
-                            style={{ color: "var(--brand)" }}
-                          >
-                            ₹{item.price}
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={() =>
-                            setCart(cart.filter((c) => c._id !== item._id))
-                          }
-                          className="text-red-500"
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-3 mt-2 bg-[var(--bg-secondary)] rounded-xl px-2 py-1 w-fit">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1)
-                          }
-                          className="w-8 h-8 font-bold"
-                        >
-                          −
-                        </button>
-                        <span className="w-6 text-center font-semibold">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="w-8 h-8 font-bold"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t pt-4 mb-4 flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span style={{ color: "var(--brand)" }}>
-                    ₹{cartTotal}
-                  </span>
-                </div>
-
-                <button
-                  onClick={handlePlaceOrder}
-                  disabled={submitting}
-                  className="w-full py-3 rounded-lg text-white font-bold transition"
-                  style={{
-                    backgroundColor: "var(--brand-soft)",
-                    opacity: submitting ? 0.6 : 1,
-                  }}
-                >
-                  {submitting ? "Placing Order..." : "Place Order"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
+        <p
+          className="text-center text-xs mt-6"
+          style={{ color: "var(--text-muted)" }}
+        >
+          🔒 Secure guest session
+        </p>
       </div>
     </div>
   );
