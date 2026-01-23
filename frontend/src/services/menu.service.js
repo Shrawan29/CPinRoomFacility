@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./api.js";
 
 export const getKitchenMenu = async () => {
   const res = await api.get("/menu/kitchen");

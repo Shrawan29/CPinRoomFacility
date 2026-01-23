@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./api.js";
 
 // 🔑 GUEST AUTHENTICATION
 export const sendGuestOTP = async (qrToken, phone) => {

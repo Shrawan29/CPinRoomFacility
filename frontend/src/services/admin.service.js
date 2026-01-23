@@ -1,5 +1,5 @@
-import api from "./api";
 
+import api from "./api.js"
 export const adminLogin = async (email, password) => {
   const res = await api.post("/admin/login", {
     email,
