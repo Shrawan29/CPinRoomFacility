@@ -172,7 +172,7 @@ export default function MenuBrowse() {
                       <span className="text-2xl font-bold text-blue-600">
                         ₹{item.price}
                       </span>
-                      {!item.available && (
+                      {item.available && (
                         <p className="text-red-500 text-xs font-semibold mt-1">
                           Not Available
                         </p>
