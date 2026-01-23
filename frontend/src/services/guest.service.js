@@ -7,7 +7,12 @@ export const sendGuestOTP = async (qrToken, phone) => {
 };
 
 export const verifyGuestOTP = async (qrToken, phone, otp, deviceId) => {
-  const res = await api.post("/guest/auth/verify-otp", { qrToken, phone, otp, deviceId });
+  const res = await api.post("/guest/auth/verify-otp", {
+    qrToken,
+    phone,
+    otp,
+    deviceId,
+  });
   return res.data;
 };
 
@@ -19,7 +24,14 @@ export const getGuestDashboard = async () => {
 
 // 🍽️ GUEST ORDERS
 export const placeOrder = async (items) => {
-  const res = await api.post("/guest/orders", items);
+  const session = localStorage.getItem("guest_session");
+
+  const res = await api.post("/guest/orders", items, {
+    headers: {
+      "x-guest-session": session,
+    },
+  });
+
   return res.data;
 };
 
