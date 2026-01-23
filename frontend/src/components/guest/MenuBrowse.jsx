@@ -20,7 +20,17 @@ export default function MenuBrowse() {
     try {
       setLoading(true);
       const response = await getGuestMenu();
-      setMenuItems(Array.isArray(response) ? response : response.items || []);
+      const items = Array.isArray(response) ? response : response.items || [];
+      
+      // 🔍 DEBUG: Log the first item to see its structure
+      if (items.length > 0) {
+        console.log("🔍 DEBUG - First menu item:", items[0]);
+        console.log("🔍 Available field value:", items[0].available);
+        console.log("🔍 Available field type:", typeof items[0].available);
+        console.log("🔍 All fields:", Object.keys(items[0]));
+      }
+      
+      setMenuItems(items);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load menu");
     } finally {
@@ -98,6 +108,22 @@ export default function MenuBrowse() {
     }
   };
 
+  // 🔍 Helper function to check if item is available
+  const isItemAvailable = (item) => {
+    // Try different possible field names and values
+    if (item.available === true) return true;
+    if (item.available === false) return false;
+    if (item.isAvailable === true) return true;
+    if (item.isAvailable === false) return false;
+    if (item.status === "available") return true;
+    if (item.status === "unavailable") return false;
+    if (item.inStock === true) return true;
+    if (item.inStock === false) return false;
+    
+    // Default to available if field doesn't exist
+    return true;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* MENU ITEMS */}
@@ -108,10 +134,11 @@ export default function MenuBrowse() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${selectedCategory === cat
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                selectedCategory === cat
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+              }`}
             >
               {cat}
             </button>
@@ -143,52 +170,63 @@ export default function MenuBrowse() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredItems.map((item) => (
-              <div
-                key={item._id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
-              >
-                {/* ITEM IMAGE */}
-                {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-48 object-cover"
-                  />
-                )}
+            {filteredItems.map((item) => {
+              const available = isItemAvailable(item);
+              
+              return (
+                <div
+                  key={item._id}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+                >
+                  {/* 🔍 DEBUG BADGE - Remove this after debugging */}
+                  <div className="bg-yellow-100 px-2 py-1 text-xs">
+                    DEBUG: available={String(item.available)} | 
+                    isAvailable={String(item.isAvailable)} | 
+                    status={item.status} | 
+                    computed={String(available)}
+                  </div>
 
-                {/* ITEM DETAILS */}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                    {item.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {item.description}
-                  </p>
+                  {/* ITEM IMAGE */}
+                  {item.image && (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
 
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-2xl font-bold text-blue-600">
-                        ₹{item.price}
-                      </span>
-                      {/* ✅ FIXED: Changed from item.available to !item.available */}
-                      {!item.available && (
-                        <p className="text-red-500 text-xs font-semibold mt-1">
-                          Not Available
-                        </p>
-                      )}
+                  {/* ITEM DETAILS */}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                      {item.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-3">
+                      {item.description}
+                    </p>
+
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-2xl font-bold text-blue-600">
+                          ₹{item.price}
+                        </span>
+                        {!available && (
+                          <p className="text-red-500 text-xs font-semibold mt-1">
+                            Not Available
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => addToCart(item)}
+                        disabled={!available}
+                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg font-medium transition"
+                      >
+                        Add to Cart
+                      </button>
                     </div>
-                    <button
-                      onClick={() => addToCart(item)}
-                      disabled={!item.available}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg font-medium transition"
-                    >
-                      Add to Cart
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
