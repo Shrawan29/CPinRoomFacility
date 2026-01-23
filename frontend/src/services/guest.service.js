@@ -19,9 +19,21 @@ export const getGuestDashboard = async () => {
 
 // 🍽️ GUEST ORDERS
 export const placeOrder = async (items) => {
-  const res = await api.post("/guest/orders", items);
+  const session = localStorage.getItem("guest_session");
+
+  const res = await api.post(
+    "/guest/orders",
+    items,
+    {
+      headers: {
+        "x-guest-session": session,
+      },
+    }
+  );
+
   return res.data;
 };
+
 
 export const getMyOrders = async () => {
   const res = await api.get("/guest/orders");
