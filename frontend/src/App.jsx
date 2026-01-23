@@ -136,22 +136,6 @@ function App() {
         }
       />
 
-      {/* ✅ GUEST ROUTES */}
-      {/* PUBLIC — MUST NOT BE PROTECTED */}
-      <Route path="/guest/login" element={<GuestLogin />} />
-
-      <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
-
-      {/* PROTECTED AFTER LOGIN */}
-      <Route
-        path="/guest/dashboard"
-        element={
-          <GuestProtectedRoute>
-            <GuestDashboard />
-          </GuestProtectedRoute>
-        }
-      />
-      {/* ✅ GUEST ROUTES */}
       {/* PUBLIC — MUST NOT BE PROTECTED */}
       <Route path="/guest/login" element={<GuestLogin />} />
       <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
