@@ -7,20 +7,25 @@ const api = axios.create({
 // Add Authorization header interceptor
 api.interceptors.request.use(
   (config) => {
+    // Do NOT attach token for public guest menu
+    const isPublicGuestAPI =
+      config.url?.startsWith("/menu/guest") ||
+      config.url?.startsWith("/hotel-info");
+
+    if (isPublicGuestAPI) {
+      return config; // 🚫 no Authorization header
+    }
+
     const adminToken = localStorage.getItem("admin_token");
     const guestToken = localStorage.getItem("guest_token");
     const token = adminToken || guestToken;
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.warn("⚠️ No token found in localStorage for request:", config.url);
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-export default api;
