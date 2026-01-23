@@ -6,10 +6,30 @@ export default function GuestProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div
+        className="flex items-center justify-center min-h-screen"
+        style={{
+          background:
+            "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+          color: "var(--text-primary)",
+        }}
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          {/* Spinner */}
+          <div
+            className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
+            style={{
+              borderWidth: "3px",
+              borderStyle: "solid",
+              borderColor: "var(--brand-soft)",
+              borderTopColor: "transparent",
+            }}
+          ></div>
+
+          {/* Text */}
+          <p style={{ color: "var(--text-muted)" }}>
+            Loading your experience…
+          </p>
         </div>
       </div>
     );
