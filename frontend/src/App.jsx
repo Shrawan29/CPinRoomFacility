@@ -24,6 +24,13 @@ import GuestLogin from "./pages/guest/GuestLogin";
 import GuestAccessFallback from "./pages/guest/GuestAccessFallback";
 import GuestDashboard from "./pages/guest/GuestDashboard";
 
+// Guest pages
+import MenuBrowse from "./components/guest/MenuBrowse";
+import GuestCart from "./pages/guest/GuestCart";
+import GuestOrders from "./pages/guest/GuestOrders";
+import HotelInfo from "./pages/guest/HotelInfo";
+
+
 // Routes
 import ProtectedRoute from "./routes/ProtectedRoute";
 import GuestProtectedRoute from "./components/GuestProtectedRoute";
@@ -144,6 +151,57 @@ function App() {
           </GuestProtectedRoute>
         }
       />
+      {/* ✅ GUEST ROUTES */}
+      {/* PUBLIC — MUST NOT BE PROTECTED */}
+      <Route path="/guest/login" element={<GuestLogin />} />
+      <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
+
+      {/* PROTECTED AFTER LOGIN */}
+      <Route
+        path="/guest/dashboard"
+        element={
+          <GuestProtectedRoute>
+            <GuestDashboard />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/menu"
+        element={
+          <GuestProtectedRoute>
+            <MenuBrowse />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/cart"
+        element={
+          <GuestProtectedRoute>
+            <GuestCart />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/orders"
+        element={
+          <GuestProtectedRoute>
+            <GuestOrders />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/hotel-info"
+        element={
+          <GuestProtectedRoute>
+            <HotelInfo />
+          </GuestProtectedRoute>
+        }
+      />
+
 
     </Routes>
   );
