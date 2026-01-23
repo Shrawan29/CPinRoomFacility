@@ -17,6 +17,7 @@ export const createMenuItem = async (req, res) => {
       price,
       description,
       isVeg,
+      isAvailable: true
     });
 
     res.status(201).json({
