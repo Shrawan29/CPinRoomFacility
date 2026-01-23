@@ -24,17 +24,19 @@ export function GuestAuthProvider({ children }) {
   const login = (sessionId, guest) => {
     setToken(sessionId);
     setGuest(guest);
+
+    // 🔑 THIS IS REQUIRED
     localStorage.setItem("guest_session", sessionId);
   };
+
 
 
   const logout = () => {
     setToken(null);
     setGuest(null);
-
-    localStorage.removeItem("guest_token");
-    localStorage.removeItem("guest_data");
+    localStorage.removeItem("guest_session");
   };
+
 
   return (
     <GuestAuthContext.Provider
