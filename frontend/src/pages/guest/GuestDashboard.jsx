@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import logo from "../../assets/logo.png";
-import {hotelbg} from "../../assets/hotel-bg.jpg";
+import hotelbg from "../../assets/hotel-bg.jpg";
 
 export default function GuestDashboard() {
   const { guest, logout } = useGuestAuth();
