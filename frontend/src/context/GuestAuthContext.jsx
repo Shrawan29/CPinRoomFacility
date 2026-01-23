@@ -20,13 +20,13 @@ export function GuestAuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = (token, guest) => {
-    setToken(token);
-    setGuest(guest);
 
-    localStorage.setItem("guest_token", token);
-    localStorage.setItem("guest_data", JSON.stringify(guest));
+  const login = (sessionId, guest) => {
+    setToken(sessionId);
+    setGuest(guest);
+    localStorage.setItem("guest_session", sessionId);
   };
+
 
   const logout = () => {
     setToken(null);
