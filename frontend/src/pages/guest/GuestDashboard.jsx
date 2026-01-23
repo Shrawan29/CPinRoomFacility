@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
-import logo from "../../assets/logo.png";
+
 import hotelbg from "../../assets/hotel-bg.jpg";
+import GuestHeader from "../../components/guest/GuestHeader";
 
 export default function GuestDashboard() {
   const { guest, logout } = useGuestAuth();
@@ -22,47 +23,14 @@ export default function GuestDashboard() {
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       {/* HEADER WITH LOGO + HOTEL NAME */}
-      <header
-        className="px-4 py-4 shadow flex items-center justify-between"
-        style={{ backgroundColor: "var(--bg-secondary)" }}
-      >
-        {/* LEFT: LOGO ABOVE + NAME BELOW */}
-        <div className="flex flex-col items-start">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow ">
-            <img
-              src={logo}
-              alt="Hotel Logo"
-              className="w-10 h-10 object-contain"
-            />
-          </div>
 
-          <h1
-            className="text-sm font-bold leading-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Hotel Centre Point
-          </h1>
-        </div>
-
-        {/* RIGHT: LOGOUT */}
-        <button
-          onClick={handleLogout}
-          className="text-sm px-3 py-2 rounded-md font-medium"
-          style={{
-            backgroundColor: "var(--brand)",
-            color: "white",
-          }}
-        >
-          Logout
-        </button>
-      </header>
-
+      <GuestHeader />
 
       {/* HERO / WELCOME */}
       <section
         className="relative h-44"
         style={{
-          backgroundImage: {hotelbg}, // Use the same image as the logo {hotel-bg},
+          backgroundImage: { hotelbg }, // Use the same image as the logo {hotel-bg},
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
