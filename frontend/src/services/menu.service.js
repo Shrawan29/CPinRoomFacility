@@ -22,5 +22,6 @@ export const deleteMenuItem = async (id) => {
 
 export const getGuestMenu = async () => {
   const res = await api.get("/menu/guest");
-  return res.data;
+  return res.data.data; // ✅ unwrap here
 };
+

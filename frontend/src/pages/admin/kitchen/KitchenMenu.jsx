@@ -23,8 +23,8 @@ export default function KitchenMenu() {
         }
 
         const fetchMenu = async () => {
-            const res = await getKitchenMenu();
-            setMenu(res.data || []);
+            const items = await getKitchenMenu(); // ✅ already array
+            setMenu(items);
             setLoading(false);
         };
 
@@ -113,7 +113,7 @@ export default function KitchenMenu() {
                         </thead>
 
                         <tbody>
-                            {menu.map((item) => (
+                            {filteredMenu.map((item) => (
                                 <tr
                                     key={item._id}
                                     className="border-t border-black/10 hover:bg-black/5"
