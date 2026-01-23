@@ -94,9 +94,12 @@ export default function MenuBrowse() {
 
     return (
         <div
-
-            className="min-h-screen"
-            style={{ backgroundColor: "red" }}
+            className="min-h-screen p-6"
+            style={{
+                background:
+                    "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+                color: "var(--text-primary)",
+            }}
         >
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
