@@ -30,7 +30,7 @@ export default function GuestDashboard() {
       <section
         className="relative h-44"
         style={{
-          backgroundImage: { hotelbg }, // Use the same image as the logo {hotel-bg},
+          backgroundImage: `url(${hotelbg})`, // Use the same image as the logo {hotel-bg},
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
