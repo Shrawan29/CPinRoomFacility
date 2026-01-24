@@ -36,8 +36,12 @@ export default function AdminEvents() {
   };
 
   /* 🔹 Add event */
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    submitEvent();
+  };
+
+  const submitEvent = async () => {
     setError("");
     setMessage("");
 
@@ -60,6 +64,7 @@ export default function AdminEvents() {
       });
 
       loadEvents();
+      setTimeout(() => setMessage(""), 3000);
     } catch {
       setError("Failed to create event");
     } finally {
@@ -69,155 +74,251 @@ export default function AdminEvents() {
 
   /* 🔹 Change status */
   const changeStatus = async (id, status) => {
-    await updateEvent(id, { status });
-    loadEvents();
+    try {
+      await updateEvent(id, { status });
+      loadEvents();
+      setMessage("Status updated successfully");
+      setTimeout(() => setMessage(""), 2000);
+    } catch {
+      setError("Failed to update status");
+    }
   };
 
   /* 🔹 Delete */
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this event?")) return;
-    await deleteEvent(id);
-    loadEvents();
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+    try {
+      await deleteEvent(id);
+      loadEvents();
+      setMessage("Event deleted successfully");
+      setTimeout(() => setMessage(""), 2000);
+    } catch {
+      setError("Failed to delete event");
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "UPCOMING":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "ACTIVE":
+        return "bg-green-100 text-green-700 border-green-200";
+      case "COMPLETED":
+        return "bg-gray-100 text-gray-700 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
   };
 
   return (
     <AdminLayout>
+      <div className="max-w-6xl mx-auto">
+        {/* PAGE HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+            Events Management
+          </h1>
+          <p className="text-[var(--text-muted)] mt-2">
+            Create and manage hotel events and activities
+          </p>
+        </div>
 
-      {/* PAGE HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
-          Events Management
-        </h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
-          Create and manage hotel events
-        </p>
-      </div>
-
-      {/* ADD EVENT CARD */}
-      <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-6 max-w-xl mb-8">
-
+        {/* NOTIFICATIONS */}
         {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
-            {error}
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError("")} className="text-red-500 hover:text-red-700">
+              ✕
+            </button>
           </div>
         )}
 
         {message && (
-          <div className="bg-green-100 text-green-700 p-3 rounded mb-4">
-            {message}
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+            <span>{message}</span>
+            <button onClick={() => setMessage("")} className="text-green-500 hover:text-green-700">
+              ✕
+            </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          <div>
-            <label className="block text-sm mb-1">Event Title</label>
-            <input
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="w-full border rounded-lg px-4 py-2"
-              placeholder="Enter event title"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Event Date</label>
-            <input
-              type="date"
-              value={form.eventDate}
-              onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
-              className="w-full border rounded-lg px-4 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Location</label>
-            <input
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-              className="w-full border rounded-lg px-4 py-2"
-              placeholder="e.g. Rooftop / Banquet Hall"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm mb-1">Description</label>
-            <textarea
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-              className="w-full border rounded-lg px-4 py-2"
-              rows={3}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="
-              w-full
-              bg-[var(--brand)]
-              text-white
-              py-2
-              rounded-lg
-              font-medium
-              hover:opacity-90
-              disabled:opacity-60
-            "
-          >
-            {loading ? "Adding Event..." : "Add Event"}
-          </button>
-        </form>
-      </div>
-
-      {/* EVENT LIST */}
-      <div className="space-y-4 max-w-4xl">
-        {events.map((event) => (
-          <div
-            key={event._id}
-            className="bg-white rounded-xl shadow-sm p-4 flex justify-between items-start"
-          >
-            <div>
-              <h2 className="font-semibold text-[var(--text-primary)]">
-                {event.title}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* ADD EVENT CARD */}
+          <div className="lg:col-span-1">
+            <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-6 sticky top-6">
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">
+                Add New Event
               </h2>
-              <p className="text-sm text-[var(--text-muted)]">
-                {event.location || "—"} •{" "}
-                {new Date(event.eventDate).toDateString()}
-              </p>
-              <span className="text-xs mt-1 inline-block px-2 py-1 rounded-full bg-black/5">
-                {event.status}
-              </span>
-            </div>
 
-            <div className="space-x-2">
-              {["UPCOMING", "ACTIVE", "COMPLETED"].map((s) => (
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Event Title *
+                  </label>
+                  <input
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    placeholder="Enter event title"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Event Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={form.eventDate}
+                    onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Location
+                  </label>
+                  <input
+                    value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    placeholder="e.g. Rooftop / Banquet Hall"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
+                    rows={4}
+                    placeholder="Event details and description..."
+                  />
+                </div>
+
                 <button
-                  key={s}
-                  onClick={() => changeStatus(event._id, s)}
-                  className="text-xs px-2 py-1 border rounded"
+                  onClick={submitEvent}
+                  disabled={loading}
+                  className="
+                    w-full
+                    bg-[var(--brand)]
+                    text-white
+                    py-3
+                    rounded-lg
+                    font-semibold
+                    hover:opacity-90
+                    disabled:opacity-60
+                    disabled:cursor-not-allowed
+                    transition-all
+                    transform
+                    active:scale-95
+                  "
                 >
-                  {s}
+                  {loading ? "Adding Event..." : "+ Add Event"}
                 </button>
-              ))}
-              <button
-                onClick={() => handleDelete(event._id)}
-                className="text-red-600 text-xs ml-2"
-              >
-                Delete
-              </button>
+              </div>
             </div>
           </div>
-        ))}
 
-        {events.length === 0 && (
-          <p className="text-sm text-[var(--text-muted)]">
-            No events created yet
-          </p>
-        )}
+          {/* EVENT LIST */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+                All Events ({events.length})
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {events.map((event) => (
+                <div
+                  key={event._id}
+                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100"
+                >
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-1">
+                            {event.title}
+                          </h3>
+                          <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
+                            <span className="flex items-center gap-1">
+                              📍 {event.location || "Location TBD"}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              📅 {new Date(event.eventDate).toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        <span className={`text-xs font-medium px-3 py-1.5 rounded-full border ${getStatusColor(event.status)}`}>
+                          {event.status}
+                        </span>
+                      </div>
+
+                      {event.description && (
+                        <p className="text-sm text-[var(--text-muted)] mb-4 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                        <span className="text-xs text-[var(--text-muted)] mr-2">
+                          Update Status:
+                        </span>
+                        {["UPCOMING", "ACTIVE", "COMPLETED"].map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => changeStatus(event._id, s)}
+                            disabled={event.status === s}
+                            className={`
+                              text-xs px-3 py-1.5 rounded-md font-medium transition-all
+                              ${event.status === s 
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-[var(--brand)] hover:text-[var(--brand)]'
+                              }
+                            `}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                        <button
+                          onClick={() => handleDelete(event._id)}
+                          className="ml-auto text-xs px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-md font-medium transition-all"
+                        >
+                          🗑 Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {events.length === 0 && (
+                <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                  <div className="text-4xl mb-3">📅</div>
+                  <p className="text-[var(--text-muted)] font-medium">
+                    No events created yet
+                  </p>
+                  <p className="text-sm text-[var(--text-muted)] mt-1">
+                    Create your first event using the form
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-
     </AdminLayout>
   );
 }
