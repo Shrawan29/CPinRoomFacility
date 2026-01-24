@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
+import notificationSound from "../../../assets/notification.mp3"; // Add your notification sound file
 
 export default function KitchenDashboard() {
   const { token, loading: authLoading } = useAdminAuth();
