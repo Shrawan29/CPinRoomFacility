@@ -14,24 +14,63 @@ export default function KitchenDashboard() {
   const previousOrderCountRef = useRef(0);
   const audioRef = useRef(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioError, setAudioError] = useState("");
 
   // Initialize notification sound
   useEffect(() => {
-    audioRef.current = new Audio(notificationSound);
-    audioRef.current.volume = 0.7;
-    
-    // Preload the audio
-    audioRef.current.load();
+    try {
+      audioRef.current = new Audio(notificationSound);
+      audioRef.current.volume = 0.7;
+      
+      // Add event listeners for debugging
+      audioRef.current.addEventListener('loadeddata', () => {
+        console.log('Audio loaded successfully');
+      });
+      
+      audioRef.current.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        setAudioError('Failed to load audio file');
+      });
+      
+      // Preload the audio
+      audioRef.current.load();
+    } catch (err) {
+      console.error('Audio initialization error:', err);
+      setAudioError(err.message);
+    }
   }, []);
 
-  // Enable audio on first user interaction
-  const enableAudio = () => {
-    if (!audioEnabled && audioRef.current) {
-      audioRef.current.play().then(() => {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        setAudioEnabled(true);
-      }).catch(err => console.log("Audio enable failed:", err));
+  // Enable audio on first user interaction with test
+  const enableAudio = async () => {
+    if (!audioRef.current) {
+      setAudioError('Audio not initialized');
+      return;
+    }
+    
+    try {
+      // Test play
+      await audioRef.current.play();
+      console.log('Audio played successfully');
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setAudioEnabled(true);
+      setAudioError('');
+    } catch (err) {
+      console.error('Audio enable failed:', err);
+      setAudioError(`Enable failed: ${err.message}`);
+    }
+  };
+  
+  // Manual test sound button
+  const testSound = async () => {
+    if (!audioRef.current) return;
+    try {
+      audioRef.current.currentTime = 0;
+      await audioRef.current.play();
+      console.log('Test sound played');
+    } catch (err) {
+      console.error('Test sound failed:', err);
+      setAudioError(`Test failed: ${err.message}`);
     }
   };
 
@@ -120,10 +159,28 @@ export default function KitchenDashboard() {
         <h1 className="text-2xl font-semibold">
           Kitchen Orders
         </h1>
-        <div className="text-sm text-[var(--text-muted)]">
-          Auto-refreshing every 5s
+        <div className="flex items-center gap-4">
+          {/* Test Sound Button */}
+          {audioEnabled && (
+            <button
+              onClick={testSound}
+              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+            >
+              🔊 Test Sound
+            </button>
+          )}
+          <div className="text-sm text-[var(--text-muted)]">
+            Auto-refreshing every 5s
+          </div>
         </div>
       </div>
+
+      {/* Error Display */}
+      {audioError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <strong>Audio Error:</strong> {audioError}
+        </div>
+      )}
 
       <div className="space-y-4">
         {loading ? (
