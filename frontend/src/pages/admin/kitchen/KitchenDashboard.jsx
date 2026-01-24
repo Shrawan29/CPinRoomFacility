@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
-import notificationSound from "../../../assets/notification.mp3"; // Add your notification sound file
+import notificationSound from "../../../assets/notification.mp3";
 
 export default function KitchenDashboard() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -10,67 +10,28 @@ export default function KitchenDashboard() {
   const [updating, setUpdating] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newOrderAlert, setNewOrderAlert] = useState(false);
-  
-  const previousOrderCountRef = useRef(0);
-  const audioRef = useRef(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
-  const [audioError, setAudioError] = useState("");
+  
+  const audioRef = useRef(null);
 
   // Initialize notification sound
   useEffect(() => {
-    try {
-      audioRef.current = new Audio(notificationSound);
-      audioRef.current.volume = 0.7;
-      
-      // Add event listeners for debugging
-      audioRef.current.addEventListener('loadeddata', () => {
-        console.log('Audio loaded successfully');
-      });
-      
-      audioRef.current.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        setAudioError('Failed to load audio file');
-      });
-      
-      // Preload the audio
-      audioRef.current.load();
-    } catch (err) {
-      console.error('Audio initialization error:', err);
-      setAudioError(err.message);
-    }
+    audioRef.current = new Audio(notificationSound);
+    audioRef.current.volume = 0.7;
+    audioRef.current.load();
   }, []);
 
-  // Enable audio on first user interaction with test
+  // Enable audio on first user interaction
   const enableAudio = async () => {
-    if (!audioRef.current) {
-      setAudioError('Audio not initialized');
-      return;
-    }
+    if (!audioRef.current) return;
     
     try {
-      // Test play
       await audioRef.current.play();
-      console.log('Audio played successfully');
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setAudioEnabled(true);
-      setAudioError('');
     } catch (err) {
       console.error('Audio enable failed:', err);
-      setAudioError(`Enable failed: ${err.message}`);
-    }
-  };
-  
-  // Manual test sound button
-  const testSound = async () => {
-    if (!audioRef.current) return;
-    try {
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
-      console.log('Test sound played');
-    } catch (err) {
-      console.error('Test sound failed:', err);
-      setAudioError(`Test failed: ${err.message}`);
     }
   };
 
@@ -83,25 +44,15 @@ export default function KitchenDashboard() {
         const res = await api.get("/admin/kitchen/orders");
         const newOrders = res.data || [];
         
-        console.log('Previous order count:', previousOrderCountRef.current);
-        console.log('Current order count:', newOrders.length);
-        
-        // Check if new order arrived - only check PLACED orders
+        // Check for new PLACED orders
         const newPlacedOrders = newOrders.filter(o => o.status === "PLACED");
         const previousPlacedCount = orders.filter(o => o.status === "PLACED").length;
         
-        if (previousOrderCountRef.current > 0 && newPlacedOrders.length > previousPlacedCount) {
-          console.log('🔔 NEW ORDER DETECTED!');
-          
+        if (orders.length > 0 && newPlacedOrders.length > previousPlacedCount) {
           // Play sound
           if (audioRef.current && audioEnabled) {
-            console.log('Attempting to play sound...');
             audioRef.current.currentTime = 0;
-            audioRef.current.play()
-              .then(() => console.log('Sound played successfully'))
-              .catch(err => console.error("Audio play failed:", err));
-          } else {
-            console.log('Audio not enabled or ref missing');
+            audioRef.current.play().catch(err => console.error("Audio play failed:", err));
           }
           
           // Show visual alert
@@ -109,7 +60,6 @@ export default function KitchenDashboard() {
           setTimeout(() => setNewOrderAlert(false), 3000);
         }
         
-        previousOrderCountRef.current = newOrders.length;
         setOrders(newOrders);
         setLoading(false);
       } catch (error) {
@@ -118,10 +68,7 @@ export default function KitchenDashboard() {
       }
     };
 
-    // Initial fetch
     fetchOrders();
-
-    // Auto-refresh every 5 seconds
     const interval = setInterval(fetchOrders, 5000);
 
     return () => clearInterval(interval);
@@ -172,32 +119,13 @@ export default function KitchenDashboard() {
         <h1 className="text-2xl font-semibold">
           Kitchen Orders
         </h1>
-        <div className="flex items-center gap-4">
-          {/* Test Sound Button */}
-          {audioEnabled && (
-            <button
-              onClick={testSound}
-              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-            >
-              🔊 Test Sound
-            </button>
-          )}
-          <div className="text-sm text-[var(--text-muted)]">
-            Auto-refreshing every 5s
-          </div>
+        <div className="text-sm text-[var(--text-muted)]">
+          Auto-refreshing every 5s
         </div>
       </div>
 
-      {/* Error Display */}
-      {audioError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <strong>Audio Error:</strong> {audioError}
-        </div>
-      )}
-
       <div className="space-y-4">
         {loading ? (
-          // Loading skeleton
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-[var(--bg-secondary)] p-5 rounded-xl animate-pulse">
