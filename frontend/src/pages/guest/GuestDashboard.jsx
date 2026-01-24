@@ -113,6 +113,26 @@ export default function GuestDashboard() {
             </div>
           </div>
 
+          {/* EVENTS */}
+          <div
+            onClick={() => navigate("/guest/events")}
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="text-3xl">🎉</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Events
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Activities during your stay
+              </p>
+            </div>
+          </div>
+
         </div>
       </main>
 
