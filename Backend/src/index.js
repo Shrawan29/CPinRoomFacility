@@ -32,7 +32,6 @@ import QRToken from "./models/QRToken.js";
 // middleware
 import adminAuth from "./middleware/adminAuth.middleware.js";
 
-import eventRoutes from "./routes/event.routes.js";
 import guestEventRoutes from "./routes/guestEvent.routes.js";
 
 
