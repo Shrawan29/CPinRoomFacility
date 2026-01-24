@@ -100,6 +100,12 @@ export default function MenuBrowse() {
                     color: "var(--text-primary)",
                 }}
             >
+                {/* SUCCESS MESSAGE */}
+                {successMessage && (
+                    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold">
+                        {successMessage}
+                    </div>
+                )}
                 {/* CATEGORIES */}
                 <div className="sticky top-16 z-10 mb-6 flex gap-3 flex-wrap">
                     {categories.map((cat) => (
