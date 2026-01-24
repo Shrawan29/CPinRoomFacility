@@ -1,6 +1,4 @@
 
-
-
 // ============================================
 // GuestDashboard.jsx - Enhanced Version
 // ============================================
@@ -28,33 +26,25 @@ export default function GuestDashboard() {
       icon: "🍽️",
       title: "Browse Menu",
       description: "Food & beverages available",
-      path: "/guest/menu",
-      gradient: "from-orange-50 to-red-50",
-      iconBg: "bg-gradient-to-br from-orange-100 to-red-100"
+      path: "/guest/menu"
     },
     {
       icon: "🏨",
       title: "Hotel Information",
       description: "Amenities, Wi-Fi & house rules",
-      path: "/guest/hotel-info",
-      gradient: "from-blue-50 to-indigo-50",
-      iconBg: "bg-gradient-to-br from-blue-100 to-indigo-100"
+      path: "/guest/hotel-info"
     },
     {
       icon: "📦",
       title: "My Orders",
       description: "Track your orders",
-      path: "/guest/orders",
-      gradient: "from-green-50 to-emerald-50",
-      iconBg: "bg-gradient-to-br from-green-100 to-emerald-100"
+      path: "/guest/orders"
     },
     {
       icon: "🎉",
       title: "Events",
       description: "Activities during your stay",
-      path: "/guest/events",
-      gradient: "from-purple-50 to-pink-50",
-      iconBg: "bg-gradient-to-br from-purple-100 to-pink-100"
+      path: "/guest/events"
     }
   ];
 
@@ -104,50 +94,45 @@ export default function GuestDashboard() {
             Quick Access
           </h3>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {menuItems.map((item, index) => (
               <div
                 key={index}
                 onClick={() => navigate(item.path)}
-                className={`
+                className="
                   group cursor-pointer
-                  bg-gradient-to-br ${item.gradient}
+                  bg-white
                   rounded-2xl shadow-md hover:shadow-lg
                   transition-all duration-300
                   active:scale-[0.98]
                   border border-gray-100
                   overflow-hidden
-                `}
+                  p-5
+                "
               >
-                <div className="bg-white/50 backdrop-blur-sm p-5 h-full">
-                  <div className="flex items-start gap-4">
-                    <div className={`
-                      w-14 h-14 rounded-xl ${item.iconBg}
-                      flex items-center justify-center
-                      text-3xl shadow-sm
-                      group-hover:scale-110 transition-transform duration-300
-                    `}>
-                      {item.icon}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3
-                        className="text-lg font-semibold mb-1 group-hover:translate-x-1 transition-transform duration-300"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {item.title}
-                      </h3>
-                      <p 
-                        className="text-sm leading-relaxed"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        {item.description}
-                      </p>
-                    </div>
-
-                    <div className="text-gray-400 group-hover:translate-x-1 group-hover:text-gray-600 transition-all duration-300">
-                      →
-                    </div>
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="
+                    w-16 h-16 rounded-2xl bg-gray-50
+                    flex items-center justify-center
+                    text-4xl
+                    group-hover:scale-110 transition-transform duration-300
+                  ">
+                    {item.icon}
+                  </div>
+                  
+                  <div className="flex-1">
+                    <h3
+                      className="text-base font-semibold mb-1"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {item.title}
+                    </h3>
+                    <p 
+                      className="text-xs leading-relaxed"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               </div>
