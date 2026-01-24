@@ -16,161 +16,108 @@ export default function GuestDashboard() {
     navigate("/guest/access-fallback");
   };
 
-  const quickActions = [
-    {
-      icon: "🍽️",
-      title: "Browse Menu",
-      description: "Order delicious food & drinks",
-      route: "/guest/menu",
-      color: "#ff6b6b",
-      bgGradient: "linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%)"
-    },
-    {
-      icon: "📦",
-      title: "My Orders",
-      description: "Track your order status",
-      route: "/guest/orders",
-      color: "#4dabf7",
-      bgGradient: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)"
-    },
-    {
-      icon: "🏨",
-      title: "Hotel Info",
-      description: "Facilities & services",
-      route: "/guest/hotel-info",
-      color: "#9775fa",
-      bgGradient: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)"
-    }
-  ];
-
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "#f5f7fa" }}
+      style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      {/* HEADER */}
+      {/* HEADER WITH LOGO + HOTEL NAME */}
+
       <GuestHeader />
 
-      {/* HERO SECTION - Enhanced for mobile */}
+      {/* HERO / WELCOME */}
       <section
-        className="relative"
+        className="relative h-44"
         style={{
-          height: "240px",
-          backgroundImage: `url(${hotelbg})`,
+          backgroundImage: `url(${hotelbg})`, // Use the same image as the logo {hotel-bg},
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/70" />
+        <div className="absolute inset-0 bg-black/40" />
 
-        {/* Welcome content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-6 pb-8 text-white">
-          <div className="space-y-2">
-            <p className="text-sm font-medium opacity-90 tracking-wide">
-              Welcome back 👋
-            </p>
-            <h1 className="text-4xl font-bold tracking-tight">
-              {guestFirstName}
-            </h1>
-            <div className="flex items-center gap-2 mt-3">
-              <div className="bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full flex items-center gap-2">
-                <span className="text-sm">🚪 Room {guest?.roomNumber}</span>
-              </div>
-            </div>
-          </div>
+        <div className="absolute bottom-4 left-4 right-4 text-white">
+          <p className="text-sm opacity-90">
+            Welcome, {guestFirstName} 👋
+          </p>
+          <h2 className="text-xl font-semibold">
+            Make yourself comfortable
+          </h2>
+          <p className="text-xs opacity-90">
+            Room {guest?.roomNumber}
+          </p>
         </div>
       </section>
 
-      {/* QUICK ACTIONS - Mobile optimized grid */}
-      <main className="flex-1 px-5 -mt-6 pb-8">
-        {/* Quick access title */}
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-            Quick Access
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            What would you like to do?
-          </p>
-        </div>
-
-        {/* Action cards */}
+      {/* MAIN ACTION CARDS */}
+      <main className="flex-1 px-4 py-6">
         <div className="grid grid-cols-1 gap-4">
-          {quickActions.map((action, index) => (
-            <div
-              key={index}
-              onClick={() => navigate(action.route)}
-              className="relative overflow-hidden rounded-3xl shadow-lg active:scale-[0.97] transition-transform duration-200"
-              style={{
-                background: action.bgGradient,
-                border: "1px solid rgba(0,0,0,0.05)"
-              }}
-            >
-              {/* Card content */}
-              <div className="flex items-center gap-5 p-6">
-                {/* Icon circle */}
-                <div
-                  className="flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-md"
-                  style={{
-                    backgroundColor: "white",
-                    border: `2px solid ${action.color}20`
-                  }}
-                >
-                  {action.icon}
-                </div>
 
-                {/* Text content */}
-                <div className="flex-1">
-                  <h3
-                    className="text-xl font-bold mb-1"
-                    style={{ color: action.color }}
-                  >
-                    {action.title}
-                  </h3>
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    {action.description}
-                  </p>
-                </div>
-
-                {/* Arrow indicator */}
-                <div
-                  className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: `${action.color}15`,
-                    color: action.color
-                  }}
-                >
-                  →
-                </div>
-              </div>
-
-              {/* Decorative element */}
-              <div
-                className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full opacity-10"
-                style={{ backgroundColor: action.color }}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Featured info card */}
-        <div className="mt-6 p-5 rounded-2xl" style={{ backgroundColor: "white", border: "1px solid #e5e7eb" }}>
-          <div className="flex items-start gap-3">
-            <div className="text-2xl">💡</div>
-            <div className="flex-1">
-              <h3 className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
-                Need assistance?
+          {/* MENU */}
+          <div
+            onClick={() => navigate("/guest/menu")}
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="text-3xl">🍽️</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Browse Menu
               </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                Our staff is available 24/7 to help you. Dial <span className="font-semibold" style={{ color: "var(--brand)" }}>0</span> from your room phone.
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Food & beverages available
               </p>
             </div>
           </div>
+
+          {/* HOTEL INFO */}
+          <div
+            onClick={() => navigate("/guest/hotel-info")}
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="text-3xl">🏨</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Hotel Information
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Amenities, Wi-Fi & house rules
+              </p>
+            </div>
+          </div>
+
+          {/* ORDERS */}
+          <div
+            onClick={() => navigate("/guest/orders")}
+            className="flex items-center gap-4 p-5 rounded-2xl shadow-md active:scale-[0.98] transition"
+            style={{ backgroundColor: "white" }}
+          >
+            <div className="text-3xl">📦</div>
+            <div>
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: "var(--text-primary)" }}
+              >
+                My Orders
+              </h3>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Track your orders
+              </p>
+            </div>
+          </div>
+
         </div>
       </main>
 
-      {/* Safe bottom space for mobile gestures */}
-      <div className="h-8" />
+      {/* SAFE BOTTOM SPACE */}
+      <div className="h-6" />
     </div>
   );
 }
