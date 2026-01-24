@@ -18,3 +18,9 @@ export const updateEvent = async (id, data) => {
 export const deleteEvent = async (id) => {
   await api.delete(`/admin/events/${id}`);
 };
+
+// Guest – upcoming + active events
+export const getGuestEvents = async () => {
+const res = await api.get("/guest/events");
+return res.data;
+};

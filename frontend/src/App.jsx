@@ -25,10 +25,13 @@ import GuestLogin from "./pages/guest/GuestLogin";
 import GuestAccessFallback from "./pages/guest/GuestAccessFallback";
 import GuestDashboard from "./pages/guest/GuestDashboard";
 
+
 // Guest pages
 import MenuBrowse from "./pages/guest/MenuBrowse";
 import GuestCart from "./pages/guest/GuestCart";
 import GuestOrders from "./pages/guest/GuestOrders";
+import GuestEvents from "./pages/guest/GuestEvents";
+
 // import HotelInfo from "./pages/guest/HotelInfo";
 
 
@@ -169,7 +172,7 @@ function App() {
         }
       />
 
-       <Route
+      <Route
         path="/guest/cart"
         element={
           <GuestProtectedRoute>
@@ -187,7 +190,16 @@ function App() {
         }
       />
 
-      {/* <Route
+        <Route
+          path="/guest/events"
+          element={
+            <GuestProtectedRoute>
+              <GuestEvents />
+            </GuestProtectedRoute>
+          }
+        />
+
+        {/* <Route
         path="/guest/hotel-info"
         element={
           <GuestProtectedRoute>
@@ -197,8 +209,8 @@ function App() {
       />  */}
 
 
-    </Routes>
-  );
+      </Routes>
+      );
 }
 
-export default App;
+      export default App;
