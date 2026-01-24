@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
-import notificationSound from "../../../assets/notification.mp3"; // Add your notification sound file
 
 export default function KitchenDashboard() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -83,12 +82,25 @@ export default function KitchenDashboard() {
         const res = await api.get("/admin/kitchen/orders");
         const newOrders = res.data || [];
         
-        // Check if new order arrived
-        if (previousOrderCountRef.current > 0 && newOrders.length > previousOrderCountRef.current) {
+        console.log('Previous order count:', previousOrderCountRef.current);
+        console.log('Current order count:', newOrders.length);
+        
+        // Check if new order arrived - only check PLACED orders
+        const newPlacedOrders = newOrders.filter(o => o.status === "PLACED");
+        const previousPlacedCount = orders.filter(o => o.status === "PLACED").length;
+        
+        if (previousOrderCountRef.current > 0 && newPlacedOrders.length > previousPlacedCount) {
+          console.log('🔔 NEW ORDER DETECTED!');
+          
           // Play sound
           if (audioRef.current && audioEnabled) {
-            audioRef.current.currentTime = 0; // Reset to start
-            audioRef.current.play().catch(err => console.log("Audio play failed:", err));
+            console.log('Attempting to play sound...');
+            audioRef.current.currentTime = 0;
+            audioRef.current.play()
+              .then(() => console.log('Sound played successfully'))
+              .catch(err => console.error("Audio play failed:", err));
+          } else {
+            console.log('Audio not enabled or ref missing');
           }
           
           // Show visual alert
@@ -112,7 +124,7 @@ export default function KitchenDashboard() {
     const interval = setInterval(fetchOrders, 5000);
 
     return () => clearInterval(interval);
-  }, [token, authLoading]);
+  }, [token, authLoading, audioEnabled, orders]);
 
   const updateStatus = async (orderId, status) => {
     setUpdating(orderId);
