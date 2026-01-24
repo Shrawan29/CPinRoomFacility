@@ -88,6 +88,7 @@ app.use("/admin/dashboard", adminDashboardRoutes);
 app.use("/admin/reports", adminReportRoutes);
 app.use("/admin/orders", orderAdminRoutes);
 app.use("/admin/kitchen/orders", orderKitchenRoutes);
+app.use("/admin/events", eventRoutes);
 
 // guest
 // guest (PUBLIC)
@@ -104,7 +105,6 @@ app.use("/rooms", roomRoutes);
 app.use("/menu", menuRoutes);
 app.use("/qr", qrRoutes);
 app.use("/hotel-info", hotelInfoRoutes);
-app.use("/events", eventRoutes);
 app.use("/guest/events", guestEventRoutes);
 
 /* =========================================================
