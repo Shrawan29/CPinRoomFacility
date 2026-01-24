@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
-
-import hotelbg from "../../assets/hotel-bg.jpg";
+import logo from "../../assets/logo.png";
 import GuestHeader from "../../components/guest/GuestHeader";
 
 export default function GuestDashboard() {
@@ -30,7 +29,7 @@ export default function GuestDashboard() {
       <section
         className="relative h-44"
         style={{
-          backgroundImage: `url(${hotelbg})`, // Use the same image as the logo {hotel-bg},
+          backgroundImage: `url(${logo})`, // Use the same image as the logo {hotel-bg},
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
