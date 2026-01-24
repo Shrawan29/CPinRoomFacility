@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
-import notificationSound from "../../../assets/notification.mp3";
 
 export default function KitchenDashboard() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -13,14 +12,27 @@ export default function KitchenDashboard() {
   
   const previousOrderCountRef = useRef(0);
   const audioRef = useRef(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
   // Initialize notification sound
   useEffect(() => {
-    // Replace '/notification.mp3' with your audio file path
-    // Example: '/sounds/notification.mp3' or '/assets/order-alert.wav'
     audioRef.current = new Audio(notificationSound);
-    audioRef.current.volume = 0.7; // Adjust volume (0.0 to 1.0)
+    audioRef.current.volume = 0.7;
+    
+    // Preload the audio
+    audioRef.current.load();
   }, []);
+
+  // Enable audio on first user interaction
+  const enableAudio = () => {
+    if (!audioEnabled && audioRef.current) {
+      audioRef.current.play().then(() => {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setAudioEnabled(true);
+      }).catch(err => console.log("Audio enable failed:", err));
+    }
+  };
 
   // Fetch orders with auto-refresh
   useEffect(() => {
@@ -34,7 +46,8 @@ export default function KitchenDashboard() {
         // Check if new order arrived
         if (previousOrderCountRef.current > 0 && newOrders.length > previousOrderCountRef.current) {
           // Play sound
-          if (audioRef.current) {
+          if (audioRef.current && audioEnabled) {
+            audioRef.current.currentTime = 0; // Reset to start
             audioRef.current.play().catch(err => console.log("Audio play failed:", err));
           }
           
@@ -82,6 +95,19 @@ export default function KitchenDashboard() {
 
   return (
     <AdminLayout>
+      {/* Audio Enable Button */}
+      {!audioEnabled && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3">
+          <span>🔔 Click to enable sound notifications</span>
+          <button
+            onClick={enableAudio}
+            className="bg-white text-yellow-600 px-4 py-1 rounded font-semibold hover:bg-yellow-50"
+          >
+            Enable Sound
+          </button>
+        </div>
+      )}
+
       {/* New Order Alert */}
       {newOrderAlert && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50">
