@@ -2,23 +2,17 @@ import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true
-    },
+    title: { type: String, required: true },
     description: String,
-    eventDate: {
-      type: Date,
-      required: true
-    },
+    eventDate: { type: Date, required: true },
     location: String,
-    isActive: {
-      type: Boolean,
-      default: true
-    }
+    status: {
+      type: String,
+      enum: ["UPCOMING", "ACTIVE", "COMPLETED"],
+      default: "UPCOMING",
+    },
   },
   { timestamps: true }
 );
 
-const Event = mongoose.model("Event", eventSchema);
-export default Event;
+export default mongoose.model("Event", eventSchema);

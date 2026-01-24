@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CheckIn from "./pages/admin/CheckIn";
 import CheckOut from "./pages/admin/CheckOut";
 import Reports from "./pages/admin/Reports";
+import AdminEvents from "./pages/admin/AdminEvents";
 
 // Kitchen
 import KitchenDashboard from "./pages/admin/kitchen/KitchenDashboard";
@@ -132,6 +133,15 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <QRCodeManager />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/events"
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+            <AdminEvents />
           </ProtectedRoute>
         }
       />

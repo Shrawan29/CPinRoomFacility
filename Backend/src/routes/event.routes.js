@@ -1,35 +1,49 @@
 import express from "express";
 import adminAuth from "../middleware/adminAuth.middleware.js";
-import guestAuth from "../middleware/guestAuth.middleware.js";
 import allowRoles from "../middleware/role.middleware.js";
 import {
   createEvent,
   updateEvent,
-  listActiveEvents
+  listEvents,
+  deleteEvent,
 } from "../controllers/event.controller.js";
 
 const router = express.Router();
 
-// Admin
+/* =========================
+   ADMIN / SUPER_ADMIN
+   ========================= */
+
+// Get all events
+router.get(
+  "/",
+  adminAuth,
+  allowRoles("ADMIN", "SUPER_ADMIN"),
+  listEvents
+);
+
+// Create new event
 router.post(
   "/",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "ADMIN"),
+  allowRoles("ADMIN", "SUPER_ADMIN"),
   createEvent
 );
 
-router.patch(
+// Update event (title, date, location, status)
+router.put(
   "/:id",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "ADMIN"),
+  allowRoles("ADMIN", "SUPER_ADMIN"),
   updateEvent
 );
 
-// Guest
-router.get(
-  "/guest",
-  guestAuth,
-  listActiveEvents
+// Delete event
+router.delete(
+  "/:id",
+  adminAuth,
+  allowRoles("ADMIN", "SUPER_ADMIN"),
+  deleteEvent
 );
 
 export default router;

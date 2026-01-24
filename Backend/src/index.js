@@ -32,6 +32,11 @@ import QRToken from "./models/QRToken.js";
 // middleware
 import adminAuth from "./middleware/adminAuth.middleware.js";
 
+import eventRoutes from "./routes/event.routes.js";
+import guestEventRoutes from "./routes/guestEvent.routes.js";
+
+
+
 dotenv.config();
 connectDB();
 
@@ -101,6 +106,7 @@ app.use("/menu", menuRoutes);
 app.use("/qr", qrRoutes);
 app.use("/hotel-info", hotelInfoRoutes);
 app.use("/events", eventRoutes);
+app.use("/guest/events", guestEventRoutes);
 
 /* =========================================================
    TEST & DEBUG ROUTES
