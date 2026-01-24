@@ -30,7 +30,7 @@ import GuestDashboard from "./pages/guest/GuestDashboard";
 import MenuBrowse from "./pages/guest/MenuBrowse";
 import GuestCart from "./pages/guest/GuestCart";
 import GuestOrders from "./pages/guest/GuestOrders";
-import GuestEvents from "./pages/guest/GuestEvents";
+import GuestEvent from "./pages/guest/GuestEvent";
 
 // import HotelInfo from "./pages/guest/HotelInfo";
 
@@ -190,14 +190,14 @@ function App() {
         }
       />
 
-        <Route
-          path="/guest/events"
-          element={
-            <GuestProtectedRoute>
-              <GuestEvents />
-            </GuestProtectedRoute>
-          }
-        />
+      <Route
+        path="/guest/events"
+        element={
+          <GuestProtectedRoute>
+            <GuestEvent />
+          </GuestProtectedRoute>
+        }
+      />
 
         {/* <Route
         path="/guest/hotel-info"
