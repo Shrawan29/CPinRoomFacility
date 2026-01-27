@@ -72,7 +72,7 @@ export default function GuestAccessFallback() {
             className="text-sm font-semibold mb-2"
             style={{ color: "var(--text-primary)" }}
           >
-            🆘 Can't find the QR code?
+            🆘 Can't login in?
           </p>
           <p
             className="text-sm"
