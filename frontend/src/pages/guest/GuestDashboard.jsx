@@ -14,6 +14,8 @@ export default function GuestDashboard() {
 
   const guestFirstName = guest?.name
     ? guest.name.split(" ")[0]
+    : guest?.phone 
+    ? guest.phone.slice(-4)
     : "Guest";
 
   const handleLogout = () => {

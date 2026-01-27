@@ -25,8 +25,10 @@ export function GuestAuthProvider({ children }) {
     setToken(sessionId);
     setGuest(guest);
 
-    // 🔑 THIS IS REQUIRED
+    // 🔑 Store in localStorage for persistence
     localStorage.setItem("guest_session", sessionId);
+    localStorage.setItem("guest_token", sessionId);
+    localStorage.setItem("guest_data", JSON.stringify(guest));
   };
 
 
@@ -35,6 +37,8 @@ export function GuestAuthProvider({ children }) {
     setToken(null);
     setGuest(null);
     localStorage.removeItem("guest_session");
+    localStorage.removeItem("guest_token");
+    localStorage.removeItem("guest_data");
   };
 
 

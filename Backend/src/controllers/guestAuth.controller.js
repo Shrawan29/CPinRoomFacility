@@ -109,6 +109,7 @@ export const verifyGuestOTP = async (req, res) => {
       guest: {
         phone,
         roomNumber: tokenDoc.roomNumber,
+        name: stay.guestName,
       },
     });
   } catch (err) {
