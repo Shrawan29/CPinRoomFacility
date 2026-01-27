@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 
 export default function QRCodeGenerator({ roomNumber }) {
   const canvasRef = useRef(null);
+  const logoCanvasRef = useRef(null);
   const [qrURL, setQrURL] = useState("");
   const [qrGenerated, setQrGenerated] = useState(false);
 
@@ -31,10 +32,60 @@ export default function QRCodeGenerator({ roomNumber }) {
         light: "#FFFFFF",
       },
     })
-      .then(() => setQrGenerated(true))
+      .then(() => {
+        // Add logo to center of QR code
+        addLogoToQR();
+        setQrGenerated(true);
+      })
       .catch((err) => console.error("QR Error:", err));
 
   }, [roomNumber]);
+
+  const addLogoToQR = () => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    
+    // Load logo image
+    const logo = new Image();
+    logo.crossOrigin = "anonymous";
+    logo.src = "/logo.png"; // Use company logo from public folder
+    
+    logo.onload = () => {
+      // Logo size (40% of QR code)
+      const logoSize = canvas.width * 0.4;
+      const logoX = (canvas.width - logoSize) / 2;
+      const logoY = (canvas.height - logoSize) / 2;
+      
+      // White background for logo
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+      
+      // Draw logo
+      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    };
+    
+    logo.onerror = () => {
+      // Fallback: use vite.svg if logo.png not found
+      const fallbackLogo = new Image();
+      fallbackLogo.crossOrigin = "anonymous";
+      fallbackLogo.src = "/vite.svg";
+      
+      fallbackLogo.onload = () => {
+        const logoSize = canvas.width * 0.4;
+        const logoX = (canvas.width - logoSize) / 2;
+        const logoY = (canvas.height - logoSize) / 2;
+        
+        // White background for logo
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+        
+        // Draw logo
+        ctx.drawImage(fallbackLogo, logoX, logoY, logoSize, logoSize);
+      };
+    };
+  };
 
   const downloadQRCode = () => {
     if (!canvasRef.current) return;
