@@ -20,13 +20,24 @@ export default function QRCodeGenerator({ roomNumber }) {
         "http://localhost:5000")
         .replace(/\/$/, "");
 
-
     // QR MUST point to backend, not frontend
     const qrCodeURL = `${API_BASE}/qr/scan/${roomNumber}`;
     setQrURL(qrCodeURL);
 
-    QRCode.toCanvas(canvasRef.current, qrCodeURL, {
-      width: 600,
+    // Setup high DPI for better clarity on zoom
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const width = 600;
+    
+    canvas.width = width * dpr;
+    canvas.height = width * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = width + "px";
+    ctx.scale(dpr, dpr);
+
+    QRCode.toCanvas(canvas, qrCodeURL, {
+      width: width,
       margin: 2,
       color: {
         dark: "#000000",
@@ -47,20 +58,14 @@ export default function QRCodeGenerator({ roomNumber }) {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    
-    // Use high DPI for better clarity on zoom
     const dpr = window.devicePixelRatio || 1;
-    if (dpr > 1) {
-      canvas.width = canvas.width * dpr;
-      canvas.height = canvas.height * dpr;
-      ctx.scale(dpr, dpr);
-    }
+    const width = 600;
     
     const drawLogoWithBackground = (image) => {
       // Logo size (20% of QR code - smaller to ensure QR remains scannable)
-      const logoSize = canvas.width * 0.2;
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
+      const logoSize = width * 0.2;
+      const centerX = width / 2;
+      const centerY = width / 2;
       const bgSize = logoSize + 16;
       const bgX = centerX - bgSize / 2;
       const bgY = centerY - bgSize / 2;
