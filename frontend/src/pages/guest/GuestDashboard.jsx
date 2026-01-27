@@ -12,11 +12,13 @@ export default function GuestDashboard() {
   const { guest, logout } = useGuestAuth();
   const navigate = useNavigate();
 
-  const guestFirstName = guest?.name
-    ? guest.name.split(" ")[0]
-    : guest?.phone 
-    ? guest.phone.slice(-4)
-    : "Guest";
+  // Extract guest name - check multiple possible property names
+  const guestFirstName = 
+    guest?.name 
+      ? guest.name.split(" ")[0]
+      : guest?.guestName
+      ? guest.guestName.split(" ")[0]
+      : "Guest";
 
   const handleLogout = () => {
     logout();
