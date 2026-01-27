@@ -7,12 +7,24 @@ export default function GuestOrders() {
 
   useEffect(() => {
     const loadOrders = async () => {
-      const res = await api.get("/guest/orders");
-      setOrders(res.data);
-      setLoading(false);
+      try {
+        const res = await api.get("/guest/orders");
+        setOrders(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading orders:", err);
+        setLoading(false);
+      }
     };
 
+    // Load orders immediately
     loadOrders();
+
+    // Set up auto-refresh every 5 seconds
+    const intervalId = setInterval(loadOrders, 5000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
