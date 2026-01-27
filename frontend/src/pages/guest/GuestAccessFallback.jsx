@@ -26,7 +26,7 @@ export default function GuestAccessFallback() {
             className="text-base mb-4"
             style={{ color: "var(--text-primary)" }}
           >
-            Please use your phone camera or a QR code scanner to scan the QR code placed in your room.
+            Please use your phone camera or a QR code scanner (e.g. Google Lens) to scan the QR code placed in your room.
           </p>
 
           <div
@@ -87,17 +87,6 @@ export default function GuestAccessFallback() {
             Dial 0 from your room phone
           </p>
         </div>
-
-        {/* ACTION BUTTON */}
-        <button
-          onClick={() => navigate("/guest/login")}
-          className="w-full py-3 rounded-lg font-semibold text-white transition mb-4"
-          style={{
-            backgroundColor: "var(--brand)",
-          }}
-        >
-          Back to Login
-        </button>
 
         {/* SAFE SPACE */}
         <div className="h-4" />
