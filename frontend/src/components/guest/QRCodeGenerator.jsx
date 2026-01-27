@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
+import logoAsset from "../../assets/logo.png";
 
 export default function QRCodeGenerator({ roomNumber }) {
   const canvasRef = useRef(null);
@@ -83,17 +84,17 @@ export default function QRCodeGenerator({ roomNumber }) {
     // Load logo image
     const logo = new Image();
     logo.crossOrigin = "anonymous";
-    logo.src = "/src/assets/logo.png";
+    logo.src = logoAsset;
     
     logo.onload = () => {
       drawLogoWithBackground(logo);
     };
     
     logo.onerror = () => {
-      // Fallback: use logo from assets if public logo.png not found
+      // Fallback: use logo from assets if primary load fails
       const fallbackLogo = new Image();
       fallbackLogo.crossOrigin = "anonymous";
-      fallbackLogo.src = "/src/assets/logo.png";
+      fallbackLogo.src = logoAsset;
       
       fallbackLogo.onload = () => {
         drawLogoWithBackground(fallbackLogo);
