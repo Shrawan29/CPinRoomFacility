@@ -29,10 +29,10 @@ export default function GuestDashboard() {
       path: "/guest/menu"
     },
     {
-      icon: "🏨",
-      title: "Hotel Information",
-      description: "Amenities, Wi-Fi & house rules",
-      path: "/guest/hotel-info"
+      icon: "🎉",
+      title: "Events",
+      description: "Activities during your stay",
+      path: "/guest/events"
     },
     {
       icon: "📦",
@@ -41,10 +41,10 @@ export default function GuestDashboard() {
       path: "/guest/orders"
     },
     {
-      icon: "🎉",
-      title: "Events",
-      description: "Activities during your stay",
-      path: "/guest/events"
+      icon: "🏨",
+      title: "Hotel Information",
+      description: "Amenities  & Wi-Fi ",
+      path: "/guest/hotel-info"
     }
   ];
 
