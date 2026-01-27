@@ -14,9 +14,9 @@ export default function QRCodeGenerator({ roomNumber }) {
 
     // IMPORTANT: backend base URL (no trailing slash)
     const API_BASE =
-  (import.meta.env.VITE_API_URL ||
-    "http://localhost:5000")
-    .replace(/\/$/, "");
+      (import.meta.env.VITE_API_URL ||
+        "http://localhost:5000")
+        .replace(/\/$/, "");
 
 
     // QR MUST point to backend, not frontend
@@ -57,19 +57,40 @@ export default function QRCodeGenerator({ roomNumber }) {
     const img = canvasRef.current.toDataURL("image/png");
 
     win.document.write(`
-      <html>
-        <head>
-          <title>Room ${roomNumber}</title>
-        </head>
-        <body style="text-align:center;font-family:sans-serif">
-          <h2>Room ${roomNumber}</h2>
-          <p>Scan to access room services</p>
-          <img src="${img}" style="width:260px" />
-        </body>
-      </html>
-    `);
+    <html>
+      <head>
+        <title>Room ${roomNumber}</title>
+        <style>
+          body {
+            text-align: center;
+            font-family: sans-serif;
+            padding: 20px;
+          }
+          .logo {
+            width: 120px;
+            margin: 0 auto 16px;
+            display: block;
+          }
+          .qr {
+            width: 260px;
+            margin-top: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <!-- LOGO -->
+        <img src="/logo.png" class="logo" />
+
+        <h2>Room ${roomNumber}</h2>
+        <p>Scan to access room services</p>
+
+        <img src="${img}" class="qr" />
+      </body>
+    </html>
+  `);
 
     win.document.close();
+    win.focus();
     win.print();
   };
 
