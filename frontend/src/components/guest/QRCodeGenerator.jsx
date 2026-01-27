@@ -47,9 +47,6 @@ export default function QRCodeGenerator({ roomNumber }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     
-    // Improve image quality - disable smoothing for sharp rendering
-    ctx.imageSmoothingEnabled = false;
-    
     const drawLogoWithBackground = (image) => {
       // Logo size (20% of QR code - smaller to ensure QR remains scannable)
       const logoSize = canvas.width * 0.2;
@@ -69,6 +66,9 @@ export default function QRCodeGenerator({ roomNumber }) {
       ctx.strokeStyle = "#CCCCCC";
       ctx.lineWidth = 2;
       ctx.stroke();
+      
+      // Enable smoothing for logo to avoid pixelation
+      ctx.imageSmoothingEnabled = true;
       
       // Draw logo centered
       ctx.drawImage(
