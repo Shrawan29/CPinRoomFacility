@@ -57,16 +57,14 @@ export default function QRCodeGenerator({ roomNumber }) {
       const bgX = centerX - bgSize / 2;
       const bgY = centerY - bgSize / 2;
       
-      // Draw circular white background
+      // Draw square white background
       ctx.fillStyle = "#FFFFFF";
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, bgSize / 2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(bgX, bgY, bgSize, bgSize);
       
       // Draw border around background
       ctx.strokeStyle = "#CCCCCC";
       ctx.lineWidth = 2;
-      ctx.stroke();
+      ctx.strokeRect(bgX, bgY, bgSize, bgSize);
       
       // Enable smoothing for logo to avoid pixelation
       ctx.imageSmoothingEnabled = true;
