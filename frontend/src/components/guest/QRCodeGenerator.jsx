@@ -26,7 +26,7 @@ export default function QRCodeGenerator({ roomNumber }) {
     setQrURL(qrCodeURL);
 
     QRCode.toCanvas(canvasRef.current, qrCodeURL, {
-      width: 400,
+      width: 600,
       margin: 2,
       color: {
         dark: "#000000",
@@ -47,6 +47,14 @@ export default function QRCodeGenerator({ roomNumber }) {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+    
+    // Use high DPI for better clarity on zoom
+    const dpr = window.devicePixelRatio || 1;
+    if (dpr > 1) {
+      canvas.width = canvas.width * dpr;
+      canvas.height = canvas.height * dpr;
+      ctx.scale(dpr, dpr);
+    }
     
     const drawLogoWithBackground = (image) => {
       // Logo size (20% of QR code - smaller to ensure QR remains scannable)
