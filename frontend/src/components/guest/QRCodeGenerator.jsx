@@ -47,23 +47,43 @@ export default function QRCodeGenerator({ roomNumber }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     
+    const drawLogoWithBackground = (image) => {
+      // Logo size (20% of QR code - smaller to ensure QR remains scannable)
+      const logoSize = canvas.width * 0.2;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const bgSize = logoSize + 16;
+      const bgX = centerX - bgSize / 2;
+      const bgY = centerY - bgSize / 2;
+      
+      // Draw circular white background
+      ctx.fillStyle = "#FFFFFF";
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, bgSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw border around background
+      ctx.strokeStyle = "#CCCCCC";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Draw logo centered
+      ctx.drawImage(
+        image,
+        centerX - logoSize / 2,
+        centerY - logoSize / 2,
+        logoSize,
+        logoSize
+      );
+    };
+    
     // Load logo image
     const logo = new Image();
     logo.crossOrigin = "anonymous";
-    logo.src = "/logo.png"; // Use company logo from public folder
+    logo.src = "/logo.png";
     
     logo.onload = () => {
-      // Logo size (20% of QR code - smaller to ensure QR remains scannable)
-      const logoSize = canvas.width * 0.2;
-      const logoX = (canvas.width - logoSize) / 2;
-      const logoY = (canvas.height - logoSize) / 2;
-      
-      // White background for logo
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6);
-      
-      // Draw logo
-      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+      drawLogoWithBackground(logo);
     };
     
     logo.onerror = () => {
@@ -73,16 +93,7 @@ export default function QRCodeGenerator({ roomNumber }) {
       fallbackLogo.src = "/vite.svg";
       
       fallbackLogo.onload = () => {
-        const logoSize = canvas.width * 0.2;
-        const logoX = (canvas.width - logoSize) / 2;
-        const logoY = (canvas.height - logoSize) / 2;
-        
-        // White background for logo
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6);
-        
-        // Draw logo
-        ctx.drawImage(fallbackLogo, logoX, logoY, logoSize, logoSize);
+        drawLogoWithBackground(fallbackLogo);
       };
     };
   };
