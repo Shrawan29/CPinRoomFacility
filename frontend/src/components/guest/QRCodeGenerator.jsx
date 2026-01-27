@@ -83,17 +83,17 @@ export default function QRCodeGenerator({ roomNumber }) {
     // Load logo image
     const logo = new Image();
     logo.crossOrigin = "anonymous";
-    logo.src = "/logo.png";
+    logo.src = "/src/assets/logo.png";
     
     logo.onload = () => {
       drawLogoWithBackground(logo);
     };
     
     logo.onerror = () => {
-      // Fallback: use vite.svg if logo.png not found
+      // Fallback: use logo from assets if public logo.png not found
       const fallbackLogo = new Image();
       fallbackLogo.crossOrigin = "anonymous";
-      fallbackLogo.src = "/vite.svg";
+      fallbackLogo.src = "/src/assets/logo.png";
       
       fallbackLogo.onload = () => {
         drawLogoWithBackground(fallbackLogo);
