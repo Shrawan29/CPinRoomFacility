@@ -31,8 +31,7 @@ import MenuBrowse from "./pages/guest/MenuBrowse";
 import GuestCart from "./pages/guest/GuestCart";
 import GuestOrders from "./pages/guest/GuestOrders";
 import GuestEvent from "./pages/guest/GuestEvent";
-
-// import HotelInfo from "./pages/guest/HotelInfo";
+import GuestHotelInfo from "./pages/guest/GuestHotelInfo";
 
 
 // Routes
@@ -199,14 +198,14 @@ function App() {
         }
       />
 
-        {/* <Route
+      <Route
         path="/guest/hotel-info"
         element={
           <GuestProtectedRoute>
-            <HotelInfo />
+            <GuestHotelInfo />
           </GuestProtectedRoute>
         }
-      />  */}
+      />
 
 
       </Routes>

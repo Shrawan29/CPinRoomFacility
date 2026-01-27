@@ -70,7 +70,7 @@ export default function GuestDashboard() {
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
           <div className="max-w-4xl mx-auto">
             <p className="text-sm opacity-90 mb-1">
-              Welcome back, {guestFirstName} 👋
+              Welcome {guestFirstName} 👋
             </p>
             <h2 className="text-2xl font-bold mb-1">
               Make yourself comfortable
