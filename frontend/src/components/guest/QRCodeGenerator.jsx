@@ -53,14 +53,14 @@ export default function QRCodeGenerator({ roomNumber }) {
     logo.src = "/logo.png"; // Use company logo from public folder
     
     logo.onload = () => {
-      // Logo size (40% of QR code)
-      const logoSize = canvas.width * 0.4;
+      // Logo size (20% of QR code - smaller to ensure QR remains scannable)
+      const logoSize = canvas.width * 0.2;
       const logoX = (canvas.width - logoSize) / 2;
       const logoY = (canvas.height - logoSize) / 2;
       
       // White background for logo
       ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+      ctx.fillRect(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6);
       
       // Draw logo
       ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
@@ -73,13 +73,13 @@ export default function QRCodeGenerator({ roomNumber }) {
       fallbackLogo.src = "/vite.svg";
       
       fallbackLogo.onload = () => {
-        const logoSize = canvas.width * 0.4;
+        const logoSize = canvas.width * 0.2;
         const logoX = (canvas.width - logoSize) / 2;
         const logoY = (canvas.height - logoSize) / 2;
         
         // White background for logo
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+        ctx.fillRect(logoX - 3, logoY - 3, logoSize + 6, logoSize + 6);
         
         // Draw logo
         ctx.drawImage(fallbackLogo, logoX, logoY, logoSize, logoSize);
