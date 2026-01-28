@@ -194,27 +194,27 @@ export default function AdminEvents() {
         <div className="grid lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
           <div className="lg:col-span-1 overflow-hidden">
-            <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">
+            <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-4 h-full overflow-y-auto">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
                 Add New Event
               </h2>
 
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                       Event Title *
                     </label>
                     <input
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="Enter event title"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                       Event Date * (DD/MM/YYYY)
                     </label>
                     <DatePicker
@@ -229,70 +229,70 @@ export default function AdminEvents() {
                       }}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="DD/MM/YYYY"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       calendarClassName="shadow-lg rounded-lg"
                       wrapperClassName="w-full"
                     />
                     {form.eventDate && form.eventDate.includes('-') && (
-                      <p className="text-xs text-[var(--text-muted)] mt-2 font-semibold">
+                      <p className="text-xs text-[var(--text-muted)] mt-1 font-semibold">
                         ✓ Selected: {formatDateDDMMYYYY(form.eventDate)}
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                       Event Time
                     </label>
                     <input
                       type="time"
                       value={form.eventTime}
                       onChange={(e) => setForm({ ...form, eventTime: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                       Location
                     </label>
                     <input
                       value={form.location}
                       onChange={(e) => setForm({ ...form, location: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="e.g. Rooftop / Banquet Hall"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                       Contact Information
                     </label>
                     <input
                       value={form.contact}
                       onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="e.g. +91-9876543210"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                     More Info Link
                   </label>
                   <input
                     value={form.link}
                     onChange={(e) => setForm({ ...form, link: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     placeholder="e.g. https://example.com/event-details"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                  <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
                     Description
                   </label>
                   <textarea
@@ -300,8 +300,8 @@ export default function AdminEvents() {
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
-                    rows={3}
+                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
+                    rows={2}
                     placeholder="Event details and description..."
                   />
                 </div>
@@ -315,9 +315,10 @@ export default function AdminEvents() {
                     w-full
                     bg-[var(--brand)]
                     text-white
-                    py-3
+                    py-2
                     rounded-lg
                     font-semibold
+                    text-sm
                     hover:opacity-90
                     disabled:opacity-60
                     disabled:cursor-not-allowed
