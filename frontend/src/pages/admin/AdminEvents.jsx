@@ -148,7 +148,7 @@ export default function AdminEvents() {
           )}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 flex-1 overflow-hidden">
+        <div className="grid lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
           <div className="lg:col-span-1 overflow-y-auto">
             <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-6 sticky top-0">
@@ -276,7 +276,7 @@ export default function AdminEvents() {
           </div>
 
           {/* EVENT LIST */}
-          <div className="lg:col-span-2 overflow-y-auto">
+          <div className="lg:col-span-1 overflow-y-auto">
             <div className="flex items-center justify-between mb-6 sticky top-0 bg-white py-2">
               <h2 className="text-xl font-semibold text-[var(--text-primary)]">
                 All Events ({events.length})
