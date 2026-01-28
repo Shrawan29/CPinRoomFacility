@@ -183,6 +183,9 @@ export default function AdminEvents() {
                     <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                       Event Date * (DD/MM/YYYY)
                     </label>
+                    <p className="text-xs text-[var(--text-muted)] mb-2">
+                      Note: The calendar will show in your browser's format
+                    </p>
                     <input
                       type="date"
                       value={form.eventDate}
@@ -190,8 +193,8 @@ export default function AdminEvents() {
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     />
                     {form.eventDate && (
-                      <p className="text-xs text-[var(--text-muted)] mt-1">
-                        Selected: {formatDateDDMMYYYY(form.eventDate)}
+                      <p className="text-xs text-[var(--text-muted)] mt-2 font-semibold">
+                        ✓ Selected: {formatDateDDMMYYYY(form.eventDate)}
                       </p>
                     )}
                   </div>
