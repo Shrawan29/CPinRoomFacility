@@ -244,11 +244,7 @@ export default function AdminEvents() {
                       calendarClassName="shadow-lg rounded-lg"
                       wrapperClassName="w-full"
                     />
-                    {form.eventDate && form.eventDate.includes('-') && (
-                      <p className="text-xs text-[var(--text-muted)] mt-2 font-semibold">
-                        ✓ Selected: {formatDateDDMMYYYY(form.eventDate)}
-                      </p>
-                    )}
+                    
                   </div>
                 </div>
 
