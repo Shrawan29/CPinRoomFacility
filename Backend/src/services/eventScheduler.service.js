@@ -11,14 +11,17 @@ export const updateEventStatuses = async () => {
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    // Update UPCOMING to ACTIVE if event date is today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Get today's date in UTC (00:00:00 UTC)
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
     
+    // Get tomorrow's date in UTC (00:00:00 UTC)
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
-    await Event.updateMany(
+    console.log(`[EventScheduler] Checking events for today: ${today.toISOString()} to ${tomorrow.toISOString()}`);
+
+    // Update UPCOMING to ACTIVE if event date is today
+    const upcomingResult = await Event.updateMany(
       {
         eventDate: { $gte: today, $lt: tomorrow },
         status: "UPCOMING"
@@ -26,14 +29,18 @@ export const updateEventStatuses = async () => {
       { status: "ACTIVE" }
     );
 
+    console.log(`[EventScheduler] Updated ${upcomingResult.modifiedCount} events from UPCOMING to ACTIVE`);
+
     // Update ACTIVE to COMPLETED if event date has passed
-    await Event.updateMany(
+    const activeResult = await Event.updateMany(
       {
         eventDate: { $lt: today },
         status: "ACTIVE"
       },
       { status: "COMPLETED" }
     );
+
+    console.log(`[EventScheduler] Updated ${activeResult.modifiedCount} events from ACTIVE to COMPLETED`);
 
     // Delete COMPLETED events that are older than 1 day
     const deletionResult = await Event.deleteMany({
@@ -46,7 +53,9 @@ export const updateEventStatuses = async () => {
 
     return {
       success: true,
-      deletedCount: deletionResult.deletedCount
+      deletedCount: deletionResult.deletedCount,
+      upcomingCount: upcomingResult.modifiedCount,
+      activeCount: activeResult.modifiedCount
     };
   } catch (error) {
     console.error(`[EventScheduler] Error updating event statuses:`, error);
