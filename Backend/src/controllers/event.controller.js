@@ -72,7 +72,9 @@ export const deleteEvent = async (req, res) => {
 
 export const listActiveEvents = async (req, res) => {
   try {
-    const today = new Date();
+    // Get today's date in UTC (00:00:00 UTC)
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
 
     const events = await Event.find({
       status: { $in: ["UPCOMING", "ACTIVE"] },

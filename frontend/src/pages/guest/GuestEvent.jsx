@@ -7,6 +7,27 @@ export default function GuestEvents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Helper function to format date as DD/MM/YYYY
+  const formatDateDDMMYYYY = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Helper function to get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return "bg-green-100 text-green-700 border-green-200";
+      case "UPCOMING":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
   useEffect(() => {
     const loadEvents = async () => {
       try {
@@ -62,16 +83,21 @@ export default function GuestEvents() {
               key={event._id}
               className="bg-white rounded-xl shadow-sm p-4"
             >
-              <h2 className="font-semibold text-lg text-[var(--text-primary)]">
-                {event.title}
-              </h2>
+              <div className="flex justify-between items-start gap-3 mb-2">
+                <h2 className="font-semibold text-lg text-[var(--text-primary)]">
+                  {event.title}
+                </h2>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(event.status)}`}>
+                  {event.status}
+                </span>
+              </div>
 
               <p className="text-sm text-[var(--text-muted)] mt-1">
                 📍 {event.location || "Hotel Premises"}
               </p>
 
               <p className="text-sm text-[var(--text-muted)]">
-                📅 {new Date(event.eventDate).toDateString()}
+                📅 {formatDateDDMMYYYY(event.eventDate)}
               </p>
 
               {event.description && (
@@ -99,22 +125,6 @@ export default function GuestEvents() {
                   </a>
                 </p>
               )}
-
-              <span
-                className="inline-block mt-3 text-xs px-3 py-1 rounded-full"
-                style={{
-                  backgroundColor:
-                    event.status === "ACTIVE"
-                      ? "var(--brand)"
-                      : "var(--bg-secondary)",
-                  color:
-                    event.status === "ACTIVE"
-                      ? "white"
-                      : "var(--text-muted)",
-                }}
-              >
-                {event.status}
-              </span>
             </div>
           ))}
         </div>
