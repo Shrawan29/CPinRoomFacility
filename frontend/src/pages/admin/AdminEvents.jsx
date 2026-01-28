@@ -23,6 +23,15 @@ export default function AdminEvents() {
     status: "UPCOMING",
   });
 
+  // Helper function to format date as DD/MM/YYYY
+  const formatDateDDMMYYYY = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   /* 🔹 Load events */
   useEffect(() => {
     loadEvents();
@@ -288,12 +297,7 @@ export default function AdminEvents() {
                               📍 {event.location || "Location TBD"}
                             </span>
                             <span className="flex items-center gap-1">
-                              📅 {new Date(event.eventDate).toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                year: 'numeric', 
-                                month: 'short', 
-                                day: 'numeric' 
-                              })}
+                              📅 {formatDateDDMMYYYY(event.eventDate)}
                             </span>
                           </div>
                         </div>
