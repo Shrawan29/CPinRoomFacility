@@ -157,39 +157,67 @@ export default function AdminEvents() {
               </h2>
 
               <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                    Event Title *
-                  </label>
-                  <input
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
-                    placeholder="Enter event title"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                      Event Title *
+                    </label>
+                    <input
+                      value={form.title}
+                      onChange={(e) => setForm({ ...form, title: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      placeholder="Enter event title"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                      Event Date *
+                    </label>
+                    <input
+                      type="date"
+                      value={form.eventDate}
+                      onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                      Location
+                    </label>
+                    <input
+                      value={form.location}
+                      onChange={(e) => setForm({ ...form, location: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      placeholder="e.g. Rooftop / Banquet Hall"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                      Contact Information
+                    </label>
+                    <input
+                      value={form.contact}
+                      onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      placeholder="e.g. +91-9876543210"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                    Event Date *
+                    More Info Link
                   </label>
                   <input
-                    type="date"
-                    value={form.eventDate}
-                    onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+                    value={form.link}
+                    onChange={(e) => setForm({ ...form, link: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                    Location
-                  </label>
-                  <input
-                    value={form.location}
-                    onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
-                    placeholder="e.g. Rooftop / Banquet Hall"
+                    placeholder="e.g. https://example.com/event-details"
                   />
                 </div>
 
@@ -203,33 +231,24 @@ export default function AdminEvents() {
                       setForm({ ...form, description: e.target.value })
                     }
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
-                    rows={4}
+                    rows={3}
                     placeholder="Event details and description..."
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                    Contact Information
+                    Status
                   </label>
-                  <input
-                    value={form.contact}
-                    onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
-                    placeholder="e.g. +91-9876543210 or email@example.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                    More Info Link
-                  </label>
-                  <input
-                    value={form.link}
-                    onChange={(e) => setForm({ ...form, link: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
-                    placeholder="e.g. https://example.com/event-details"
-                  />
+                  >
+                    <option value="UPCOMING">UPCOMING</option>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                  </select>
                 </div>
 
                 <button
