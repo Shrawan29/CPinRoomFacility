@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../../layouts/AdminLayout";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   getEvents,
   createEvent,
@@ -226,13 +228,21 @@ export default function AdminEvents() {
                     <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                       Event Date * (DD/MM/YYYY)
                     </label>
-                    <input
-                      type="text"
-                      placeholder="DD/MM/YYYY"
-                      value={form.eventDate && form.eventDate.includes('-') ? convertYYYYMMDDToDDMMYYYY(form.eventDate) : form.eventDate}
-                      onChange={handleEventDateChange}
-                      maxLength="10"
+                    <DatePicker
+                      selected={form.eventDate ? new Date(form.eventDate) : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          setForm({ ...form, eventDate: `${year}-${month}-${day}` });
+                        }
+                      }}
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="DD/MM/YYYY"
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      calendarClassName="shadow-lg rounded-lg"
+                      wrapperClassName="w-full"
                     />
                     {form.eventDate && form.eventDate.includes('-') && (
                       <p className="text-xs text-[var(--text-muted)] mt-2 font-semibold">
