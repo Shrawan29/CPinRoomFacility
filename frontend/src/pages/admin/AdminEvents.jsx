@@ -194,7 +194,7 @@ export default function AdminEvents() {
         <div className="grid lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
           <div className="lg:col-span-1 overflow-hidden">
-            <div className="bg-[var(--bg-secondary)] bg-opacity-50 rounded-xl shadow-sm p-4 h-full overflow-y-auto">
+            <div className="bg-[var(--bg-secondary)] bg-opacity-50 rounded-xl shadow-sm p-4 -y-auto">
               <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
                 Add New Event
               </h2>
