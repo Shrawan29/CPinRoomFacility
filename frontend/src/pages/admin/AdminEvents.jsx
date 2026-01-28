@@ -340,33 +340,7 @@ export default function AdminEvents() {
                         </p>
                       )}
 
-                      <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-                        <span className="text-xs text-[var(--text-muted)] mr-2">
-                          Update Status:
-                        </span>
-                        {["UPCOMING", "ACTIVE", "COMPLETED"].map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => changeStatus(event._id, s)}
-                            disabled={event.status === s}
-                            className={`
-                              text-xs px-3 py-1.5 rounded-md font-medium transition-all
-                              ${event.status === s 
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-[var(--brand)] hover:text-[var(--brand)]'
-                              }
-                            `}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                        <button
-                          onClick={() => handleDelete(event._id)}
-                          className="ml-auto text-xs px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-md font-medium transition-all"
-                        >
-                          🗑 Delete
-                        </button>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
