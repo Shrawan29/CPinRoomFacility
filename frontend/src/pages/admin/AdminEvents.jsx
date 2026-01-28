@@ -116,9 +116,9 @@ export default function AdminEvents() {
 
   return (
     <AdminLayout>
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto h-screen flex flex-col overflow-hidden">
         {/* PAGE HEADER */}
-        <div className="mb-8">
+        <div className="mb-4 shrink-0">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">
             Events Management
           </h1>
@@ -128,28 +128,30 @@ export default function AdminEvents() {
         </div>
 
         {/* NOTIFICATIONS */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={() => setError("")} className="text-red-500 hover:text-red-700">
-              ✕
-            </button>
-          </div>
-        )}
+        <div className="shrink-0">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+              <span>{error}</span>
+              <button onClick={() => setError("")} className="text-red-500 hover:text-red-700">
+                ✕
+              </button>
+            </div>
+          )}
 
-        {message && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
-            <span>{message}</span>
-            <button onClick={() => setMessage("")} className="text-green-500 hover:text-green-700">
-              ✕
-            </button>
-          </div>
-        )}
+          {message && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+              <span>{message}</span>
+              <button onClick={() => setMessage("")} className="text-green-500 hover:text-green-700">
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
-          <div className="lg:col-span-1">
-            <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-6 sticky top-6">
+          <div className="lg:col-span-1 overflow-y-auto">
+            <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-6 sticky top-0">
               <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">
                 Add New Event
               </h2>
@@ -255,8 +257,8 @@ export default function AdminEvents() {
           </div>
 
           {/* EVENT LIST */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-6">
+          <div className="lg:col-span-2 overflow-y-auto">
+            <div className="flex items-center justify-between mb-6 sticky top-0 bg-white py-2">
               <h2 className="text-xl font-semibold text-[var(--text-primary)]">
                 All Events ({events.length})
               </h2>
