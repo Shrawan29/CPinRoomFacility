@@ -6,6 +6,8 @@ const eventSchema = new mongoose.Schema(
     description: String,
     eventDate: { type: Date, required: true },
     location: String,
+    contact: String,
+    link: String,
     status: {
       type: String,
       enum: ["UPCOMING", "ACTIVE", "COMPLETED"],

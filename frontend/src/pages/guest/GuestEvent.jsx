@@ -80,6 +80,26 @@ export default function GuestEvents() {
                 </p>
               )}
 
+              {event.contact && (
+                <p className="text-sm mt-2 text-[var(--text-muted)]">
+                  📞 Contact: <span className="font-semibold text-[var(--text-primary)]">{event.contact}</span>
+                </p>
+              )}
+
+              {event.link && (
+                <p className="text-sm mt-2">
+                  <a
+                    href={event.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-white px-3 py-1 rounded-lg font-semibold"
+                    style={{ backgroundColor: "var(--brand)" }}
+                  >
+                    🔗 More Info
+                  </a>
+                </p>
+              )}
+
               <span
                 className="inline-block mt-3 text-xs px-3 py-1 rounded-full"
                 style={{

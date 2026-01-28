@@ -18,6 +18,8 @@ export default function AdminEvents() {
     description: "",
     eventDate: "",
     location: "",
+    contact: "",
+    link: "",
     status: "UPCOMING",
   });
 
@@ -60,6 +62,8 @@ export default function AdminEvents() {
         description: "",
         eventDate: "",
         location: "",
+        contact: "",
+        link: "",
         status: "UPCOMING",
       });
 
@@ -202,6 +206,30 @@ export default function AdminEvents() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    Contact Information
+                  </label>
+                  <input
+                    value={form.contact}
+                    onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    placeholder="e.g. +91-9876543210 or email@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                    More Info Link
+                  </label>
+                  <input
+                    value={form.link}
+                    onChange={(e) => setForm({ ...form, link: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    placeholder="e.g. https://example.com/event-details"
+                  />
+                </div>
+
                 <button
                   onClick={submitEvent}
                   disabled={loading}
@@ -269,6 +297,25 @@ export default function AdminEvents() {
                       {event.description && (
                         <p className="text-sm text-[var(--text-muted)] mb-4 line-clamp-2">
                           {event.description}
+                        </p>
+                      )}
+
+                      {event.contact && (
+                        <p className="text-sm text-[var(--text-muted)] mb-2">
+                          📞 Contact: <span className="font-semibold text-[var(--text-primary)]">{event.contact}</span>
+                        </p>
+                      )}
+
+                      {event.link && (
+                        <p className="text-sm mb-3">
+                          <a
+                            href={event.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[var(--brand)] font-semibold hover:underline inline-flex items-center gap-1"
+                          >
+                            🔗 {event.link}
+                          </a>
                         </p>
                       )}
 
