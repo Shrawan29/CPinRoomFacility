@@ -194,7 +194,7 @@ export default function AdminEvents() {
         <div className="grid lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
           <div className="lg:col-span-1 overflow-hidden">
-            <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm p-4 h-full overflow-y-auto">
+            <div className="bg-[var(--bg-secondary)] bg-opacity-50 rounded-xl shadow-sm p-4 h-full overflow-y-auto">
               <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
                 Add New Event
               </h2>
@@ -202,19 +202,19 @@ export default function AdminEvents() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
                       Event Title *
                     </label>
                     <input
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="Enter event title"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
                       Event Date * (DD/MM/YYYY)
                     </label>
                     <DatePicker
@@ -229,7 +229,7 @@ export default function AdminEvents() {
                       }}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="DD/MM/YYYY"
-                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       calendarClassName="shadow-lg rounded-lg"
                       wrapperClassName="w-full"
                     />
@@ -241,58 +241,58 @@ export default function AdminEvents() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                       Event Time
                     </label>
                     <input
                       type="time"
                       value={form.eventTime}
                       onChange={(e) => setForm({ ...form, eventTime: e.target.value })}
-                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                       Location
                     </label>
                     <input
                       value={form.location}
                       onChange={(e) => setForm({ ...form, location: e.target.value })}
-                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="e.g. Rooftop / Banquet Hall"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                       Contact Information
                     </label>
                     <input
                       value={form.contact}
                       onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                      className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="e.g. +91-9876543210"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                     More Info Link
                   </label>
                   <input
                     value={form.link}
                     onChange={(e) => setForm({ ...form, link: e.target.value })}
-                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     placeholder="e.g. https://example.com/event-details"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-primary)] mb-1">
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                     Description
                   </label>
                   <textarea
@@ -300,7 +300,7 @@ export default function AdminEvents() {
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
+                    className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
                     rows={2}
                     placeholder="Event details and description..."
                   />
