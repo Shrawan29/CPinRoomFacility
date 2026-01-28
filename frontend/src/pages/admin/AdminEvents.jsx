@@ -32,6 +32,49 @@ export default function AdminEvents() {
     return `${day}/${month}/${year}`;
   };
 
+  // Helper function to convert DD/MM/YYYY to YYYY-MM-DD format
+  const convertDDMMYYYYToYYYYMMDD = (ddmmyyyy) => {
+    const parts = ddmmyyyy.split('/');
+    if (parts.length !== 3) return '';
+    const day = parts[0];
+    const month = parts[1];
+    const year = parts[2];
+    if (day.length !== 2 || month.length !== 2 || year.length !== 4) return '';
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper function to convert YYYY-MM-DD to DD/MM/YYYY
+  const convertYYYYMMDDToDDMMYYYY = (yyyymmdd) => {
+    const parts = yyyymmdd.split('-');
+    if (parts.length !== 3) return '';
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  };
+
+  const handleEventDateChange = (e) => {
+    const inputValue = e.target.value;
+    // Allow both DD/MM/YYYY and numbers
+    const cleaned = inputValue.replace(/[^\d/]/g, '');
+    
+    // Auto-format as user types DD/MM/YYYY
+    let formatted = cleaned;
+    if (cleaned.length >= 2 && cleaned.length <= 4) {
+      formatted = cleaned.slice(0, 2) + (cleaned.length > 2 ? '/' + cleaned.slice(2) : '');
+    } else if (cleaned.length >= 5) {
+      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + (cleaned.length > 4 ? '/' + cleaned.slice(4, 8) : '');
+    }
+    
+    // If we have a complete date, convert to YYYY-MM-DD format for storage
+    if (formatted.length === 10) {
+      const converted = convertDDMMYYYYToYYYYMMDD(formatted);
+      if (converted) {
+        setForm({ ...form, eventDate: converted });
+      }
+    } else {
+      // Store the formatted input temporarily
+      setForm({ ...form, eventDate: formatted });
+    }
+  };
+
   /* 🔹 Load events */
   useEffect(() => {
     loadEvents();
@@ -183,16 +226,15 @@ export default function AdminEvents() {
                     <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
                       Event Date * (DD/MM/YYYY)
                     </label>
-                    <p className="text-xs text-[var(--text-muted)] mb-2">
-                      Note: The calendar will show in your browser's format
-                    </p>
                     <input
-                      type="date"
-                      value={form.eventDate}
-                      onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+                      type="text"
+                      placeholder="DD/MM/YYYY"
+                      value={form.eventDate && form.eventDate.includes('-') ? convertYYYYMMDDToDDMMYYYY(form.eventDate) : form.eventDate}
+                      onChange={handleEventDateChange}
+                      maxLength="10"
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     />
-                    {form.eventDate && (
+                    {form.eventDate && form.eventDate.includes('-') && (
                       <p className="text-xs text-[var(--text-muted)] mt-2 font-semibold">
                         ✓ Selected: {formatDateDDMMYYYY(form.eventDate)}
                       </p>
