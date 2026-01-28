@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import connectDB from "./config/db.js";
+import { initializeEventScheduler } from "./services/eventScheduler.service.js";
 
 // routes
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
@@ -38,6 +39,9 @@ import guestEventRoutes from "./routes/guestEvent.routes.js";
 
 dotenv.config();
 connectDB();
+
+// Initialize event scheduler when server starts
+initializeEventScheduler();
 
 const app = express();
 

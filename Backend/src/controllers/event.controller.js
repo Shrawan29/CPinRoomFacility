@@ -6,7 +6,7 @@ import Event from "../models/Event.js";
 
 export const createEvent = async (req, res) => {
   try {
-    const { title, description, eventDate, location, status } = req.body;
+    const { title, description, eventDate, location, contact, link, status } = req.body;
 
     if (!title || !eventDate) {
       return res.status(400).json({
@@ -19,6 +19,8 @@ export const createEvent = async (req, res) => {
       description,
       eventDate,
       location,
+      contact,
+      link,
       status: status || "UPCOMING",
     });
 
