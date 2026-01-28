@@ -181,7 +181,7 @@ export default function AdminEvents() {
 
                   <div>
                     <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-                      Event Date *
+                      Event Date * (DD/MM/YYYY)
                     </label>
                     <input
                       type="date"
@@ -189,6 +189,11 @@ export default function AdminEvents() {
                       onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
                       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     />
+                    {form.eventDate && (
+                      <p className="text-xs text-[var(--text-muted)] mt-1">
+                        Selected: {formatDateDDMMYYYY(form.eventDate)}
+                      </p>
+                    )}
                   </div>
                 </div>
 
