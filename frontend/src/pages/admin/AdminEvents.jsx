@@ -18,6 +18,7 @@ export default function AdminEvents() {
     title: "",
     description: "",
     eventDate: "",
+    eventTime: "",
     location: "",
     contact: "",
     link: "",
@@ -114,6 +115,7 @@ export default function AdminEvents() {
         title: "",
         description: "",
         eventDate: "",
+        eventTime: "",
         location: "",
         contact: "",
         link: "",
@@ -231,7 +233,23 @@ export default function AdminEvents() {
                       calendarClassName="shadow-lg rounded-lg"
                       wrapperClassName="w-full"
                     />
-                    
+                    {form.eventDate && form.eventDate.includes('-') && (
+                      <p className="text-xs text-[var(--text-muted)] mt-2 font-semibold">
+                        ✓ Selected: {formatDateDDMMYYYY(form.eventDate)}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+                      Event Time
+                    </label>
+                    <input
+                      type="time"
+                      value={form.eventTime}
+                      onChange={(e) => setForm({ ...form, eventTime: e.target.value })}
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    />
                   </div>
                 </div>
 
@@ -340,7 +358,7 @@ export default function AdminEvents() {
                               📍 {event.location || "Location TBD"}
                             </span>
                             <span className="flex items-center gap-1">
-                              📅 {formatDateDDMMYYYY(event.eventDate)}
+                              📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
                             </span>
                           </div>
                         </div>

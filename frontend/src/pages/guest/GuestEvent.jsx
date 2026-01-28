@@ -97,7 +97,7 @@ export default function GuestEvents() {
               </p>
 
               <p className="text-sm text-[var(--text-muted)]">
-                📅 {formatDateDDMMYYYY(event.eventDate)}
+                📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
               </p>
 
               {event.description && (
