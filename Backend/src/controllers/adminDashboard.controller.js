@@ -43,7 +43,7 @@ export const getAdminDashboardStats = async (req, res) => {
 export const getAllGuests = async (req, res) => {
   try {
     const guests = await GuestSession.find()
-      .sort({ createdAt: -1 })
+      .sort({ syncedAt: -1, updatedAt: -1, createdAt: -1 })
       .lean();
 
     res.json(guests);
@@ -57,6 +57,7 @@ export const getAllGuests = async (req, res) => {
 export const getAllRooms = async (req, res) => {
   try {
     const rooms = await Room.find()
+      .collation({ locale: "en", numericOrdering: true })
       .sort({ roomNumber: 1 })
       .lean();
 
