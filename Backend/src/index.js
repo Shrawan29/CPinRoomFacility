@@ -4,6 +4,7 @@ import cors from "cors";
 
 import connectDB from "./config/db.js";
 import { initializeEventScheduler } from "./services/eventScheduler.service.js";
+import dataSyncService from "./services/dataSync.service.js";
 
 // routes
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
@@ -42,6 +43,9 @@ connectDB();
 
 // Initialize event scheduler when server starts
 initializeEventScheduler();
+
+// Initialize data sync service when server starts
+dataSyncService.initialize();
 
 const app = express();
 
