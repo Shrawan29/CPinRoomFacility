@@ -11,7 +11,7 @@ export default function CreateAdmin() {
     email: "",
     phone: "",
     password: "",
-    role: "ADMIN",
+    role: "DINING_ADMIN",
   });
 
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ export default function CreateAdmin() {
         email: "",
         phone: "",
         password: "",
-        role: "ADMIN",
+        role: "DINING_ADMIN",
       });
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create admin");
@@ -164,12 +164,11 @@ export default function CreateAdmin() {
                     focus:ring-[var(--brand)]
                   "
                 >
-                  <option value="ADMIN">Admin (Front Desk)</option>
-                  <option value="DINING_ADMIN">Dining Admin (Kitchen)</option>
+                  <option value="DINING_ADMIN">Kitchen Admin</option>
                 </select>
 
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Dining Admin can manage menu items and order statuses only
+                  Kitchen Admin can manage menu items and order statuses
                 </p>
               </div>
 

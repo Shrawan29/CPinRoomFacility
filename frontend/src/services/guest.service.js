@@ -1,17 +1,11 @@
 import api from "./api.js";
 
 // 🔑 GUEST AUTHENTICATION
-export const sendGuestOTP = async (qrToken, phone) => {
-  const res = await api.post("/guest/auth/send-otp", { qrToken, phone });
-  return res.data;
-};
-
-export const verifyGuestOTP = async (qrToken, phone, otp, deviceId) => {
-  const res = await api.post("/guest/auth/verify-otp", {
-    qrToken,
-    phone,
-    otp,
-    deviceId,
+export const guestLogin = async (guestName, roomNumber, password) => {
+  const res = await api.post("/guest/auth/login", {
+    guestName,
+    roomNumber,
+    password,
   });
   return res.data;
 };

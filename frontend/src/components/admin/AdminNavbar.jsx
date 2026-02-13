@@ -11,8 +11,6 @@ export default function AdminNavbar() {
       <h1 className="text-lg font-semibold text-[var(--text-primary)]">
         {role === "SUPER_ADMIN"
           ? "Super Admin Dashboard"
-          : role === "ADMIN"
-          ? "Admin Dashboard"
           : "Kitchen Dashboard"}
       </h1>
 

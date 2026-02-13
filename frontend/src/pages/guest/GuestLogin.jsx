@@ -1,80 +1,46 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
-import { sendGuestOTP, verifyGuestOTP } from "../../services/guest.service";
+import { guestLogin } from "../../services/guest.service";
 
 export default function GuestLogin() {
   const navigate = useNavigate();
   const { login } = useGuestAuth();
   const [searchParams] = useSearchParams();
 
-  const [step, setStep] = useState("phone");
   const [formData, setFormData] = useState({
-    qrToken: "",
-    phone: "",
-    otp: "",
+    guestName: "",
+    roomNumber: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [roomNumber, setRoomNumber] = useState("");
-
-  // persistent device id
-  const deviceId = (() => {
-    const existing = localStorage.getItem("guest_device_id");
-    if (existing) return existing;
-    const id = `device_${crypto.randomUUID()}`;
-    localStorage.setItem("guest_device_id", id);
-    return id;
-  })();
 
   useEffect(() => {
-    const qrToken = searchParams.get("token");
-    if (!qrToken) {
+    const roomNumber = searchParams.get("room");
+    if (!roomNumber) {
       navigate("/guest/access-fallback");
       return;
     }
-    setFormData((prev) => ({ ...prev, qrToken }));
+    setFormData((prev) => ({ ...prev, roomNumber }));
   }, [searchParams, navigate]);
 
-  const handleSendOTP = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    if (!formData.phone) {
-      setError("Please enter your phone number");
+    if (!formData.guestName || !formData.password) {
+      setError("Please enter your name and password");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await sendGuestOTP(formData.qrToken, formData.phone);
-      if (response?.roomNumber) setRoomNumber(response.roomNumber);
-      setStep("otp");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    if (!formData.otp) {
-      setError("Please enter the OTP");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await verifyGuestOTP(
-        formData.qrToken,
-        formData.phone,
-        formData.otp,
-        deviceId
+      const response = await guestLogin(
+        formData.guestName,
+        formData.roomNumber,
+        formData.password
       );
 
       if (response?.token && response?.guest) {
@@ -84,7 +50,9 @@ export default function GuestLogin() {
         setError("Login failed. Please try again.");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to verify OTP");
+      setError(
+        err.response?.data?.message || "Login failed. Please check your credentials."
+      );
     } finally {
       setLoading(false);
     }
@@ -105,12 +73,12 @@ export default function GuestLogin() {
           🏨 Room Service
         </h1>
 
-        {roomNumber && (
+        {formData.roomNumber && (
           <p
             className="text-center font-semibold mb-6"
             style={{ color: "var(--brand)" }}
           >
-            Room #{roomNumber}
+            Room #{formData.roomNumber}
           </p>
         )}
 
@@ -120,68 +88,54 @@ export default function GuestLogin() {
           </div>
         )}
 
-        {step === "phone" && (
-          <form onSubmit={handleSendOTP} className="space-y-4">
-            <input
-              type="tel"
-              placeholder="+91 XXXXX XXXXX"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
-              style={{
-                borderColor: "var(--bg-secondary)",
-                color: "var(--text-primary)",
-              }}
-              autoFocus
-            />
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Your Name"
+            value={formData.guestName}
+            onChange={(e) =>
+              setFormData({ ...formData, guestName: e.target.value })
+            }
+            className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+            style={{
+              borderColor: "var(--bg-secondary)",
+              color: "var(--text-primary)",
+            }}
+            autoFocus
+          />
 
-            <button
-              disabled={loading}
-              className="w-full py-3 rounded-lg font-semibold text-white transition"
-              style={{
-                backgroundColor: "var(--brand)",
-                opacity: loading ? 0.6 : 1,
-              }}
-            >
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </button>
-          </form>
-        )}
+          <input
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+            className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+            style={{
+              borderColor: "var(--bg-secondary)",
+              color: "var(--text-primary)",
+            }}
+          />
 
-        {step === "otp" && (
-          <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <input
-              type="text"
-              maxLength="6"
-              value={formData.otp}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  otp: e.target.value.replace(/\D/g, ""),
-                })
-              }
-              className="w-full px-4 py-3 border-2 rounded-lg text-center text-2xl tracking-widest focus:outline-none"
-              style={{
-                borderColor: "var(--bg-secondary)",
-                color: "var(--text-primary)",
-              }}
-              autoFocus
-            />
+          <p
+            className="text-xs text-center"
+            style={{ color: "var(--text-muted)" }}
+          >
+            💡 Password: {formData.guestName ? formData.guestName + "_" + formData.roomNumber : "guestname_roomno"}
+          </p>
 
-            <button
-              disabled={loading}
-              className="w-full py-3 rounded-lg font-semibold text-white transition"
-              style={{
-                backgroundColor: "var(--brand-soft)",
-                opacity: loading ? 0.6 : 1,
-              }}
-            >
-              {loading ? "Verifying..." : "Verify & Login"}
-            </button>
-          </form>
-        )}
+          <button
+            disabled={loading}
+            className="w-full py-3 rounded-lg font-semibold text-white transition"
+            style={{
+              backgroundColor: "var(--brand)",
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            {loading ? "Logging in..." : "Login to Room Service"}
+          </button>
+        </form>
 
         <p
           className="text-center text-xs mt-6"

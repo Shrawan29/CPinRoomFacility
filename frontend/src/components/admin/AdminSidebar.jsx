@@ -15,15 +15,7 @@ export default function AdminSidebar() {
     { label: "Manage Admins", path: "/admin/super/admins" },
     { label: "Hotel Info", path: "/admin/hotel-info" },
     { label: "Events", path: "/admin/events" },
-  ];
-
-  const adminMenu = [
-    { label: "Dashboard", path: "/admin/dashboard" },
-    { label: "Check-in Guest", path: "/admin/checkin" },
-    { label: "Check-out Guest", path: "/admin/checkout" },
-    { label: "Orders", path: "/admin/orders" },
-    { label: "Events", path: "/admin/events" },
-    { label: "Reports", path: "/admin/reports" }
+    { label: "Reports", path: "/admin/reports" },
   ];
 
   const diningAdminMenu = [
@@ -36,8 +28,6 @@ export default function AdminSidebar() {
   const menu =
     role === "SUPER_ADMIN"
       ? superAdminMenu
-      : role === "ADMIN"
-      ? adminMenu
       : diningAdminMenu;
 
   return (

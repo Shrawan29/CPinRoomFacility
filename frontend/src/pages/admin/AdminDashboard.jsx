@@ -85,9 +85,8 @@ export default function AdminDashboard() {
         <StatCard title="Total Rooms" value={stats.totalRooms} />
         <StatCard title="Available Rooms" value={stats.availableRooms} />
         <StatCard title="Occupied Rooms" value={stats.occupiedRooms} />
-        <StatCard title="Active Stays" value={stats.activeStays} />
-        <StatCard title="Today's Check-ins" value={stats.todayCheckIns} />
-        <StatCard title="Today's Check-outs" value={stats.todayCheckOuts} />
+        <StatCard title="Active Guest Sessions" value={stats.activeSessions} />
+        <StatCard title="Today's Orders" value={stats.todayOrders} />
 
       </div>
 

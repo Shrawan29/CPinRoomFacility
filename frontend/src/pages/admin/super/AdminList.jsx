@@ -216,9 +216,7 @@ export default function AdminList() {
                             px-3 py-1 rounded-full text-xs font-medium
                             ${admin.role === "SUPER_ADMIN"
                                 ? "bg-purple-100 text-purple-700"
-                                : admin.role === "ADMIN"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-orange-100 text-orange-700"
+                                : "bg-orange-100 text-orange-700"
                               }
                           `}
                           >
@@ -310,8 +308,7 @@ export default function AdminList() {
                 }
                 className="w-full border rounded px-3 py-2 mb-6"
               >
-                <option value="ADMIN">Admin</option>
-                <option value="DINING_ADMIN">Dining Admin</option>
+                <option value="DINING_ADMIN">Kitchen Admin</option>
               </select>
 
               <div className="flex justify-end gap-3">

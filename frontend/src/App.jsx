@@ -6,10 +6,7 @@ import SuperAdminDashboard from "./pages/admin/super/SuperAdminDashboard";
 import CreateAdmin from "./pages/admin/super/CreateAdmin";
 import AdminList from "./pages/admin/super/AdminList";
 
-// Admin
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import CheckIn from "./pages/admin/CheckIn";
-import CheckOut from "./pages/admin/CheckOut";
+// Reports & Events (SUPER_ADMIN only)
 import Reports from "./pages/admin/Reports";
 import AdminEvents from "./pages/admin/AdminEvents";
 
@@ -73,38 +70,11 @@ function App() {
         }
       />
 
-      {/* ADMIN */}
-      <Route
-        path="/admin/dashboard"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/checkin"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <CheckIn />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/checkout"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <CheckOut />
-          </ProtectedRoute>
-        }
-      />
-
+      {/* REPORTS (SUPER_ADMIN only) */}
       <Route
         path="/admin/reports"
         element={
-          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <Reports />
           </ProtectedRoute>
         }
@@ -142,7 +112,7 @@ function App() {
       <Route
         path="/admin/events"
         element={
-          <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <AdminEvents />
           </ProtectedRoute>
         }

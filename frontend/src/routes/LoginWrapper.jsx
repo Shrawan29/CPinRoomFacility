@@ -15,9 +15,6 @@ export default function LoginWrapper() {
     if (admin.role === "SUPER_ADMIN") {
       return <Navigate to="/admin/super/dashboard" replace />;
     }
-    if (admin.role === "ADMIN") {
-      return <Navigate to="/admin/dashboard" replace />;
-    }
     if (admin.role === "DINING_ADMIN") {
       return <Navigate to="/admin/kitchen/dashboard" replace />;
     }

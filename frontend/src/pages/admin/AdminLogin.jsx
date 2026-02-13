@@ -30,8 +30,6 @@ export default function AdminLogin() {
 
       if (data.admin.role === "SUPER_ADMIN") {
         navigate("/admin/super/dashboard");
-      } else if (data.admin.role === "ADMIN") {
-        navigate("/admin/dashboard");
       } else if (data.admin.role === "DINING_ADMIN") {
         navigate("/admin/kitchen/dashboard");
       }
