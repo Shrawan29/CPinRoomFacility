@@ -39,3 +39,31 @@ export const getAdminDashboardStats = async (req, res) => {
     });
   }
 };
+
+export const getAllGuests = async (req, res) => {
+  try {
+    const guests = await GuestSession.find()
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(guests);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to load guests",
+    });
+  }
+};
+
+export const getAllRooms = async (req, res) => {
+  try {
+    const rooms = await Room.find()
+      .sort({ roomNumber: 1 })
+      .lean();
+
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to load rooms",
+    });
+  }
+};

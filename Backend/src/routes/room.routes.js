@@ -11,10 +11,32 @@ const router = express.Router();
 router.get(
   "/available",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   async (req, res) => {
     try {
       const rooms = await Room.find({ status: "AVAILABLE" }).sort({
+        roomNumber: 1,
+      });
+
+      res.json(rooms);
+    } catch (error) {
+      res.status(500).json({
+        message: "Failed to fetch rooms",
+      });
+    }
+  }
+);
+
+/**
+ * SUPER_ADMIN → Get ALL rooms (occupied + available)
+ */
+router.get(
+  "/all",
+  adminAuth,
+  allowRoles("SUPER_ADMIN"),
+  async (req, res) => {
+    try {
+      const rooms = await Room.find().sort({
         roomNumber: 1,
       });
 
