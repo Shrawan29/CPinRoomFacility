@@ -85,12 +85,15 @@ class DataSyncService {
       const roomOps = [];
       const sessionOps = [];
       const activeSyncedSessionIds = [];
+      const activeRoomNumbers = [];
       const expiresAt = computeExpiresAt();
       const syncedAt = new Date();
 
       for (const hotelRoom of hotelRooms) {
         const roomNumber = hotelRoom?.room?.toString?.() ?? "";
         if (!roomNumber) continue;
+
+        activeRoomNumbers.push(roomNumber);
 
         roomOps.push({
           updateOne: {
@@ -134,6 +137,14 @@ class DataSyncService {
 
       if (roomOps.length > 0) {
         await Room.bulkWrite(roomOps, { ordered: false });
+      }
+
+      // Cleanup: remove rooms that no longer exist in hotel.rooms
+      // This keeps the target rooms collection as a true mirror of the source.
+      if (activeRoomNumbers.length > 0) {
+        await Room.deleteMany({ roomNumber: { $nin: activeRoomNumbers } });
+      } else {
+        await Room.deleteMany({});
       }
 
       if (sessionOps.length > 0) {
