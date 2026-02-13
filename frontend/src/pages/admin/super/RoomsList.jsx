@@ -6,6 +6,7 @@ import api from "../../../services/api";
 export default function RoomsList() {
   const { token, loading: authLoading } = useAdminAuth();
   const [rooms, setRooms] = useState([]);
+  const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,20 +16,26 @@ export default function RoomsList() {
       return;
     }
 
-    const fetchRooms = async () => {
+    const fetchRoomsAndGuests = async () => {
       try {
-        const res = await api.get("/admin/dashboard/rooms");
-        setRooms(Array.isArray(res.data) ? res.data : []);
+        const [roomsRes, guestsRes] = await Promise.all([
+          api.get("/admin/dashboard/rooms"),
+          api.get("/admin/dashboard/guests"),
+        ]);
+
+        setRooms(Array.isArray(roomsRes.data) ? roomsRes.data : []);
+        setGuests(Array.isArray(guestsRes.data) ? guestsRes.data : []);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load rooms");
         setRooms([]);
+        setGuests([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRooms();
+    fetchRoomsAndGuests();
   }, [token, authLoading]);
 
   if (loading) {
@@ -53,6 +60,18 @@ export default function RoomsList() {
 
   const availableRooms = rooms.filter((r) => r.status === "AVAILABLE");
   const occupiedRooms = rooms.filter((r) => r.status === "OCCUPIED");
+
+  const guestsByRoom = guests.reduce((acc, guest) => {
+    const roomNumber = String(guest?.roomNumber ?? "").trim();
+    if (!roomNumber) return acc;
+
+    const guestName = String(guest?.guestName ?? "").trim();
+    if (!guestName) return acc;
+
+    if (!acc[roomNumber]) acc[roomNumber] = new Set();
+    acc[roomNumber].add(guestName);
+    return acc;
+  }, {});
 
   return (
     <AdminLayout>
@@ -97,6 +116,7 @@ export default function RoomsList() {
             <tr className="bg-black/5 text-left text-sm text-[var(--text-muted)]">
               <th className="px-5 py-3">Room Number</th>
               <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">Guests</th>
               <th className="px-5 py-3">Created At</th>
               <th className="px-5 py-3">Last Updated</th>
             </tr>
@@ -106,7 +126,7 @@ export default function RoomsList() {
             {rooms.length === 0 ? (
               <tr>
                 <td
-                  colSpan="4"
+                  colSpan="5"
                   className="px-5 py-6 text-center text-[var(--text-muted)]"
                 >
                   No rooms found
@@ -132,6 +152,14 @@ export default function RoomsList() {
                     >
                       {room.status}
                     </span>
+                  </td>
+
+                  <td className="px-5 py-4 text-[var(--text-muted)] text-sm">
+                    {(() => {
+                      const set = guestsByRoom[String(room.roomNumber)] || null;
+                      if (!set || set.size === 0) return "-";
+                      return Array.from(set).join(", ");
+                    })()}
                   </td>
 
                   <td className="px-5 py-4 text-[var(--text-muted)] text-sm">
