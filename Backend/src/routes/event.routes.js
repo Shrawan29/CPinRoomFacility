@@ -19,7 +19,7 @@ const router = express.Router();
 router.get(
   "/",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   listEvents
 );
 
@@ -27,7 +27,7 @@ router.get(
 router.post(
   "/",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   createEvent
 );
 
@@ -35,7 +35,7 @@ router.post(
 router.put(
   "/:id",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   updateEvent
 );
 
@@ -43,7 +43,7 @@ router.put(
 router.delete(
   "/:id",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   deleteEvent
 );
 

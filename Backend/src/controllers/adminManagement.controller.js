@@ -8,7 +8,7 @@ export const createAdmin = async (req, res) => {
   try {
     const { name, email, phone, password, role } = req.body;
 
-    const allowedRoles = ["ADMIN", "DINING_ADMIN"];
+    const allowedRoles = ["DINING_ADMIN"];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({
         message: "Invalid admin role",

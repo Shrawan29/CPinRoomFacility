@@ -11,14 +11,14 @@ const router = express.Router();
 router.get(
   "/daily",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   getDailyReport
 );
 
 router.get(
   "/monthly",
   adminAuth,
-  allowRoles("ADMIN", "SUPER_ADMIN"),
+  allowRoles("SUPER_ADMIN"),
   getMonthlyReport
 );
 
