@@ -26,8 +26,7 @@ const qrTokenSchema = new mongoose.Schema(
 // Auto-delete expired tokens (TTL)
 qrTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-// Performance & safety indexes
-qrTokenSchema.index({ token: 1 });
+// Performance & safety indexes (token uniqueness already handled by schema)
 qrTokenSchema.index(
   { token: 1, used: 1 },
   { partialFilterExpression: { used: false } }
