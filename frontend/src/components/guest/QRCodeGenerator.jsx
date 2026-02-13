@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import logoAsset from "../../assets/logo.png";
 
-export default function QRCodeGenerator({ roomNumber }) {
+export default function QRCodeGenerator({ roomNumber, baseURL }) {
   const canvasRef = useRef(null);
   const logoCanvasRef = useRef(null);
   const [qrURL, setQrURL] = useState("");
@@ -15,10 +15,11 @@ export default function QRCodeGenerator({ roomNumber }) {
     setQrGenerated(false);
 
     // IMPORTANT: backend base URL (no trailing slash)
-    const API_BASE =
-      (import.meta.env.VITE_API_URL ||
-        "http://localhost:5000")
-        .replace(/\/$/, "");
+    const API_BASE = (
+      baseURL ||
+      import.meta.env.VITE_API_URL ||
+      "http://localhost:5000"
+    ).replace(/\/$/, "");
 
     // QR MUST point to backend, not frontend
     const qrCodeURL = `${API_BASE}/qr/scan/${roomNumber}`;
@@ -51,7 +52,7 @@ export default function QRCodeGenerator({ roomNumber }) {
       })
       .catch((err) => console.error("QR Error:", err));
 
-  }, [roomNumber]);
+  }, [roomNumber, baseURL]);
 
   const addLogoToQR = () => {
     if (!canvasRef.current) return;

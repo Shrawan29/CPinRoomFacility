@@ -1,19 +1,37 @@
 import { useState, useEffect } from "react";
 import QRCodeGenerator from "../../components/guest/QRCodeGenerator";
+import api from "../../services/api";
 
 export default function QRCodeManager() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [baseURL, setBaseURL] = useState("https://cpinroomfacility-production.up.railway.app");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // In production, fetch rooms from backend
-    // For now, generate sample room numbers
-    const sampleRooms = Array.from({ length: 50 }, (_, i) => ({
-      number: 101 + i,
-    }));
-    setRooms(sampleRooms);
-    setSelectedRoom(sampleRooms[0].number);
+    const fetchRooms = async () => {
+      try {
+        const res = await api.get("/admin/dashboard/rooms");
+        const list = Array.isArray(res.data) ? res.data : [];
+        const normalized = list
+          .map((r) => String(r?.roomNumber ?? "").trim())
+          .filter(Boolean)
+          .sort((a, b) => Number(a) - Number(b));
+
+        setRooms(normalized);
+        setSelectedRoom((prev) => prev ?? normalized[0] ?? null);
+        setError(null);
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load rooms");
+        setRooms([]);
+        setSelectedRoom(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
   }, []);
 
   return (
@@ -46,21 +64,30 @@ export default function QRCodeManager() {
           {/* ROOM LIST */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Rooms</h2>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {rooms.map((room) => (
-                <button
-                  key={room.number}
-                  onClick={() => setSelectedRoom(room.number)}
-                  className={`w-full px-4 py-2 rounded-lg font-semibold transition text-left ${
-                    selectedRoom === room.number
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  }`}
-                >
-                  Room #{room.number}
-                </button>
-              ))}
-            </div>
+
+            {loading ? (
+              <div className="text-sm text-gray-600">Loading rooms…</div>
+            ) : error ? (
+              <div className="text-sm text-red-600">{error}</div>
+            ) : rooms.length === 0 ? (
+              <div className="text-sm text-gray-600">No rooms found</div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {rooms.map((roomNumber) => (
+                  <button
+                    key={roomNumber}
+                    onClick={() => setSelectedRoom(roomNumber)}
+                    className={`w-full px-4 py-2 rounded-lg font-semibold transition text-left ${
+                      String(selectedRoom) === String(roomNumber)
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    }`}
+                  >
+                    Room #{roomNumber}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* QR CODE DISPLAY */}
