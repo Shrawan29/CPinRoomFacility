@@ -1,6 +1,8 @@
 import Room from "../models/Room.js";
 import GuestSession from "../models/GuestSession.js";
 import Order from "../models/Order.js";
+import mongoose from "mongoose";
+import dataSyncService from "../services/dataSync.service.js";
 
 export const getAdminDashboardStats = async (req, res) => {
   try {
@@ -65,6 +67,27 @@ export const getAllRooms = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to load rooms",
+    });
+  }
+};
+
+export const getSyncStatus = async (req, res) => {
+  try {
+    const targetDbName = mongoose.connection?.name;
+    const [roomsCount, syncedGuestsCount] = await Promise.all([
+      Room.countDocuments(),
+      GuestSession.countDocuments({ source: "HOTEL_SYNC" }),
+    ]);
+
+    res.json({
+      targetDbName,
+      roomsCount,
+      syncedGuestsCount,
+      sync: dataSyncService.getStatus(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to load sync status",
     });
   }
 };

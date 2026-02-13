@@ -4,7 +4,8 @@ import allowRoles from "../middleware/role.middleware.js";
 import { 
   getAdminDashboardStats,
   getAllGuests,
-  getAllRooms
+  getAllRooms,
+  getSyncStatus
 } from "../controllers/adminDashboard.controller.js";
 
 const router = express.Router();
@@ -28,6 +29,13 @@ router.get(
   adminAuth,
   allowRoles("SUPER_ADMIN"),
   getAllRooms
+);
+
+router.get(
+  "/sync-status",
+  adminAuth,
+  allowRoles("SUPER_ADMIN"),
+  getSyncStatus
 );
 
 export default router;

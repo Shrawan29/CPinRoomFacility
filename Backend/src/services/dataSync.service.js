@@ -29,6 +29,14 @@ class DataSyncService {
   constructor() {
     this.isSyncing = false;
     this.syncInterval = null;
+    this.lastRun = null;
+  }
+
+  getStatus() {
+    return {
+      isSyncing: this.isSyncing,
+      lastRun: this.lastRun,
+    };
   }
 
   initialize() {
@@ -61,6 +69,8 @@ class DataSyncService {
     }
 
     this.isSyncing = true;
+
+    const startedAt = new Date();
 
     try {
       const sourceDbName = process.env.HOTEL_SOURCE_DB || "hotel";
@@ -145,10 +155,27 @@ class DataSyncService {
         GuestSession.countDocuments({ source: SYNC_SOURCE }),
       ]);
 
+      this.lastRun = {
+        ok: true,
+        startedAt,
+        finishedAt: new Date(),
+        sourceDbName,
+        sourceCollectionName,
+        hotelRoomsFetched: hotelRooms.length,
+        roomsCount: syncedRoomsCount,
+        guestsCount: syncedGuestsCount,
+      };
+
       console.log(
         `[DataSync] Synced from ${sourceDbName}.${sourceCollectionName} -> Rooms: ${syncedRoomsCount}, Guests: ${syncedGuestsCount}`
       );
     } catch (error) {
+      this.lastRun = {
+        ok: false,
+        startedAt,
+        finishedAt: new Date(),
+        error: error?.message || String(error),
+      };
       console.error("[DataSync] Error syncing data:", error.message);
     } finally {
       this.isSyncing = false;
