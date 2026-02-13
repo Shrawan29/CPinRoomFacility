@@ -7,16 +7,13 @@ const guestSessionSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
-    phone: {
+    guestName: {
       type: String,
       required: true
     },
     roomNumber: {
       type: String,
       required: true
-    },
-    deviceId: {
-      type: String
     },
     expiresAt: {
       type: Date,

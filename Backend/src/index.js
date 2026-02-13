@@ -8,7 +8,6 @@ import { initializeEventScheduler } from "./services/eventScheduler.service.js";
 // routes
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminManagementRoutes from "./routes/adminManagement.routes.js";
-import adminStayRoutes from "./routes/adminStay.routes.js";
 import adminDashboardRoutes from "./routes/adminDashboard.routes.js";
 import adminReportRoutes from "./routes/adminReport.routes.js";
 import orderKitchenRoutes from "./routes/orderKitchen.routes.js";
@@ -27,8 +26,9 @@ import eventRoutes from "./routes/event.routes.js";
 // models (used in debug routes)
 import Room from "./models/Room.js";
 import Admin from "./models/Admin.js";
-import ActiveStay from "./models/ActiveStay.js";
 import QRToken from "./models/QRToken.js";
+import GuestCredential from "./models/GuestCredential.js";
+import GuestSession from "./models/GuestSession.js";
 
 // middleware
 import adminAuth from "./middleware/adminAuth.middleware.js";
@@ -87,7 +87,6 @@ app.use(express.json());
 // admin
 app.use("/admin", adminAuthRoutes);
 app.use("/admin/manage", adminManagementRoutes);
-app.use("/admin/stay", adminStayRoutes);
 app.use("/admin/dashboard", adminDashboardRoutes);
 app.use("/admin/reports", adminReportRoutes);
 app.use("/admin/orders", orderAdminRoutes);
@@ -131,20 +130,14 @@ app.get("/debug/admins", async (req, res) => {
   res.json({ count: admins.length, admins });
 });
 
-app.post("/debug/create-test-stay", async (req, res) => {
-  const stay = await ActiveStay.create({
-    guestName: "Test Guest",
-    phone: "9999999999",
-    roomNumber: "101",
-    status: "ACTIVE",
-    checkInAt: new Date(),
-  });
-  res.json({ message: "Test stay created", stay });
+app.get("/debug/guest-credentials", async (req, res) => {
+  const credentials = await GuestCredential.find().select("-passwordHash");
+  res.json({ count: credentials.length, credentials });
 });
 
-app.get("/debug/active-stays", async (req, res) => {
-  const stays = await ActiveStay.find();
-  res.json({ count: stays.length, stays });
+app.get("/debug/guest-sessions", async (req, res) => {
+  const sessions = await GuestSession.find().limit(10);
+  res.json({ count: sessions.length, sessions });
 });
 
 app.get("/debug/qr-tokens", async (req, res) => {

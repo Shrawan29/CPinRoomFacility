@@ -6,8 +6,8 @@ const router = express.Router();
 router.get("/dashboard", guestAuth, (req, res) => {
   res.json({
     message: "Guest access granted",
-    roomNumber: req.guest.roomNumber,
-    phone: req.guest.phone
+    guestName: req.guest.guestName,
+    roomNumber: req.guest.roomNumber
   });
 });
 

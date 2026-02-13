@@ -1,5 +1,6 @@
 import Room from "../models/Room.js";
-import ActiveStay from "../models/ActiveStay.js";
+import GuestSession from "../models/GuestSession.js";
+import Order from "../models/Order.js";
 
 export const getAdminDashboardStats = async (req, res) => {
   try {
@@ -13,19 +14,15 @@ export const getAdminDashboardStats = async (req, res) => {
       totalRooms,
       availableRooms,
       occupiedRooms,
-      activeStays,
-      todayCheckIns,
-      todayCheckOuts,
+      activeSessions,
+      todayOrders,
     ] = await Promise.all([
       Room.countDocuments(),
       Room.countDocuments({ status: "AVAILABLE" }),
       Room.countDocuments({ status: "OCCUPIED" }),
-      ActiveStay.countDocuments({ status: "ACTIVE" }),
-      ActiveStay.countDocuments({
-        checkInAt: { $gte: todayStart, $lte: todayEnd },
-      }),
-      ActiveStay.countDocuments({
-        checkOutAt: { $gte: todayStart, $lte: todayEnd },
+      GuestSession.countDocuments({ expiresAt: { $gt: new Date() } }),
+      Order.countDocuments({
+        createdAt: { $gte: todayStart, $lte: todayEnd },
       }),
     ]);
 
@@ -33,9 +30,8 @@ export const getAdminDashboardStats = async (req, res) => {
       totalRooms,
       availableRooms,
       occupiedRooms,
-      activeStays,
-      todayCheckIns,
-      todayCheckOuts,
+      activeSessions,
+      todayOrders,
     });
   } catch (error) {
     res.status(500).json({

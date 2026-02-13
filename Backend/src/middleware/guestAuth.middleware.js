@@ -1,5 +1,4 @@
 import GuestSession from "../models/GuestSession.js";
-import ActiveStay from "../models/ActiveStay.js";
 
 const guestAuth = async (req, res, next) => {
   try {
@@ -11,7 +10,7 @@ const guestAuth = async (req, res, next) => {
       });
     }
 
-    // 1. Validate session
+    // Validate session
     const session = await GuestSession.findOne({ sessionId });
     if (!session) {
       return res.status(401).json({
@@ -19,22 +18,16 @@ const guestAuth = async (req, res, next) => {
       });
     }
 
-    // 2. Validate active stay
-    const stay = await ActiveStay.findOne({
-      roomNumber: session.roomNumber,
-      phone: session.phone,
-      status: "ACTIVE"
-    });
-
-    if (!stay) {
-      return res.status(403).json({
-        message: "Stay inactive. Please contact reception."
+    // Check session expiry
+    if (session.expiresAt < new Date()) {
+      return res.status(401).json({
+        message: "Session expired"
       });
     }
 
-    // 3. Attach guest context
+    // Attach guest context
     req.guest = {
-      phone: session.phone,
+      guestName: session.guestName,
       roomNumber: session.roomNumber
     };
 

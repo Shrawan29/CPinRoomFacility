@@ -1,4 +1,5 @@
-import ActiveStay from "../models/ActiveStay.js";
+import GuestSession from "../models/GuestSession.js";
+import Order from "../models/Order.js";
 import Room from "../models/Room.js";
 
 /**
@@ -13,23 +14,23 @@ export const getDailyReport = async (req, res) => {
     end.setHours(23, 59, 59, 999);
 
     const [
-      todayCheckIns,
-      todayCheckOuts,
+      newGuestSessions,
+      totalOrders,
       occupiedRooms
     ] = await Promise.all([
-      ActiveStay.countDocuments({
-        checkInAt: { $gte: start, $lte: end }
+      GuestSession.countDocuments({
+        createdAt: { $gte: start, $lte: end }
       }),
-      ActiveStay.countDocuments({
-        checkOutAt: { $gte: start, $lte: end }
+      Order.countDocuments({
+        createdAt: { $gte: start, $lte: end }
       }),
       Room.countDocuments({ status: "OCCUPIED" })
     ]);
 
     res.json({
       date: start.toDateString(),
-      todayCheckIns,
-      todayCheckOuts,
+      newGuestSessions,
+      totalOrders,
       occupiedRooms
     });
   } catch (error) {
@@ -48,22 +49,22 @@ export const getMonthlyReport = async (req, res) => {
     const end = new Date(year, month, 0, 23, 59, 59);
 
     const [
-      monthlyCheckIns,
-      monthlyCheckOuts
+      monthlyGuestSessions,
+      monthlyOrders
     ] = await Promise.all([
-      ActiveStay.countDocuments({
-        checkInAt: { $gte: start, $lte: end }
+      GuestSession.countDocuments({
+        createdAt: { $gte: start, $lte: end }
       }),
-      ActiveStay.countDocuments({
-        checkOutAt: { $gte: start, $lte: end }
+      Order.countDocuments({
+        createdAt: { $gte: start, $lte: end }
       })
     ]);
 
     res.json({
       month,
       year,
-      monthlyCheckIns,
-      monthlyCheckOuts
+      monthlyGuestSessions,
+      monthlyOrders
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to load monthly report" });

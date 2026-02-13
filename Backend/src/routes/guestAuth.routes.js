@@ -1,12 +1,9 @@
 import express from "express";
-import {
-  sendGuestOTP,
-  verifyGuestOTP
-} from "../controllers/guestAuth.controller.js";
+import { guestLogin } from "../controllers/guestAuth.controller.js";
 
 const router = express.Router();
 
-router.post("/send-otp", sendGuestOTP);
-router.post("/verify-otp", verifyGuestOTP);
+// Guest login endpoint
+router.post("/login", guestLogin);
 
 export default router;
