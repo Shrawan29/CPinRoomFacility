@@ -15,6 +15,7 @@ export default function AdminSidebar() {
     { label: "Manage Admins", path: "/admin/super/admins" },
     { label: "Guests", path: "/admin/super/guests" },
     { label: "Rooms", path: "/admin/super/rooms" },
+    { label: "QR Codes", path: "/admin/qr-codes" },
     { label: "Hotel Info", path: "/admin/hotel-info" },
     { label: "Events", path: "/admin/events" },
     { label: "Reports", path: "/admin/reports" },
