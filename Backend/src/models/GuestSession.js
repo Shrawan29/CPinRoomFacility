@@ -7,6 +7,12 @@ const guestSessionSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
+    source: {
+      type: String,
+      enum: ["APP", "HOTEL_SYNC"],
+      default: "APP",
+      required: true
+    },
     guestName: {
       type: String,
       required: true
@@ -18,6 +24,9 @@ const guestSessionSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true
+    },
+    syncedAt: {
+      type: Date
     }
   },
   { timestamps: true }
