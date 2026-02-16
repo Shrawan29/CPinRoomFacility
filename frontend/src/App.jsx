@@ -5,7 +5,6 @@ import LoginWrapper from "./routes/LoginWrapper";
 import SuperAdminDashboard from "./pages/admin/super/SuperAdminDashboard";
 import CreateAdmin from "./pages/admin/super/CreateAdmin";
 import AdminList from "./pages/admin/super/AdminList";
-import GuestsList from "./pages/admin/super/GuestsList";
 import RoomsList from "./pages/admin/super/RoomsList";
 
 // Reports & Events (SUPER_ADMIN only)
@@ -68,15 +67,6 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <AdminList />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/super/guests"
-        element={
-          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-            <GuestsList />
           </ProtectedRoute>
         }
       />

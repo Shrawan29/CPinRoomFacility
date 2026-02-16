@@ -13,7 +13,6 @@ export default function AdminSidebar() {
     { label: "Dashboard", path: "/admin/super/dashboard" },
     { label: "Create Admin", path: "/admin/super/create-admin" },
     { label: "Manage Admins", path: "/admin/super/admins" },
-    { label: "Guests", path: "/admin/super/guests" },
     { label: "Rooms", path: "/admin/super/rooms" },
     { label: "QR Codes", path: "/admin/qr-codes" },
     { label: "Hotel Info", path: "/admin/hotel-info" },

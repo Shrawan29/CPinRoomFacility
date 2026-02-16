@@ -10,6 +10,34 @@ export default function RoomsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const formatGuestDisplayName = (value) => {
+    const raw = String(value ?? "")
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!raw) return "";
+
+    const tokens = raw.split(" ");
+    const title = String(tokens[0] || "").toUpperCase().replace(/\.+$/, "");
+    const titleMap = {
+      MR: "MR.",
+      MS: "MS.",
+      MRS: "MRS.",
+      DR: "DR.",
+    };
+
+    const hasTitle = Boolean(titleMap[title]);
+    const rest = (hasTitle ? tokens.slice(1) : tokens)
+      .map((t) => {
+        const w = String(t || "").toLowerCase();
+        if (!w) return "";
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      })
+      .filter(Boolean);
+
+    return [hasTitle ? titleMap[title] : null, ...rest].filter(Boolean).join(" ");
+  };
+
   useEffect(() => {
     if (authLoading || !token) {
       setLoading(authLoading);
@@ -69,7 +97,7 @@ export default function RoomsList() {
     if (!guestName) return acc;
 
     if (!acc[roomNumber]) acc[roomNumber] = new Set();
-    acc[roomNumber].add(guestName);
+    acc[roomNumber].add(formatGuestDisplayName(guestName));
     return acc;
   }, {});
 
