@@ -28,7 +28,7 @@ export const normalizeGuestName = (raw) => {
   const cleaned = normalizeWhitespace(raw);
   if (!cleaned) return "";
 
-  const parts = cleaned.split(" ");
+  let parts = cleaned.split(" ");
 
   // Drop trailing numeric token (guest id)
   if (parts.length > 1 && /^\d+$/.test(parts[parts.length - 1])) {
