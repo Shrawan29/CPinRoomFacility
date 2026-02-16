@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import GuestCredential from "../src/models/GuestCredential.js";
 import Room from "../src/models/Room.js";
-import bcrypt from "bcrypt";
+import { normalizeGuestName, normalizePasswordInput } from "../src/utils/guestName.util.js";
 
 dotenv.config();
 
@@ -24,9 +24,10 @@ const seedGuestCredentials = async () => {
     // Create credentials for each room
     const credentials = [];
     for (const room of rooms) {
-      const guestName = `Guest_${room.roomNumber}`;
-      const password = `${guestName}_${room.roomNumber}`.toLowerCase();
-      const passwordHash = await GuestCredential.hashPassword(password);
+      const guestName = normalizeGuestName(`Guest_${room.roomNumber}`);
+      const passwordHint = `${guestName}_${room.roomNumber}`;
+      const passwordToStore = normalizePasswordInput(passwordHint);
+      const passwordHash = await GuestCredential.hashPassword(passwordToStore);
 
       credentials.push({
         guestName,
@@ -39,9 +40,19 @@ const seedGuestCredentials = async () => {
     await GuestCredential.insertMany(credentials);
 
     console.log(`✅ Guest credentials seeded successfully for ${credentials.length} rooms`);
+    console.log("\nℹ️  Login format:");
+    console.log("   - Guest Name is normalized to a canonical format (case-insensitive)");
+    console.log("   - Password hint is: {Guest Name}_{Room Number} (case-insensitive)");
+    console.log(
+      `   - Example normalization: \"AGRAWAL MR. 25357\" -> \"${normalizeGuestName(
+        "AGRAWAL MR. 25357"
+      )}\"`
+    );
     console.log("\n📝 Sample Credentials:");
     credentials.slice(0, 3).forEach((cred) => {
-      console.log(`   Room ${cred.roomNumber}: ${cred.guestName} / ${cred.guestName}_${cred.roomNumber}`);
+      console.log(
+        `   Room ${cred.roomNumber}: ${cred.guestName} / ${cred.guestName}_${cred.roomNumber}`
+      );
     });
 
     process.exit(0);

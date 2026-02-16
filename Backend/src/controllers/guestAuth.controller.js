@@ -1,6 +1,11 @@
 import crypto from "crypto";
 import GuestCredential from "../models/GuestCredential.js";
 import GuestSession from "../models/GuestSession.js";
+import {
+  normalizeGuestName,
+  normalizePasswordInput,
+  normalizeRoomNumber,
+} from "../utils/guestName.util.js";
 
 /**
  * Guest Login - Username & Password
@@ -16,10 +21,17 @@ export const guestLogin = async (req, res) => {
         .json({ message: "Guest name, room number, and password required" });
     }
 
+    const normalizedGuestName = normalizeGuestName(guestName);
+    const normalizedRoomNumber = normalizeRoomNumber(roomNumber);
+    const normalizedPassword = normalizePasswordInput(password);
+    const legacyPassword = String(password || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
     // Find guest credential
     const credential = await GuestCredential.findOne({
-      guestName: guestName.trim(),
-      roomNumber: roomNumber.trim(),
+      guestName: normalizedGuestName,
+      roomNumber: normalizedRoomNumber,
       status: "ACTIVE",
     });
 
@@ -30,7 +42,10 @@ export const guestLogin = async (req, res) => {
     }
 
     // Verify password
-    const passwordMatch = await credential.comparePassword(password);
+    let passwordMatch = await credential.comparePassword(normalizedPassword);
+    if (!passwordMatch && legacyPassword && legacyPassword !== normalizedPassword) {
+      passwordMatch = await credential.comparePassword(legacyPassword);
+    }
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid password" });
     }
@@ -40,16 +55,16 @@ export const guestLogin = async (req, res) => {
 
     await GuestSession.create({
       sessionId,
-      guestName,
-      roomNumber,
+      guestName: normalizedGuestName,
+      roomNumber: normalizedRoomNumber,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     });
 
     res.json({
       token: sessionId,
       guest: {
-        guestName,
-        roomNumber,
+        guestName: normalizedGuestName,
+        roomNumber: normalizedRoomNumber,
       },
     });
   } catch (err) {

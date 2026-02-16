@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 import crypto from "crypto";
 import Room from "../models/Room.js";
 import GuestSession from "../models/GuestSession.js";
+import GuestCredential from "../models/GuestCredential.js";
+import {
+  normalizeGuestName,
+  normalizePasswordInput,
+} from "../utils/guestName.util.js";
 
 const SYNC_SOURCE = "HOTEL_SYNC";
 const DEFAULT_SYNC_INTERVAL_MS = 10_000;
@@ -84,10 +89,19 @@ class DataSyncService {
 
       const roomOps = [];
       const sessionOps = [];
+      const credentialOps = [];
       const activeSyncedSessionIds = [];
       const activeRoomNumbers = [];
       const expiresAt = computeExpiresAt();
       const syncedAt = new Date();
+
+      // Load existing HOTEL_SYNC credentials once to avoid bcrypt hashing on every cycle
+      const existingCredentials = await GuestCredential.find({ source: "HOTEL_SYNC", status: "ACTIVE" })
+        .select("guestName roomNumber")
+        .lean();
+      const existingCredentialKeySet = new Set(
+        existingCredentials.map((c) => `${String(c.roomNumber)}::${String(c.guestName)}`)
+      );
 
       for (const hotelRoom of hotelRooms) {
         const roomNumber = hotelRoom?.room?.toString?.() ?? "";
@@ -113,6 +127,9 @@ class DataSyncService {
           const guestLabel = String(guestLabelRaw || "").trim();
           if (!guestLabel) continue;
 
+          const normalizedGuest = normalizeGuestName(guestLabel);
+          if (!normalizedGuest) continue;
+
           const sessionId = stableSessionId(roomNumber, guestLabel);
           activeSyncedSessionIds.push(sessionId);
 
@@ -123,7 +140,7 @@ class DataSyncService {
                 $set: {
                   sessionId,
                   source: SYNC_SOURCE,
-                  guestName: guestLabel,
+                  guestName: normalizedGuest,
                   roomNumber,
                   expiresAt,
                   syncedAt,
@@ -132,6 +149,35 @@ class DataSyncService {
               upsert: true,
             },
           });
+
+          // Create credentials once per (roomNumber, normalizedGuest)
+          const credentialKey = `${roomNumber}::${normalizedGuest}`;
+          if (!existingCredentialKeySet.has(credentialKey)) {
+            existingCredentialKeySet.add(credentialKey);
+            const plainPassword = normalizePasswordInput(`${normalizedGuest}_${roomNumber}`);
+            const passwordHash = await GuestCredential.hashPassword(plainPassword);
+
+            credentialOps.push({
+              updateOne: {
+                filter: {
+                  source: "HOTEL_SYNC",
+                  guestName: normalizedGuest,
+                  roomNumber,
+                  status: "ACTIVE",
+                },
+                update: {
+                  $setOnInsert: {
+                    source: "HOTEL_SYNC",
+                    guestName: normalizedGuest,
+                    roomNumber,
+                    passwordHash,
+                    status: "ACTIVE",
+                  },
+                },
+                upsert: true,
+              },
+            });
+          }
         }
       }
 
@@ -149,6 +195,31 @@ class DataSyncService {
 
       if (sessionOps.length > 0) {
         await GuestSession.bulkWrite(sessionOps, { ordered: false });
+      }
+
+      if (credentialOps.length > 0) {
+        await GuestCredential.bulkWrite(credentialOps, { ordered: false });
+      }
+
+      // Helpful dev-only output: show canonical login hints
+      if (process.env.NODE_ENV !== "production") {
+        const sample = await GuestCredential.find({
+          source: "HOTEL_SYNC",
+          status: "ACTIVE",
+        })
+          .sort({ updatedAt: -1 })
+          .limit(5)
+          .select("guestName roomNumber updatedAt")
+          .lean();
+
+        if (sample.length > 0) {
+          console.log("[DataSync] Sample guest login hints (case-insensitive password):");
+          for (const c of sample) {
+            console.log(
+              `  Room ${c.roomNumber}: ${c.guestName} / ${c.guestName}_${c.roomNumber}`
+            );
+          }
+        }
       }
 
       // Cleanup: remove synced sessions that no longer exist in hotel.rooms

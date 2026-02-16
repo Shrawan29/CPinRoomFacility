@@ -3,6 +3,12 @@ import bcrypt from "bcrypt";
 
 const guestCredentialSchema = new mongoose.Schema(
   {
+    source: {
+      type: String,
+      enum: ["APP", "HOTEL_SYNC"],
+      default: "APP",
+      required: true,
+    },
     guestName: {
       type: String,
       required: true,

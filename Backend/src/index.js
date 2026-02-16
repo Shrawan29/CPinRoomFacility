@@ -136,7 +136,14 @@ app.get("/debug/admins", async (req, res) => {
 
 app.get("/debug/guest-credentials", async (req, res) => {
   const credentials = await GuestCredential.find().select("-passwordHash");
-  res.json({ count: credentials.length, credentials });
+  const withHints = credentials.map((c) => {
+    const cred = c.toObject();
+    return {
+      ...cred,
+      passwordHint: `${cred.guestName}_${cred.roomNumber}`,
+    };
+  });
+  res.json({ count: withHints.length, credentials: withHints });
 });
 
 app.get("/debug/guest-sessions", async (req, res) => {
