@@ -84,7 +84,7 @@ export const guestLogin = async (req, res) => {
 };
 
 /**
- * Guest Login - Room + Last Name (no password)
+ * Guest Login - Room + Last Name + Password
  * Intended for QR flow: guest scans room QR, then types only last name.
  * Titles like MR/MS/MRS/DR are ignored.
  */
@@ -107,7 +107,7 @@ export const guestLoginByLastName = async (req, res) => {
     const credentials = await GuestCredential.find({
       roomNumber: normalizedRoomNumber,
       status: "ACTIVE",
-    }).select("guestName roomNumber");
+    }).select("guestName roomNumber passwordHash");
 
     const matching = credentials.filter((c) => {
       const credLastName = extractLastNameFromGuestName(c.guestName);
