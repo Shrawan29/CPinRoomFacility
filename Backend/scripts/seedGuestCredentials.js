@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import GuestCredential from "../src/models/GuestCredential.js";
 import Room from "../src/models/Room.js";
-import { normalizeGuestName, normalizePasswordInput } from "../src/utils/guestName.util.js";
+import {
+  extractLastNameFromGuestName,
+  normalizeGuestName,
+  normalizePasswordInput,
+} from "../src/utils/guestName.util.js";
 
 dotenv.config();
 
@@ -25,7 +29,8 @@ const seedGuestCredentials = async () => {
     const credentials = [];
     for (const room of rooms) {
       const guestName = normalizeGuestName(`Guest_${room.roomNumber}`);
-      const passwordHint = `${guestName}_${room.roomNumber}`;
+      const lastName = extractLastNameFromGuestName(guestName);
+      const passwordHint = `${room.roomNumber}_${lastName}`;
       const passwordToStore = normalizePasswordInput(passwordHint);
       const passwordHash = await GuestCredential.hashPassword(passwordToStore);
 
@@ -42,7 +47,7 @@ const seedGuestCredentials = async () => {
     console.log(`✅ Guest credentials seeded successfully for ${credentials.length} rooms`);
     console.log("\nℹ️  Login format:");
     console.log("   - Guest Name is normalized to a canonical format (case-insensitive)");
-    console.log("   - Password hint is: {Guest Name}_{Room Number} (case-insensitive)");
+    console.log("   - Password hint is: {Room Number}_{Last Name} (case-insensitive)");
     console.log(
       `   - Example normalization: \"AGRAWAL MR. 25357\" -> \"${normalizeGuestName(
         "AGRAWAL MR. 25357"
@@ -50,8 +55,9 @@ const seedGuestCredentials = async () => {
     );
     console.log("\n📝 Sample Credentials:");
     credentials.slice(0, 3).forEach((cred) => {
+      const lastName = extractLastNameFromGuestName(cred.guestName);
       console.log(
-        `   Room ${cred.roomNumber}: ${cred.guestName} / ${cred.guestName}_${cred.roomNumber}`
+        `   Room ${cred.roomNumber}: ${cred.guestName} / ${cred.roomNumber}_${lastName}`
       );
     });
 

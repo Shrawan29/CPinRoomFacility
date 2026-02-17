@@ -138,9 +138,13 @@ app.get("/debug/guest-credentials", async (req, res) => {
   const credentials = await GuestCredential.find().select("-passwordHash");
   const withHints = credentials.map((c) => {
     const cred = c.toObject();
+    const tokens = String(cred.guestName || "").trim().split(/\s+/).filter(Boolean);
+    const titleTokens = new Set(["MR.", "MS.", "MRS.", "DR."]);
+    const withoutTitle = tokens.length > 0 && titleTokens.has(tokens[0]) ? tokens.slice(1) : tokens;
+    const lastName = withoutTitle.length > 0 ? withoutTitle[withoutTitle.length - 1] : "";
     return {
       ...cred,
-      passwordHint: `${cred.guestName}_${cred.roomNumber}`,
+      passwordHint: `${cred.roomNumber}_${lastName}`,
     };
   });
   res.json({ count: withHints.length, credentials: withHints });

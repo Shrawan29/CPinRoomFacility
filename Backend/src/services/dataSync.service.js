@@ -6,6 +6,7 @@ import GuestCredential from "../models/GuestCredential.js";
 import {
   normalizeGuestName,
   normalizePasswordInput,
+  extractLastNameFromGuestName,
 } from "../utils/guestName.util.js";
 
 const SYNC_SOURCE = "HOTEL_SYNC";
@@ -154,7 +155,8 @@ class DataSyncService {
           const credentialKey = `${roomNumber}::${normalizedGuest}`;
           if (!existingCredentialKeySet.has(credentialKey)) {
             existingCredentialKeySet.add(credentialKey);
-            const plainPassword = normalizePasswordInput(`${normalizedGuest}_${roomNumber}`);
+            const lastName = extractLastNameFromGuestName(normalizedGuest);
+            const plainPassword = normalizePasswordInput(`${roomNumber}_${lastName}`);
             const passwordHash = await GuestCredential.hashPassword(plainPassword);
 
             credentialOps.push({
@@ -215,8 +217,9 @@ class DataSyncService {
         if (sample.length > 0) {
           console.log("[DataSync] Sample guest login hints (case-insensitive password):");
           for (const c of sample) {
+            const lastName = extractLastNameFromGuestName(c.guestName);
             console.log(
-              `  Room ${c.roomNumber}: ${c.guestName} / ${c.guestName}_${c.roomNumber}`
+              `  Room ${c.roomNumber}: ${c.guestName} / ${c.roomNumber}_${lastName}`
             );
           }
         }

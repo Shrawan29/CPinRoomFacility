@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import GuestSession from "../src/models/GuestSession.js";
 import GuestCredential from "../src/models/GuestCredential.js";
 import {
+  extractLastNameFromGuestName,
   normalizeGuestName,
   normalizePasswordInput,
   normalizeRoomNumber,
@@ -44,7 +45,8 @@ const backfill = async () => {
 
     const ops = [];
     for (const pair of uniquePairs.values()) {
-      const passwordHint = `${pair.guestName}_${pair.roomNumber}`;
+      const lastName = extractLastNameFromGuestName(pair.guestName);
+      const passwordHint = `${pair.roomNumber}_${lastName}`;
       const canonicalPassword = normalizePasswordInput(passwordHint);
       const passwordHash = await GuestCredential.hashPassword(canonicalPassword);
 
@@ -85,7 +87,8 @@ const backfill = async () => {
 
     console.log("\n📝 Sample login hints (password is case-insensitive):");
     for (const c of sample) {
-      console.log(`  Room ${c.roomNumber}: ${c.guestName} / ${c.guestName}_${c.roomNumber}`);
+      const lastName = extractLastNameFromGuestName(c.guestName);
+      console.log(`  Room ${c.roomNumber}: ${c.guestName} / ${c.roomNumber}_${lastName}`);
     }
 
     process.exit(0);

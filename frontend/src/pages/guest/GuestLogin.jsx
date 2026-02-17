@@ -100,7 +100,8 @@ export default function GuestLogin() {
           />
 
           <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-            Enter only your last name (no title).
+            Enter only your last name (no title). Password format is
+            {formData.lastName ? ` ${formData.roomNumber}_${formData.lastName}` : " room_lastname"}.
           </p>
 
           <button

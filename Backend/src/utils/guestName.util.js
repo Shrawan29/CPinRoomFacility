@@ -20,6 +20,10 @@ const canonicalizeTitleToken = (token) => {
   return TITLE_MAP.get(upper) || null;
 };
 
+const isTitleToken = (token) => {
+  return Boolean(canonicalizeTitleToken(token));
+};
+
 // Examples:
 // - "CHARU MS. 25375" -> "MS. CHARU"
 // - "AGRAWAL MR. 25374" -> "MR. AGRAWAL"
@@ -55,6 +59,40 @@ export const normalizeGuestName = (raw) => {
   });
 
   return normalizeWhitespace(parts.join(" "));
+};
+
+/**
+ * Normalize a last-name input.
+ * - Trims/uppercases
+ * - If the user enters multiple words, returns the last token
+ * - Ignores title tokens (MR/MS/MRS/DR) with or without dot
+ */
+export const normalizeLastName = (raw) => {
+  const cleaned = normalizeWhitespace(raw).toUpperCase();
+  if (!cleaned) return "";
+
+  const tokens = cleaned
+    .split(" ")
+    .filter(Boolean)
+    .filter((t) => !isTitleToken(t));
+
+  if (tokens.length === 0) return "";
+  return tokens[tokens.length - 1];
+};
+
+/**
+ * Extract the last name from a raw or normalized guest name.
+ * Titles are ignored; returns the last token of the remaining name.
+ */
+export const extractLastNameFromGuestName = (rawOrNormalizedGuestName) => {
+  const normalized = normalizeGuestName(rawOrNormalizedGuestName);
+  if (!normalized) return "";
+  const tokens = normalized.split(" ").filter(Boolean);
+  if (tokens.length === 0) return "";
+
+  const withoutTitle = isTitleToken(tokens[0]) ? tokens.slice(1) : tokens;
+  if (withoutTitle.length === 0) return "";
+  return withoutTitle[withoutTitle.length - 1];
 };
 
 export const normalizeRoomNumber = (raw) => {

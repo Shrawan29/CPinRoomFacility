@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import GuestCredential from "../src/models/GuestCredential.js";
-import { normalizeGuestName, normalizePasswordInput } from "../src/utils/guestName.util.js";
+import {
+  extractLastNameFromGuestName,
+  normalizeGuestName,
+  normalizePasswordInput,
+} from "../src/utils/guestName.util.js";
 
 dotenv.config();
 
@@ -64,7 +68,8 @@ const migrate = async () => {
       const canonicalGuestName = entry.canonicalGuestName;
       const roomNumber = entry.roomNumber;
 
-      const passwordHint = `${canonicalGuestName}_${roomNumber}`;
+      const lastName = extractLastNameFromGuestName(canonicalGuestName);
+      const passwordHint = `${roomNumber}_${lastName}`;
       const canonicalPassword = normalizePasswordInput(passwordHint);
       const passwordHash = await GuestCredential.hashPassword(canonicalPassword);
 
@@ -103,7 +108,8 @@ const migrate = async () => {
 
     console.log("\n📝 Sample login hints (password is case-insensitive):");
     for (const c of sample) {
-      console.log(`  Room ${c.roomNumber}: ${c.guestName} / ${c.guestName}_${c.roomNumber}`);
+      const lastName = extractLastNameFromGuestName(c.guestName);
+      console.log(`  Room ${c.roomNumber}: ${c.guestName} / ${c.roomNumber}_${lastName}`);
     }
 
     process.exit(0);

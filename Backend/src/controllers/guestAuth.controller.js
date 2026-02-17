@@ -2,48 +2,16 @@ import crypto from "crypto";
 import GuestCredential from "../models/GuestCredential.js";
 import GuestSession from "../models/GuestSession.js";
 import {
+  extractLastNameFromGuestName,
   normalizeGuestName,
+  normalizeLastName,
   normalizePasswordInput,
   normalizeRoomNumber,
 } from "../utils/guestName.util.js";
 
-const TITLE_TOKENS = new Set(["MR.", "MS.", "MRS.", "DR."]);
-
-const normalizeLastNameInput = (raw) => {
-  const cleaned = String(raw || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toUpperCase();
-  if (!cleaned) return "";
-
-  // If the user accidentally types a title or full name, keep only the last token
-  // and strip known title tokens.
-  const tokens = cleaned
-    .replace(/\./g, ".")
-    .split(" ")
-    .filter(Boolean)
-    .filter((t) => !TITLE_TOKENS.has(t));
-  if (tokens.length === 0) return "";
-  return tokens[tokens.length - 1];
-};
-
-const extractLastNameFromNormalizedGuestName = (normalizedGuestName) => {
-  const cleaned = String(normalizedGuestName || "")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!cleaned) return "";
-
-  const tokens = cleaned.split(" ").filter(Boolean);
-  if (tokens.length === 0) return "";
-
-  const withoutTitle = TITLE_TOKENS.has(tokens[0]) ? tokens.slice(1) : tokens;
-  if (withoutTitle.length === 0) return "";
-  return withoutTitle[withoutTitle.length - 1];
-};
-
 /**
  * Guest Login - Username & Password
- * Password format: guestname_roomno
+ * Password format: roomno_lastname (case-insensitive)
  */
 export const guestLogin = async (req, res) => {
   try {
@@ -58,6 +26,11 @@ export const guestLogin = async (req, res) => {
     const normalizedGuestName = normalizeGuestName(guestName);
     const normalizedRoomNumber = normalizeRoomNumber(roomNumber);
     const normalizedPassword = normalizePasswordInput(password);
+    const underscorePassword = normalizePasswordInput(
+      String(password || "")
+        .replace(/\s+/g, "_")
+        .trim()
+    );
     const legacyPassword = String(password || "")
       .replace(/\s+/g, " ")
       .trim();
@@ -77,6 +50,9 @@ export const guestLogin = async (req, res) => {
 
     // Verify password
     let passwordMatch = await credential.comparePassword(normalizedPassword);
+    if (!passwordMatch && underscorePassword && underscorePassword !== normalizedPassword) {
+      passwordMatch = await credential.comparePassword(underscorePassword);
+    }
     if (!passwordMatch && legacyPassword && legacyPassword !== normalizedPassword) {
       passwordMatch = await credential.comparePassword(legacyPassword);
     }
@@ -123,7 +99,7 @@ export const guestLoginByLastName = async (req, res) => {
     }
 
     const normalizedRoomNumber = normalizeRoomNumber(roomNumber);
-    const normalizedLastName = normalizeLastNameInput(lastName);
+    const normalizedLastName = normalizeLastName(lastName);
     if (!normalizedLastName) {
       return res.status(400).json({ message: "Valid last name required" });
     }
@@ -134,7 +110,7 @@ export const guestLoginByLastName = async (req, res) => {
     }).select("guestName roomNumber");
 
     const matching = credentials.filter((c) => {
-      const credLastName = extractLastNameFromNormalizedGuestName(c.guestName);
+      const credLastName = extractLastNameFromGuestName(c.guestName);
       return credLastName === normalizedLastName;
     });
 
@@ -145,6 +121,15 @@ export const guestLoginByLastName = async (req, res) => {
     // Deterministic pick if multiple guests share last name.
     matching.sort((a, b) => String(a.guestName).localeCompare(String(b.guestName)));
     const credential = matching[0];
+
+    // Enforce password scheme: roomno_lastname (case-insensitive)
+    const expectedPassword = normalizePasswordInput(
+      `${normalizedRoomNumber}_${normalizedLastName}`
+    );
+    const passwordMatch = await credential.comparePassword(expectedPassword);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: "Invalid password for room" });
+    }
 
     const sessionId = crypto.randomBytes(32).toString("hex");
 
