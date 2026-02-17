@@ -10,6 +10,8 @@ export default function RoomsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const REFRESH_MS = 10000;
+
   const formatGuestDisplayName = (value) => {
     const raw = String(value ?? "")
       .replace(/_/g, " ")
@@ -44,26 +46,43 @@ export default function RoomsList() {
       return;
     }
 
-    const fetchRoomsAndGuests = async () => {
+    let cancelled = false;
+
+    const fetchRoomsAndGuests = async ({ silent = false } = {}) => {
       try {
+        if (!silent) setLoading(true);
         const [roomsRes, guestsRes] = await Promise.all([
           api.get("/admin/dashboard/rooms"),
           api.get("/admin/dashboard/guests"),
         ]);
 
+        if (cancelled) return;
         setRooms(Array.isArray(roomsRes.data) ? roomsRes.data : []);
         setGuests(Array.isArray(guestsRes.data) ? guestsRes.data : []);
-        setError(null);
+        if (!silent) setError(null);
       } catch (err) {
-        setError(err.response?.data?.message || "Failed to load rooms");
-        setRooms([]);
-        setGuests([]);
+        if (cancelled) return;
+        if (!silent) {
+          setError(err.response?.data?.message || "Failed to load rooms");
+          setRooms([]);
+          setGuests([]);
+        }
       } finally {
-        setLoading(false);
+        if (cancelled) return;
+        if (!silent) setLoading(false);
       }
     };
 
-    fetchRoomsAndGuests();
+    fetchRoomsAndGuests({ silent: false });
+
+    const intervalId = setInterval(() => {
+      fetchRoomsAndGuests({ silent: true });
+    }, REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
   }, [token, authLoading]);
 
   if (loading) {
