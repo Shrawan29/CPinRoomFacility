@@ -90,12 +90,12 @@ export const guestLogin = async (req, res) => {
  */
 export const guestLoginByLastName = async (req, res) => {
   try {
-    const { roomNumber, lastName } = req.body;
+    const { roomNumber, lastName, password } = req.body;
 
-    if (!roomNumber || !lastName) {
+    if (!roomNumber || !lastName || !password) {
       return res
         .status(400)
-        .json({ message: "Room number and last name required" });
+        .json({ message: "Room number, last name, and password required" });
     }
 
     const normalizedRoomNumber = normalizeRoomNumber(roomNumber);
@@ -123,10 +123,23 @@ export const guestLoginByLastName = async (req, res) => {
     const credential = matching[0];
 
     // Enforce password scheme: roomno_lastname (case-insensitive)
-    const expectedPassword = normalizePasswordInput(
-      `${normalizedRoomNumber}_${normalizedLastName}`
+    const expectedPassword = normalizePasswordInput(`${normalizedRoomNumber}_${normalizedLastName}`);
+    const providedPassword = normalizePasswordInput(password);
+    const providedUnderscore = normalizePasswordInput(
+      String(password || "")
+        .replace(/\s+/g, "_")
+        .trim()
     );
-    const passwordMatch = await credential.comparePassword(expectedPassword);
+
+    let passwordMatch = await credential.comparePassword(providedPassword);
+    if (!passwordMatch && providedUnderscore && providedUnderscore !== providedPassword) {
+      passwordMatch = await credential.comparePassword(providedUnderscore);
+    }
+
+    // If the user typed something else, still require it matches the expected scheme.
+    if (passwordMatch && providedPassword !== expectedPassword && providedUnderscore !== expectedPassword) {
+      passwordMatch = false;
+    }
     if (!passwordMatch) {
       return res.status(401).json({ message: "Invalid password for room" });
     }

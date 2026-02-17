@@ -11,6 +11,7 @@ export default function GuestLogin() {
   const [formData, setFormData] = useState({
     lastName: "",
     roomNumber: "",
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,14 +30,18 @@ export default function GuestLogin() {
     setLoading(true);
     setError("");
 
-    if (!formData.lastName) {
-      setError("Please enter your last name");
+    if (!formData.lastName || !formData.password) {
+      setError("Please enter your last name and password");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await guestLoginByLastName(formData.roomNumber, formData.lastName);
+      const response = await guestLoginByLastName(
+        formData.roomNumber,
+        formData.lastName,
+        formData.password
+      );
 
       if (response?.token && response?.guest) {
         login(response.token, response.guest);
@@ -97,6 +102,20 @@ export default function GuestLogin() {
               color: "var(--text-primary)",
             }}
             autoFocus
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+            className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
+            style={{
+              borderColor: "var(--bg-secondary)",
+              color: "var(--text-primary)",
+            }}
           />
 
           <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>

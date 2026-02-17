@@ -10,10 +10,11 @@ export const guestLogin = async (guestName, roomNumber, password) => {
   return res.data;
 };
 
-export const guestLoginByLastName = async (roomNumber, lastName) => {
+export const guestLoginByLastName = async (roomNumber, lastName, password) => {
   const res = await api.post("/guest/auth/login-lastname", {
     roomNumber,
     lastName,
+    password,
   });
   return res.data;
 };
