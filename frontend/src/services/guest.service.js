@@ -10,6 +10,14 @@ export const guestLogin = async (guestName, roomNumber, password) => {
   return res.data;
 };
 
+export const guestLoginByLastName = async (roomNumber, lastName) => {
+  const res = await api.post("/guest/auth/login-lastname", {
+    roomNumber,
+    lastName,
+  });
+  return res.data;
+};
+
 // 📊 GUEST DASHBOARD
 export const getGuestDashboard = async () => {
   const res = await api.get("/guest/dashboard");

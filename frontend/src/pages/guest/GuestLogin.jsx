@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
-import { guestLogin } from "../../services/guest.service";
+import { guestLoginByLastName } from "../../services/guest.service";
 
 export default function GuestLogin() {
   const navigate = useNavigate();
@@ -9,9 +9,8 @@ export default function GuestLogin() {
   const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
-    guestName: "",
+    lastName: "",
     roomNumber: "",
-    password: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,18 +29,14 @@ export default function GuestLogin() {
     setLoading(true);
     setError("");
 
-    if (!formData.guestName || !formData.password) {
-      setError("Please enter your name and password");
+    if (!formData.lastName) {
+      setError("Please enter your last name");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await guestLogin(
-        formData.guestName,
-        formData.roomNumber,
-        formData.password
-      );
+      const response = await guestLoginByLastName(formData.roomNumber, formData.lastName);
 
       if (response?.token && response?.guest) {
         login(response.token, response.guest);
@@ -51,7 +46,7 @@ export default function GuestLogin() {
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || "Login failed. Please check your credentials."
+        err.response?.data?.message || "Login failed. Please check your details."
       );
     } finally {
       setLoading(false);
@@ -91,10 +86,10 @@ export default function GuestLogin() {
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="text"
-            placeholder="Your Name"
-            value={formData.guestName}
+            placeholder="Last Name (no Mr/Ms)"
+            value={formData.lastName}
             onChange={(e) =>
-              setFormData({ ...formData, guestName: e.target.value })
+              setFormData({ ...formData, lastName: e.target.value })
             }
             className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
             style={{
@@ -104,25 +99,8 @@ export default function GuestLogin() {
             autoFocus
           />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-            className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none"
-            style={{
-              borderColor: "var(--bg-secondary)",
-              color: "var(--text-primary)",
-            }}
-          />
-
-          <p
-            className="text-xs text-center"
-            style={{ color: "var(--text-muted)" }}
-          >
-            💡 Password: {formData.guestName ? formData.guestName + "_" + formData.roomNumber : "guestname_roomno"}
+          <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+            Enter only your last name (no title).
           </p>
 
           <button
