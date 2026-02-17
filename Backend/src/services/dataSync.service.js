@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import crypto from "crypto";
+import bcrypt from "bcrypt";
 import Room from "../models/Room.js";
 import GuestSession from "../models/GuestSession.js";
 import GuestCredential from "../models/GuestCredential.js";
@@ -96,12 +97,16 @@ class DataSyncService {
       const expiresAt = computeExpiresAt();
       const syncedAt = new Date();
 
-      // Load existing HOTEL_SYNC credentials once to avoid bcrypt hashing on every cycle
+      // Load existing HOTEL_SYNC credentials once so we can avoid re-hashing
+      // when the expected plain password already matches the stored hash.
       const existingCredentials = await GuestCredential.find({ source: "HOTEL_SYNC", status: "ACTIVE" })
-        .select("guestName roomNumber")
+        .select("guestName roomNumber passwordHash")
         .lean();
-      const existingCredentialKeySet = new Set(
-        existingCredentials.map((c) => `${String(c.roomNumber)}::${String(c.guestName)}`)
+      const existingCredentialByKey = new Map(
+        existingCredentials.map((c) => [
+          `${String(c.roomNumber)}::${String(c.guestName)}`,
+          c,
+        ])
       );
 
       for (const hotelRoom of hotelRooms) {
@@ -153,12 +158,23 @@ class DataSyncService {
 
           // Create credentials once per (roomNumber, normalizedGuest)
           const credentialKey = `${roomNumber}::${normalizedGuest}`;
-          if (!existingCredentialKeySet.has(credentialKey)) {
-            existingCredentialKeySet.add(credentialKey);
-            const lastName = extractLastNameFromGuestName(normalizedGuest);
-            const plainPassword = normalizePasswordInput(`${roomNumber}_${lastName}`);
-            const passwordHash = await GuestCredential.hashPassword(plainPassword);
+          const lastName = extractLastNameFromGuestName(normalizedGuest);
+          const plainPassword = normalizePasswordInput(`${roomNumber}_${lastName}`);
+          const existing = existingCredentialByKey.get(credentialKey);
 
+          let needsPasswordUpdate = false;
+          if (!existing) {
+            needsPasswordUpdate = true;
+          } else if (existing.passwordHash) {
+            // If a credential exists but was created with an older password scheme,
+            // bcrypt.compare will fail and we will transparently upgrade it.
+            needsPasswordUpdate = !(await bcrypt.compare(plainPassword, existing.passwordHash));
+          } else {
+            needsPasswordUpdate = true;
+          }
+
+          if (needsPasswordUpdate) {
+            const passwordHash = await GuestCredential.hashPassword(plainPassword);
             credentialOps.push({
               updateOne: {
                 filter: {
@@ -168,16 +184,25 @@ class DataSyncService {
                   status: "ACTIVE",
                 },
                 update: {
+                  $set: {
+                    passwordHash,
+                  },
                   $setOnInsert: {
                     source: "HOTEL_SYNC",
                     guestName: normalizedGuest,
                     roomNumber,
-                    passwordHash,
                     status: "ACTIVE",
                   },
                 },
                 upsert: true,
               },
+            });
+
+            // Keep local cache in sync to avoid repeated work in this cycle.
+            existingCredentialByKey.set(credentialKey, {
+              guestName: normalizedGuest,
+              roomNumber,
+              passwordHash,
             });
           }
         }
