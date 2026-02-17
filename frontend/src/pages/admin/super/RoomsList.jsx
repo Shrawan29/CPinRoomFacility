@@ -90,6 +90,9 @@ export default function RoomsList() {
   const occupiedRooms = rooms.filter((r) => r.status === "OCCUPIED");
 
   const guestsByRoom = guests.reduce((acc, guest) => {
+    const isActive = new Date(guest?.expiresAt) > new Date();
+    if (!isActive) return acc;
+
     const roomNumber = String(guest?.roomNumber ?? "").trim();
     if (!roomNumber) return acc;
 
@@ -184,6 +187,7 @@ export default function RoomsList() {
 
                   <td className="px-5 py-4 text-[var(--text-muted)] text-sm">
                     {(() => {
+                      if (room.status === "AVAILABLE") return "-";
                       const set = guestsByRoom[String(room.roomNumber)] || null;
                       if (!set || set.size === 0) return "-";
                       return Array.from(set).join(", ");

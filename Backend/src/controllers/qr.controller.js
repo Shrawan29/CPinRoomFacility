@@ -17,6 +17,12 @@ export const scanRoomQR = async (req, res) => {
       );
     }
 
+    if (room.status === "AVAILABLE") {
+      return res.redirect(
+        `${FRONTEND_URL}/guest/access-fallback?reason=no-guest-registered`
+      );
+    }
+
     /* ============================
        2. Redirect to guest login with room number
        ============================ */

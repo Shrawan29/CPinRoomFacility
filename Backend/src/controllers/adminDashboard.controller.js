@@ -44,7 +44,7 @@ export const getAdminDashboardStats = async (req, res) => {
 
 export const getAllGuests = async (req, res) => {
   try {
-    const guests = await GuestSession.find()
+    const guests = await GuestSession.find({ expiresAt: { $gt: new Date() } })
       .sort({ syncedAt: -1, updatedAt: -1, createdAt: -1 })
       .lean();
 

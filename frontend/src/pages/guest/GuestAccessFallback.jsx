@@ -1,7 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function GuestAccessFallback() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const reason = String(params.get("reason") || "");
+  const isNoGuest = reason === "no-guest-registered";
 
   return (
     <div
@@ -22,12 +27,15 @@ export default function GuestAccessFallback() {
 
         {/* MAIN MESSAGE */}
         <div className="text-center mb-8">
-          <p
-            className="text-base mb-4"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Please use your phone camera or a QR code scanner (e.g. Google Lens) to scan the QR code placed in your room.
-          </p>
+          {isNoGuest ? (
+            <p className="text-base mb-4" style={{ color: "var(--text-primary)" }}>
+              No guest registered for this room.
+            </p>
+          ) : (
+            <p className="text-base mb-4" style={{ color: "var(--text-primary)" }}>
+              Please use your phone camera or a QR code scanner (e.g. Google Lens) to scan the QR code placed in your room.
+            </p>
+          )}
 
           <div
             className="p-4 rounded-lg mb-4"
@@ -37,26 +45,25 @@ export default function GuestAccessFallback() {
               className="text-sm font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              🔍 Look for the QR code:
+              {isNoGuest ? "🛎️ Need help?" : "🔍 Look for the QR code:"}
             </p>
-            <p
-              className="text-xs mt-2"
-              style={{ color: "var(--text-muted)" }}
-            >
-              • On the wall in your room
+            {isNoGuest ? (
+              <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+                Please contact reception to complete check-in.
               </p>
-            <p
-              className="text-xs"
-              style={{ color: "var(--text-muted)" }}
-            >
-              • On the table or desk
-            </p>
-            <p
-              className="text-xs"
-              style={{ color: "var(--text-muted)" }}
-            >
-              • Near the entrance
-            </p>
+            ) : (
+              <>
+                <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+                  • On the wall in your room
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  • On the table or desk
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  • Near the entrance
+                </p>
+              </>
+            )}
           </div>
         </div>
 

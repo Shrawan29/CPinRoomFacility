@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import Room from "../models/Room.js";
 import GuestCredential from "../models/GuestCredential.js";
 import GuestSession from "../models/GuestSession.js";
 import {
@@ -34,6 +35,15 @@ export const guestLogin = async (req, res) => {
     const legacyPassword = String(password || "")
       .replace(/\s+/g, " ")
       .trim();
+
+    const room = await Room.findOne({ roomNumber: normalizedRoomNumber }).select(
+      "status"
+    );
+    if (!room || room.status !== "OCCUPIED") {
+      return res.status(403).json({
+        message: "No guest registered for this room",
+      });
+    }
 
     // Find guest credential
     const credential = await GuestCredential.findOne({
@@ -102,6 +112,15 @@ export const guestLoginByLastName = async (req, res) => {
     const normalizedLastName = normalizeLastName(lastName);
     if (!normalizedLastName) {
       return res.status(400).json({ message: "Valid last name required" });
+    }
+
+    const room = await Room.findOne({ roomNumber: normalizedRoomNumber }).select(
+      "status"
+    );
+    if (!room || room.status !== "OCCUPIED") {
+      return res.status(403).json({
+        message: "No guest registered for this room",
+      });
     }
 
     const credentials = await GuestCredential.find({

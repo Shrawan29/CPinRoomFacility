@@ -94,8 +94,14 @@ class DataSyncService {
       const credentialOps = [];
       const activeSyncedSessionIds = [];
       const activeRoomNumbers = [];
+      const activeGuestNamesByRoom = new Map();
       const expiresAt = computeExpiresAt();
       const syncedAt = new Date();
+
+      // HOTEL_SYNC credentials are fully derived from the hotel source.
+      // To avoid accumulating duplicate documents (historically caused by
+      // status-filtered upserts), we discard inactive derived credentials on each sync.
+      await GuestCredential.deleteMany({ source: "HOTEL_SYNC", status: "INACTIVE" });
 
       // Load existing HOTEL_SYNC credentials once so we can avoid re-hashing
       // when the expected plain password already matches the stored hash.
@@ -129,12 +135,16 @@ class DataSyncService {
         });
 
         const guests = Array.isArray(hotelRoom?.guests) ? hotelRoom.guests : [];
+
+        const activeGuestNames = new Set();
         for (const guestLabelRaw of guests) {
           const guestLabel = String(guestLabelRaw || "").trim();
           if (!guestLabel) continue;
 
           const normalizedGuest = normalizeGuestName(guestLabel);
           if (!normalizedGuest) continue;
+
+          activeGuestNames.add(normalizedGuest);
 
           const sessionId = stableSessionId(roomNumber, guestLabel);
           activeSyncedSessionIds.push(sessionId);
@@ -181,11 +191,11 @@ class DataSyncService {
                   source: "HOTEL_SYNC",
                   guestName: normalizedGuest,
                   roomNumber,
-                  status: "ACTIVE",
                 },
                 update: {
                   $set: {
                     passwordHash,
+                    status: "ACTIVE",
                   },
                   $setOnInsert: {
                     source: "HOTEL_SYNC",
@@ -206,6 +216,8 @@ class DataSyncService {
             });
           }
         }
+
+        activeGuestNamesByRoom.set(roomNumber, activeGuestNames);
       }
 
       if (roomOps.length > 0) {
@@ -226,6 +238,54 @@ class DataSyncService {
 
       if (credentialOps.length > 0) {
         await GuestCredential.bulkWrite(credentialOps, { ordered: false });
+      }
+
+      // Deactivate stale HOTEL_SYNC credentials per room.
+      // This prevents AVAILABLE rooms from still having ACTIVE guest credentials.
+      // Also deactivates guests that are no longer present in an OCCUPIED room.
+      const deactivateOps = [];
+      for (const roomNumber of activeRoomNumbers) {
+        const activeGuestNames = activeGuestNamesByRoom.get(roomNumber) || new Set();
+        const activeNamesArray = Array.from(activeGuestNames);
+
+        const filterBase = {
+          source: "HOTEL_SYNC",
+          roomNumber,
+          status: "ACTIVE",
+        };
+
+        if (activeNamesArray.length === 0) {
+          deactivateOps.push({
+            updateMany: {
+              filter: filterBase,
+              update: { $set: { status: "INACTIVE" } },
+            },
+          });
+        } else {
+          deactivateOps.push({
+            updateMany: {
+              filter: {
+                ...filterBase,
+                guestName: { $nin: activeNamesArray },
+              },
+              update: { $set: { status: "INACTIVE" } },
+            },
+          });
+        }
+      }
+
+      if (deactivateOps.length > 0) {
+        await GuestCredential.bulkWrite(deactivateOps, { ordered: false });
+      }
+
+      // Cleanup APP sessions when a room has no registered guests.
+      // This ensures that once a room is AVAILABLE, app-created sessions cannot linger.
+      const availableRooms = activeRoomNumbers.filter((roomNumber) => {
+        const names = activeGuestNamesByRoom.get(roomNumber);
+        return !names || names.size === 0;
+      });
+      if (availableRooms.length > 0) {
+        await GuestSession.deleteMany({ source: "APP", roomNumber: { $in: availableRooms } });
       }
 
       // Helpful dev-only output: show canonical login hints
