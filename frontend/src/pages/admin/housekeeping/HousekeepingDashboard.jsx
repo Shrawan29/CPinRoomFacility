@@ -44,18 +44,43 @@ export default function HousekeepingDashboard() {
   const audioRef = useRef(null);
   const didInitRef = useRef(false);
   const lastPendingIdsRef = useRef(new Set());
+  const audioPrimedRef = useRef(false);
 
   const statusParam = useMemo(() => status, [status]);
+
+  const primeAudioOnce = async () => {
+    if (audioPrimedRef.current) return;
+    audioPrimedRef.current = true;
+
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(notificationSound);
+      }
+      const audio = audioRef.current;
+      const prevVolume = audio.volume;
+      audio.volume = 0;
+      audio.currentTime = 0;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = prevVolume;
+    } catch (e) {
+      // Autoplay policies vary; real notifications will still attempt to play.
+      console.debug("[Housekeeping] Audio prime failed", e);
+    }
+  };
 
   const playNotification = async () => {
     try {
       if (!audioRef.current) {
         audioRef.current = new Audio(notificationSound);
       }
+      audioRef.current.volume = 1;
       audioRef.current.currentTime = 0;
       await audioRef.current.play();
-    } catch {
+    } catch (e) {
       // Some browsers block autoplay until user interaction.
+      console.debug("[Housekeeping] Notification sound blocked", e);
     }
   };
 
@@ -91,6 +116,15 @@ export default function HousekeepingDashboard() {
   };
 
   useEffect(() => {
+    const onFirstInteraction = () => {
+      primeAudioOnce();
+      window.removeEventListener("pointerdown", onFirstInteraction);
+      window.removeEventListener("keydown", onFirstInteraction);
+    };
+
+    window.addEventListener("pointerdown", onFirstInteraction);
+    window.addEventListener("keydown", onFirstInteraction);
+
     didInitRef.current = false;
     lastPendingIdsRef.current = new Set();
     setLoading(true);
@@ -103,6 +137,8 @@ export default function HousekeepingDashboard() {
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener("pointerdown", onFirstInteraction);
+      window.removeEventListener("keydown", onFirstInteraction);
     };
   }, [statusParam]);
 

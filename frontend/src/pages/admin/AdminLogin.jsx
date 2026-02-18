@@ -4,6 +4,7 @@ import { useAdminAuth } from "../../context/AdminAuthContext";
 import { useNavigate } from "react-router-dom";
 import hotelBg from "../../assets/hotel-bg.jpg";
 import logo from "../../assets/logo.png";
+import notificationSound from "../../assets/notification.mp3";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -18,6 +19,18 @@ export default function AdminLogin() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    // Prime audio playback on a user gesture (login click) so later notifications
+    // can play without being blocked by browser autoplay restrictions.
+    try {
+      const audio = new Audio(notificationSound);
+      audio.volume = 0;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+    } catch {
+      // Ignore: some browsers may still block this.
+    }
 
     try {
       const data = await adminLogin(email, password);
