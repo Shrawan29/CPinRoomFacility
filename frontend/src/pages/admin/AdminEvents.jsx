@@ -367,7 +367,7 @@ export default function AdminEvents() {
                   {form.image ? (
                     <div
                       className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)]"
-                      style={{ aspectRatio: "9 / 16" }}
+                      style={{ aspectRatio: "16 / 9" }}
                     >
                       <img
                         src={form.image}
@@ -440,8 +440,8 @@ export default function AdminEvents() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       {event.image ? (
                         <div
-                          className="w-full sm:w-32 rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)] shrink-0"
-                          style={{ aspectRatio: "9 / 16" }}
+                          className="w-full sm:w-48 rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)] shrink-0"
+                          style={{ aspectRatio: "16 / 9" }}
                         >
                           <img
                             src={event.image}
@@ -452,8 +452,8 @@ export default function AdminEvents() {
                         </div>
                       ) : (
                         <div
-                          className="w-full sm:w-32 rounded-lg border border-dashed border-black/10 bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)] shrink-0"
-                          style={{ aspectRatio: "9 / 16" }}
+                          className="w-full sm:w-48 rounded-lg border border-dashed border-black/10 bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)] shrink-0"
+                          style={{ aspectRatio: "16 / 9" }}
                         >
                           No image
                         </div>
