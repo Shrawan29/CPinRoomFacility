@@ -18,6 +18,9 @@ export default function LoginWrapper() {
     if (admin.role === "DINING_ADMIN") {
       return <Navigate to="/admin/kitchen/dashboard" replace />;
     }
+    if (admin.role === "HOUSEKEEPING_ADMIN") {
+      return <Navigate to="/admin/housekeeping" replace />;
+    }
   }
 
   // Not logged in → show login page
