@@ -352,22 +352,33 @@ export default function GuestDashboard() {
               backgroundPosition: "center",
             }}
           >
-            <div className="absolute inset-0" style={{ backgroundColor: "rgba(246,234,219,0.82)" }} />
+            <div
+              className="absolute inset-0 backdrop-blur-[2px]"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(246,234,219,0.96) 0%, rgba(246,234,219,0.88) 48%, rgba(246,234,219,0.30) 100%)",
+              }}
+            />
+
             <div className="relative px-4 pt-10 pb-8">
               <div className="max-w-xl mx-auto">
-                <div className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
-                  Welcome, {guestFirstName}
-                </div>
-                <div
-                  className="mt-3 text-[28px] font-semibold leading-tight tracking-wide"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  Make yourself
-                  <br />
-                  comfortable
-                </div>
-                <div className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
-                  Room {guest?.roomNumber || "—"}
+                <div className="max-w-[18rem]">
+                  <div className="text-xs tracking-wide" style={{ color: "var(--text-muted)" }}>
+                    Welcome{guestFirstName && guestFirstName !== "Guest" ? ` ${guestFirstName}` : ""}
+                  </div>
+
+                  <h1
+                    className="mt-2 text-[30px] font-semibold leading-tight"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    Make yourself
+                    <br />
+                    comfortable
+                  </h1>
+
+                  <div className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+                    Room {guest?.roomNumber || "—"}
+                  </div>
                 </div>
               </div>
             </div>
