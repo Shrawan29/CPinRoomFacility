@@ -57,13 +57,27 @@ export default function HousekeepingDashboard() {
         audioRef.current = new Audio(notificationSound);
       }
       const audio = audioRef.current;
-      const prevVolume = audio.volume;
-      audio.volume = 0;
+      audio.muted = false;
+      audio.volume = 0.05;
       audio.currentTime = 0;
-      await audio.play();
-      audio.pause();
-      audio.currentTime = 0;
-      audio.volume = prevVolume;
+
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise
+          .then(() => {
+            setTimeout(() => {
+              try {
+                audio.pause();
+                audio.currentTime = 0;
+              } catch {
+                // ignore
+              }
+            }, 50);
+          })
+          .catch((e) => {
+            console.debug("[Housekeeping] Audio prime failed", e);
+          });
+      }
     } catch (e) {
       // Autoplay policies vary; real notifications will still attempt to play.
       console.debug("[Housekeeping] Audio prime failed", e);
@@ -75,9 +89,15 @@ export default function HousekeepingDashboard() {
       if (!audioRef.current) {
         audioRef.current = new Audio(notificationSound);
       }
+      audioRef.current.muted = false;
       audioRef.current.volume = 1;
       audioRef.current.currentTime = 0;
-      await audioRef.current.play();
+      const playPromise = audioRef.current.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch((e) => {
+          console.debug("[Housekeeping] Notification sound blocked", e);
+        });
+      }
     } catch (e) {
       // Some browsers block autoplay until user interaction.
       console.debug("[Housekeeping] Notification sound blocked", e);

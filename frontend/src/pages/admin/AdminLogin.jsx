@@ -24,10 +24,25 @@ export default function AdminLogin() {
     // can play without being blocked by browser autoplay restrictions.
     try {
       const audio = new Audio(notificationSound);
-      audio.volume = 0;
-      await audio.play();
-      audio.pause();
-      audio.currentTime = 0;
+      audio.muted = false;
+      audio.volume = 0.05;
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise
+          .then(() => {
+            setTimeout(() => {
+              try {
+                audio.pause();
+                audio.currentTime = 0;
+              } catch {
+                // ignore
+              }
+            }, 50);
+          })
+          .catch(() => {
+            // ignore
+          });
+      }
     } catch {
       // Ignore: some browsers may still block this.
     }
