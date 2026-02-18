@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import hotelbg from "../../assets/hotel-bg.jpg";
@@ -7,6 +8,9 @@ export default function GuestDashboard() {
   const { guest } = useGuestAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const inRoomRef = useRef(null);
+  const moreRef = useRef(null);
 
   const guestLastName = guest?.name ? guest.name.trim().split(/\s+/).slice(-1)[0] : "";
   const guestFirstName = guest?.name
@@ -131,45 +135,76 @@ export default function GuestDashboard() {
     ),
   };
 
-  const cardClassName =
-    "rounded-[18px] border border-black/10 bg-white/45 shadow-[0_10px_26px_rgba(0,0,0,0.05)] backdrop-blur-md";
   const cardHoverClassName = "hover:bg-white/60 hover:shadow-[0_14px_34px_rgba(0,0,0,0.06)]";
 
-  const bottomNav = [
-    {
-      key: "home",
-      label: "Home",
-      iconKey: "home",
-      path: "/guest/dashboard",
-      match: ["/guest/dashboard"],
-    },
-    {
-      key: "orders",
-      label: "Orders",
-      iconKey: "orders",
-      path: "/guest/orders",
-      match: ["/guest/orders"],
-    },
-    {
-      key: "services",
-      label: "Services",
-      iconKey: "services",
-      path: "/guest/menu",
-      match: ["/guest/menu", "/guest/cart", "/guest/housekeeping"],
-    },
-    {
-      key: "profile",
-      label: "Profile",
-      iconKey: "profile",
-      path: "/guest/hotel-info",
-      match: ["/guest/hotel-info"],
-    },
-  ];
+  const bottomNav = useMemo(
+    () => [
+      {
+        key: "home",
+        label: "Home",
+        iconKey: "home",
+        path: "/guest/dashboard",
+        match: ["/guest/dashboard"],
+      },
+      {
+        key: "orders",
+        label: "Orders",
+        iconKey: "orders",
+        path: "/guest/orders",
+        match: ["/guest/orders"],
+      },
+      {
+        key: "spa",
+        label: "Spa",
+        iconKey: "spa",
+        path: "/guest/dashboard#in-room",
+        match: ["/guest/dashboard"],
+      },
+      {
+        key: "concierge",
+        label: "Concierge",
+        iconKey: "assistance",
+        path: "/guest/dashboard#more",
+        match: ["/guest/dashboard"],
+      },
+    ],
+    []
+  );
 
   const isNavActive = (navItem) =>
     navItem.match.some(
       (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     );
+
+  const scrollToSection = (hash) => {
+    const ref = hash === "#in-room" ? inRoomRef : hash === "#more" ? moreRef : null;
+    if (!ref?.current) return;
+    ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  useEffect(() => {
+    if (location.pathname !== "/guest/dashboard") return;
+    if (!location.hash) return;
+    scrollToSection(location.hash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.hash]);
+
+  const handleBottomNav = (item) => {
+    if (item.path.startsWith("/guest/dashboard#")) {
+      const hash = item.path.split("#")[1] ? `#${item.path.split("#")[1]}` : "";
+      if (location.pathname !== "/guest/dashboard") {
+        navigate(item.path);
+        return;
+      }
+      if (hash) {
+        window.history.replaceState(null, "", `${location.pathname}${hash}`);
+        scrollToSection(hash);
+      }
+      return;
+    }
+
+    navigate(item.path);
+  };
 
   const inRoomServices = [
     {
@@ -198,25 +233,19 @@ export default function GuestDashboard() {
     {
       iconKey: "menu",
       title: "Browse Menu",
-      subtitle: "All food & beverages",
+      subtitle: "View full food & beverage menu",
       path: "/guest/menu",
     },
     {
       iconKey: "events",
       title: "Events",
-      subtitle: "What’s happening today",
+      subtitle: "Discover events and activities",
       path: "/guest/events",
-    },
-    {
-      iconKey: "orders",
-      title: "My Orders",
-      subtitle: "Track your orders",
-      path: "/guest/orders",
     },
     {
       iconKey: "info",
       title: "Hotel Information",
-      subtitle: "Amenities & Wi‑Fi",
+      subtitle: "Amenities, Wi‑Fi & hotel details",
       path: "/guest/hotel-info",
     },
   ];
@@ -260,12 +289,12 @@ export default function GuestDashboard() {
           {icons[iconKey]}
         </div>
         <div className="flex-1">
-          <div className="font-semibold tracking-wide leading-tight" style={{ color: "var(--text-primary)" }}>
+          <div className="text-sm font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
             {title}
           </div>
           {subtitle ? (
             <div
-              className="mt-1 text-xs tracking-wide leading-snug"
+              className="mt-2 text-xs leading-snug"
               style={{ color: "var(--text-muted)" }}
             >
               {subtitle}
@@ -284,11 +313,8 @@ export default function GuestDashboard() {
 
   const SectionHeader = ({ title, subtitle }) => (
     <div>
-      <div className="flex items-center gap-3">
-        <div className="text-sm font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
-          {title}
-        </div>
-        <div className="h-px flex-1" style={{ backgroundColor: "rgba(0,0,0,0.08)" }} />
+      <div className="text-base font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
+        {title}
       </div>
       {subtitle ? (
         <div className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
@@ -312,7 +338,7 @@ export default function GuestDashboard() {
               <button
                 key={item.key}
                 type="button"
-                onClick={() => navigate(item.path)}
+                onClick={() => handleBottomNav(item)}
                 className="rounded-[18px] px-2 py-2 transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
                 style={{
                   backgroundColor: active ? "rgba(164,0,93,0.08)" : "transparent",
@@ -393,7 +419,7 @@ export default function GuestDashboard() {
 
           <div className="h-8" />
 
-          <div className="mt-2">
+          <div className="mt-6" ref={inRoomRef}>
             <SectionHeader
               title="In-Room Services"
               subtitle="Everything you need during your stay"
@@ -405,9 +431,9 @@ export default function GuestDashboard() {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-6" ref={moreRef}>
             <SectionHeader title="More" subtitle="Explore the hotel" />
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-1 gap-4">
               {moreItems.map((item) => (
                 <ActionTile key={item.title} {...item} />
               ))}
