@@ -55,6 +55,11 @@ export default function HousekeepingDashboard() {
   const didInitRef = useRef(false);
   const lastPendingIdsRef = useRef(new Set());
   const audioPrimedRef = useRef(false);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   const statusParam = useMemo(() => status, [status]);
 
@@ -97,7 +102,7 @@ export default function HousekeepingDashboard() {
   };
 
   const playNotification = async () => {
-    if (!soundEnabled) return;
+    if (!soundEnabledRef.current) return;
     try {
       if (!audioRef.current) {
         audioRef.current = new Audio(notificationSound);
@@ -121,6 +126,7 @@ export default function HousekeepingDashboard() {
 
   const onToggleSound = async (nextEnabled) => {
     setSoundEnabled(nextEnabled);
+    soundEnabledRef.current = nextEnabled;
     setSoundBlocked(false);
     try {
       localStorage.setItem(SOUND_STORAGE_KEY, nextEnabled ? "1" : "0");
@@ -132,6 +138,21 @@ export default function HousekeepingDashboard() {
       await primeAudioOnce();
       await playNotification();
     }
+  };
+
+  const onTestSound = () => {
+    // Must run on a direct user gesture.
+    setSoundBlocked(false);
+    setSoundEnabled(true);
+    soundEnabledRef.current = true;
+    try {
+      localStorage.setItem(SOUND_STORAGE_KEY, "1");
+    } catch {
+      // ignore
+    }
+
+    primeAudioOnce();
+    playNotification();
   };
 
   const load = async ({ showLoading } = {}) => {
@@ -167,7 +188,7 @@ export default function HousekeepingDashboard() {
 
   useEffect(() => {
     const onFirstInteraction = () => {
-      if (soundEnabled) {
+      if (soundEnabledRef.current) {
         primeAudioOnce();
       }
       window.removeEventListener("pointerdown", onFirstInteraction);
@@ -242,6 +263,19 @@ export default function HousekeepingDashboard() {
             />
             Enable sound
           </label>
+
+          <button
+            type="button"
+            onClick={onTestSound}
+            className="text-sm px-4 py-2 rounded-lg border"
+            style={{
+              backgroundColor: "var(--bg-secondary)",
+              borderColor: "rgba(0,0,0,0.08)",
+              color: "var(--text-primary)",
+            }}
+          >
+            Test sound
+          </button>
 
           <select
             value={status}
