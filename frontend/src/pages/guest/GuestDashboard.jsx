@@ -25,38 +25,65 @@ export default function GuestDashboard() {
     navigate("/guest/access-fallback");
   };
 
-  const menuItems = [
+  const inRoomServices = [
+    {
+      icon: "🧹",
+      title: "Housekeeping",
+      path: "/guest/housekeeping",
+    },
+    {
+      icon: "🍽️",
+      title: "Food Order",
+      path: "/guest/menu",
+    },
+  ];
+
+  const quickAccess = [
     {
       icon: "🍽️",
       title: "Browse Menu",
-      description: "Food & beverages available",
-      path: "/guest/menu"
+      path: "/guest/menu",
     },
     {
       icon: "🎉",
       title: "Events",
-      description: "Activities during your stay",
-      path: "/guest/events"
+      path: "/guest/events",
     },
     {
       icon: "📦",
       title: "My Orders",
-      description: "Track your orders",
-      path: "/guest/orders"
+      path: "/guest/orders",
     },
     {
       icon: "🏨",
-      title: "Hotel Information",
-      description: "Amenities  & Wi-Fi ",
-      path: "/guest/hotel-info"
+      title: "Hotel Info",
+      path: "/guest/hotel-info",
     },
-    {
-      icon: "🧹",
-      title: "Housekeeping",
-      description: "Request towels or cleaning",
-      path: "/guest/housekeeping"
-    }
   ];
+
+  const ActionTile = ({ icon, title, path }) => (
+    <button
+      type="button"
+      onClick={() => navigate(path)}
+      className="w-full text-left rounded-xl border border-black/10 bg-white/70 backdrop-blur-sm px-4 py-3 shadow-sm active:opacity-95 transition"
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-black/5">
+          <span className="text-xl" aria-hidden>
+            {icon}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-medium text-[var(--text-primary)] truncate">
+            {title}
+          </div>
+        </div>
+        <div className="text-xl leading-none" style={{ color: "var(--text-muted)" }}>
+          ›
+        </div>
+      </div>
+    </button>
+  );
 
   return (
     <div
@@ -68,102 +95,67 @@ export default function GuestDashboard() {
 
       {/* HERO / WELCOME */}
       <section
-        className="relative h-52 overflow-hidden"
+        className="relative overflow-hidden"
         style={{
           backgroundImage: `url(${hotelbg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
-
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+        <div className="absolute inset-0 bg-[var(--bg-primary)]/80" />
+        <div className="relative px-4 py-6">
           <div className="max-w-4xl mx-auto">
-            <p className="text-sm opacity-90 mb-1">
-              Welcome {guestFirstName} 👋
+            <p className="text-base" style={{ color: "var(--text-primary)" }}>
+              Welcome {guestFirstName}.
             </p>
-            <h2 className="text-2xl font-bold mb-1">
-              Make yourself comfortable
+            <h2
+              className="mt-2 text-3xl font-bold leading-tight"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Make yourself
+              <br />
+              comfortable
             </h2>
-            <div className="flex items-center gap-2 text-sm opacity-90">
-              <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full">
-                Room {guest?.roomNumber}
-              </span>
-            </div>
+            <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+              Room {guest?.roomNumber || "—"}
+            </p>
           </div>
         </div>
       </section>
 
-      {/* MAIN ACTION CARDS */}
-      <main className="flex-1 px-4 py-6">
+      {/* MAIN */}
+      <main className="flex-1 px-4 py-5">
         <div className="max-w-4xl mx-auto">
-          <h3 
-            className="text-lg font-semibold mb-4"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Quick Access
-          </h3>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {menuItems.map((item, index) => (
-              <div
-                key={index}
-                onClick={() => navigate(item.path)}
-                className="
-                  group cursor-pointer
-                  bg-white
-                  rounded-2xl shadow-md hover:shadow-lg
-                  transition-all duration-300
-                  active:scale-[0.98]
-                  border border-gray-100
-                  overflow-hidden
-                  p-5
-                "
-              >
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="
-                    w-16 h-16 rounded-2xl bg-gray-50
-                    flex items-center justify-center
-                    text-4xl
-                    group-hover:scale-110 transition-transform duration-300
-                  ">
-                    {item.icon}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <h3
-                      className="text-base font-semibold mb-1"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      {item.title}
-                    </h3>
-                    <p 
-                      className="text-xs leading-relaxed"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              In-Room Services
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {inRoomServices.map((item) => (
+                <ActionTile key={item.title} {...item} />
+              ))}
+            </div>
           </div>
 
-          {/* ADDITIONAL INFO SECTION */}
-          <div className="mt-8 p-5 bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              Quick Access
+            </h3>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {quickAccess.map((item) => (
+                <ActionTile key={item.title} {...item} />
+              ))}
+            </div>
+          </div>
+
+          <div className="p-5 bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm border border-black/10">
             <div className="flex items-start gap-3">
               <div className="text-2xl">💡</div>
               <div>
-                <h4 
-                  className="font-semibold mb-1"
-                  style={{ color: "var(--text-primary)" }}
-                >
+                <h4 className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
                   Need Assistance?
                 </h4>
-                <p 
-                  className="text-sm"
-                  style={{ color: "var(--text-muted)" }}
-                >
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                   Our team is available 24/7. Dial 0 from your room phone or visit the reception desk.
                 </p>
               </div>

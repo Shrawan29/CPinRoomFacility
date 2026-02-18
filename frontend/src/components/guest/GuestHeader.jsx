@@ -22,7 +22,7 @@ export default function GuestHeader() {
     >
       {/* LEFT: LOGO + HOTEL NAME */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-md ring-2 ring-gray-100">
+        <div className="w-12 h-12 rounded-xl bg-white/70 backdrop-blur-sm flex items-center justify-center shadow-sm border border-black/5">
           <img
             src={logo}
             alt="Hotel Logo"
@@ -62,7 +62,7 @@ export default function GuestHeader() {
 
         <button
           onClick={handleLogout}
-          className="text-sm px-4 py-2 rounded-lg font-medium transition-all hover:opacity-90 active:scale-95 shadow-sm"
+          className="text-sm px-4 py-2 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-95 shadow-sm border border-black/10"
           style={{
             backgroundColor: "var(--brand)",
             color: "white",
