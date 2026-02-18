@@ -52,7 +52,7 @@ export default function GuestEvents() {
       {/* HEADER */}
       <GuestHeader />
 
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 max-w-xl mx-auto">
         {/* PAGE TITLE */}
         <div className="mb-4">
           <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
@@ -83,50 +83,62 @@ export default function GuestEvents() {
             <Link
               key={event._id}
               to={`/guest/events/${event._id}`}
-              className="bg-white rounded-xl shadow-sm p-4"
+              className="bg-white rounded-xl shadow-sm border border-black/5 overflow-hidden block"
             >
-              <div className="flex gap-3">
-                {event.image ? (
-                  <div
-                    className="w-24 rounded-lg overflow-hidden bg-[var(--bg-secondary)] border border-black/10 shrink-0"
-                    style={{ aspectRatio: "9 / 16" }}
+              {event.image ? (
+                <div
+                  className="w-full bg-[var(--bg-secondary)]"
+                  style={{ aspectRatio: "16 / 9" }}
+                >
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)]"
+                  style={{ aspectRatio: "16 / 9" }}
+                >
+                  No image
+                </div>
+              )}
+
+              <div className="p-4">
+                <div className="flex justify-between items-start gap-3">
+                  <h2 className="font-semibold text-lg text-[var(--text-primary)] leading-snug">
+                    {event.title}
+                  </h2>
+                  <span
+                    className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
+                      event.status
+                    )}`}
                   >
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="w-24 rounded-lg overflow-hidden bg-[var(--bg-secondary)] border border-dashed border-black/10 shrink-0 flex items-center justify-center text-xs text-[var(--text-muted)]"
-                    style={{ aspectRatio: "9 / 16" }}
-                  >
-                    No image
-                  </div>
-                )}
+                    {event.status}
+                  </span>
+                </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-3 mb-2">
-                    <h2 className="font-semibold text-lg text-[var(--text-primary)] truncate">
-                      {event.title}
-                    </h2>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(event.status)}`}>
-                      {event.status}
-                    </span>
+                <div className="mt-2 text-sm text-[var(--text-muted)] space-y-1">
+                  <div>📍 {event.location || "Hotel Premises"}</div>
+                  <div>
+                    📅 {formatDateDDMMYYYY(event.eventDate)}{" "}
+                    {event.eventTime && `@ ${event.eventTime}`}
                   </div>
+                </div>
 
-                  <p className="text-sm text-[var(--text-muted)] mt-1">
-                    📍 {event.location || "Hotel Premises"}
+                {event.description ? (
+                  <p className="mt-3 text-sm text-[var(--text-primary)] opacity-80 line-clamp-2">
+                    {event.description}
                   </p>
+                ) : null}
 
-                  <p className="text-sm text-[var(--text-muted)]">
-                    📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
-                  </p>
-
-                  <div className="mt-3 text-sm font-semibold" style={{ color: "var(--brand)" }}>
-                    View details
-                  </div>
+                <div
+                  className="mt-4 text-sm font-semibold"
+                  style={{ color: "var(--brand)" }}
+                >
+                  View details
                 </div>
               </div>
             </Link>

@@ -57,7 +57,7 @@ export default function GuestEventDetails() {
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
       <GuestHeader />
 
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 max-w-xl mx-auto">
         <div className="mb-4">
           <Link
             to="/guest/events"
@@ -72,11 +72,11 @@ export default function GuestEventDetails() {
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         {!loading && !error && event && (
-          <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="bg-white rounded-xl shadow-sm border border-black/5 overflow-hidden">
             {event.image ? (
               <div
-                className="w-full rounded-lg overflow-hidden mb-4 bg-[var(--bg-secondary)] border border-black/10"
-                style={{ aspectRatio: "9 / 16" }}
+                className="w-full bg-[var(--bg-secondary)]"
+                style={{ aspectRatio: "16 / 9" }}
               >
                 <img
                   src={event.image}
@@ -86,56 +86,59 @@ export default function GuestEventDetails() {
               </div>
             ) : null}
 
-            <div className="flex justify-between items-start gap-3 mb-2">
-              <h1 className="text-xl font-semibold text-[var(--text-primary)]">
-                {event.title}
-              </h1>
-              <span
-                className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
-                  event.status
-                )}`}
-              >
-                {event.status}
-              </span>
-            </div>
+            <div className="p-4">
 
-            <p className="text-sm text-[var(--text-muted)] mt-1">
-              📍 {event.location || "Hotel Premises"}
-            </p>
-
-            <p className="text-sm text-[var(--text-muted)]">
-              📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
-            </p>
-
-            {event.description ? (
-              <div className="mt-4">
-                <div className="text-sm font-semibold text-[var(--text-primary)]">Details</div>
-                <div className="text-sm text-[var(--text-primary)] mt-1 whitespace-pre-wrap">
-                  {event.description}
-                </div>
-              </div>
-            ) : null}
-
-            {event.contact ? (
-              <p className="text-sm mt-4 text-[var(--text-muted)]">
-                📞 Contact: {" "}
-                <span className="font-semibold text-[var(--text-primary)]">{event.contact}</span>
-              </p>
-            ) : null}
-
-            {event.link ? (
-              <div className="mt-4">
-                <a
-                  href={normalizeExternalUrl(event.link)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-white px-3 py-2 rounded-lg font-semibold"
-                  style={{ backgroundColor: "var(--brand)" }}
+              <div className="flex justify-between items-start gap-3 mb-2">
+                <h1 className="text-xl font-semibold text-[var(--text-primary)]">
+                  {event.title}
+                </h1>
+                <span
+                  className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(
+                    event.status
+                  )}`}
                 >
-                  🔗 More Info
-                </a>
+                  {event.status}
+                </span>
               </div>
-            ) : null}
+
+              <p className="text-sm text-[var(--text-muted)] mt-1">
+                📍 {event.location || "Hotel Premises"}
+              </p>
+
+              <p className="text-sm text-[var(--text-muted)]">
+                📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
+              </p>
+
+              {event.description ? (
+                <div className="mt-4">
+                  <div className="text-sm font-semibold text-[var(--text-primary)]">Details</div>
+                  <div className="text-sm text-[var(--text-primary)] mt-1 whitespace-pre-wrap">
+                    {event.description}
+                  </div>
+                </div>
+              ) : null}
+
+              {event.contact ? (
+                <p className="text-sm mt-4 text-[var(--text-muted)]">
+                  📞 Contact: {" "}
+                  <span className="font-semibold text-[var(--text-primary)]">{event.contact}</span>
+                </p>
+              ) : null}
+
+              {event.link ? (
+                <div className="mt-4">
+                  <a
+                    href={normalizeExternalUrl(event.link)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1 text-white px-3 py-2 rounded-lg font-semibold w-full"
+                    style={{ backgroundColor: "var(--brand)" }}
+                  >
+                    🔗 More Info
+                  </a>
+                </div>
+              ) : null}
+            </div>
           </div>
         )}
       </div>
