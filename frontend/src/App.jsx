@@ -29,6 +29,7 @@ import MenuBrowse from "./pages/guest/MenuBrowse";
 import GuestCart from "./pages/guest/GuestCart";
 import GuestOrders from "./pages/guest/GuestOrders";
 import GuestEvent from "./pages/guest/GuestEvent";
+import GuestEventDetails from "./pages/guest/GuestEventDetails";
 import GuestHotelInfo from "./pages/guest/GuestHotelInfo";
 import GuestHousekeeping from "./pages/guest/GuestHousekeeping";
 
@@ -188,6 +189,15 @@ function App() {
         element={
           <GuestProtectedRoute>
             <GuestEvent />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/events/:id"
+        element={
+          <GuestProtectedRoute>
+            <GuestEventDetails />
           </GuestProtectedRoute>
         }
       />

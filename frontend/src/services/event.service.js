@@ -24,3 +24,8 @@ export const getGuestEvents = async () => {
 const res = await api.get("/guest/events");
 return res.data;
 };
+
+export const getGuestEventById = async (id) => {
+  const res = await api.get(`/guest/events/${id}`);
+  return res.data;
+};

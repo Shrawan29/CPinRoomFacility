@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import {
   getEvents,
   createEvent,
+  updateEvent,
   deleteEvent,
 } from "../../services/event.service";
 
@@ -17,6 +18,7 @@ export default function AdminEvents() {
   const [form, setForm] = useState({
     title: "",
     description: "",
+    image: "",
     eventDate: "",
     eventTime: "",
     location: "",
@@ -24,6 +26,58 @@ export default function AdminEvents() {
     link: "",
     status: "UPCOMING",
   });
+
+  const handleImageFile = (file) => {
+    setError("");
+    if (!file) {
+      setForm({ ...form, image: "" });
+      return;
+    }
+
+    const maxBytes = 1024 * 1024; // 1MB
+    if (file.size > maxBytes) {
+      setError("Image too large (max 1MB)");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      setForm((prev) => ({ ...prev, image: dataUrl }));
+    };
+    reader.onerror = () => {
+      setError("Failed to read image");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const updateEventImage = async (eventId, file) => {
+    setError("");
+    setMessage("");
+
+    if (!file) return;
+    const maxBytes = 1024 * 1024; // 1MB
+    if (file.size > maxBytes) {
+      setError("Image too large (max 1MB)");
+      return;
+    }
+
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      await updateEvent(eventId, { image: dataUrl });
+      setMessage("Event image updated");
+      loadEvents();
+      setTimeout(() => setMessage(""), 2000);
+    } catch {
+      setError("Failed to update event image");
+    }
+  };
 
   // Helper function to format date as DD/MM/YYYY
   const formatDateDDMMYYYY = (dateString) => {
@@ -114,6 +168,7 @@ export default function AdminEvents() {
       setForm({
         title: "",
         description: "",
+        image: "",
         eventDate: "",
         eventTime: "",
         location: "",
@@ -293,6 +348,25 @@ export default function AdminEvents() {
 
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                    Event Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageFile(e.target.files?.[0])}
+                    className="w-full text-base"
+                  />
+                  {form.image ? (
+                    <img
+                      src={form.image}
+                      alt="Event"
+                      className="mt-2 w-full max-h-40 object-cover rounded-lg border"
+                    />
+                  ) : null}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                     Description
                   </label>
                   <textarea
@@ -349,6 +423,14 @@ export default function AdminEvents() {
                 >
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
+                      {event.image ? (
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          className="w-full max-h-44 object-cover rounded-lg mb-4 border"
+                        />
+                      ) : null}
+
                       <div className="flex items-start gap-3 mb-3">
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-1">
@@ -397,12 +479,26 @@ export default function AdminEvents() {
                         <p className="text-xs text-[var(--text-muted)]">
                           📝 Status updates automatically based on event date
                         </p>
-                        <button
-                          onClick={() => handleDelete(event._id)}
-                          className="text-xs px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-md font-medium transition-all"
-                        >
-                          🗑 Delete
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer"
+                            style={{ color: "var(--brand)" }}
+                          >
+                            🖼 Change Image
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => updateEventImage(event._id, e.target.files?.[0])}
+                              className="hidden"
+                            />
+                          </label>
+
+                          <button
+                            onClick={() => handleDelete(event._id)}
+                            className="text-xs px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-md font-medium transition-all"
+                          >
+                            🗑 Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -4,6 +4,12 @@ const eventSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: String,
+    image: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 2000000,
+    },
     eventDate: { type: Date, required: true },
     eventTime: { type: String }, // Format: HH:MM (e.g., "14:30")
     location: String,

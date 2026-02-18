@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getGuestEvents } from "../../services/event.service";
 import GuestHeader from "../../components/guest/GuestHeader";
+import { Link } from "react-router-dom";
 
 export default function GuestEvents() {
   const [events, setEvents] = useState([]);
@@ -79,10 +80,19 @@ export default function GuestEvents() {
         {/* EVENTS LIST */}
         <div className="space-y-4 mt-4">
           {events.map((event) => (
-            <div
+            <Link
               key={event._id}
+              to={`/guest/events/${event._id}`}
               className="bg-white rounded-xl shadow-sm p-4"
             >
+              {event.image ? (
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="w-full max-h-44 object-cover rounded-lg mb-3"
+                />
+              ) : null}
+
               <div className="flex justify-between items-start gap-3 mb-2">
                 <h2 className="font-semibold text-lg text-[var(--text-primary)]">
                   {event.title}
@@ -100,32 +110,10 @@ export default function GuestEvents() {
                 📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
               </p>
 
-              {event.description && (
-                <p className="text-sm mt-2 text-[var(--text-primary)]">
-                  {event.description}
-                </p>
-              )}
-
-              {event.contact && (
-                <p className="text-sm mt-2 text-[var(--text-muted)]">
-                  📞 Contact: <span className="font-semibold text-[var(--text-primary)]">{event.contact}</span>
-                </p>
-              )}
-
-              {event.link && (
-                <p className="text-sm mt-2">
-                  <a
-                    href={event.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-white px-3 py-1 rounded-lg font-semibold"
-                    style={{ backgroundColor: "var(--brand)" }}
-                  >
-                    🔗 More Info
-                  </a>
-                </p>
-              )}
-            </div>
+              <div className="mt-3 text-sm font-semibold" style={{ color: "var(--brand)" }}>
+                View details
+              </div>
+            </Link>
           ))}
         </div>
       </div>
