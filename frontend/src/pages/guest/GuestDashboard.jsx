@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import hotelbg from "../../assets/hotel-bg.jpg";
@@ -9,10 +8,6 @@ export default function GuestDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const inRoomRef = useRef(null);
-  const moreRef = useRef(null);
-
-  const guestLastName = guest?.name ? guest.name.trim().split(/\s+/).slice(-1)[0] : "";
   const guestFirstName = guest?.name
     ? guest.name.split(" ")[0]
     : guest?.guestName
@@ -135,78 +130,45 @@ export default function GuestDashboard() {
     ),
   };
 
-  const cardHoverClassName = "hover:bg-white/60 hover:shadow-[0_14px_34px_rgba(0,0,0,0.06)]";
+  const cardHoverClassName = "hover:bg-white/70 hover:shadow-[0_14px_34px_rgba(0,0,0,0.06)]";
 
-  const bottomNav = useMemo(
-    () => [
-      {
-        key: "home",
-        label: "Home",
-        iconKey: "home",
-        path: "/guest/dashboard",
-        match: ["/guest/dashboard"],
-      },
-      {
-        key: "orders",
-        label: "Orders",
-        iconKey: "orders",
-        path: "/guest/orders",
-        match: ["/guest/orders"],
-      },
-      {
-        key: "spa",
-        label: "Spa",
-        iconKey: "spa",
-        path: "/guest/dashboard#in-room",
-        match: ["/guest/dashboard"],
-      },
-      {
-        key: "concierge",
-        label: "Concierge",
-        iconKey: "assistance",
-        path: "/guest/dashboard#more",
-        match: ["/guest/dashboard"],
-      },
-    ],
-    []
-  );
+  const bottomNav = [
+    {
+      key: "home",
+      label: "Home",
+      iconKey: "home",
+      path: "/guest/dashboard",
+      match: ["/guest/dashboard"],
+    },
+    {
+      key: "orders",
+      label: "Orders",
+      iconKey: "orders",
+      path: "/guest/orders",
+      match: ["/guest/orders"],
+    },
+    {
+      key: "services",
+      label: "Services",
+      iconKey: "services",
+      path: "/guest/menu",
+      match: ["/guest/menu", "/guest/cart", "/guest/housekeeping"],
+    },
+    {
+      key: "profile",
+      label: "Profile",
+      iconKey: "profile",
+      path: "/guest/hotel-info",
+      match: ["/guest/hotel-info"],
+    },
+  ];
 
   const isNavActive = (navItem) =>
     navItem.match.some(
       (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     );
 
-  const scrollToSection = (hash) => {
-    const ref = hash === "#in-room" ? inRoomRef : hash === "#more" ? moreRef : null;
-    if (!ref?.current) return;
-    ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  useEffect(() => {
-    if (location.pathname !== "/guest/dashboard") return;
-    if (!location.hash) return;
-    scrollToSection(location.hash);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, location.hash]);
-
-  const handleBottomNav = (item) => {
-    if (item.path.startsWith("/guest/dashboard#")) {
-      const hash = item.path.split("#")[1] ? `#${item.path.split("#")[1]}` : "";
-      if (location.pathname !== "/guest/dashboard") {
-        navigate(item.path);
-        return;
-      }
-      if (hash) {
-        window.history.replaceState(null, "", `${location.pathname}${hash}`);
-        scrollToSection(hash);
-      }
-      return;
-    }
-
-    navigate(item.path);
-  };
-
-  const inRoomServices = [
+  const primaryActions = [
     {
       iconKey: "housekeeping",
       title: "Housekeeping",
@@ -229,7 +191,7 @@ export default function GuestDashboard() {
     },
   ];
 
-  const moreItems = [
+  const secondaryActions = [
     {
       iconKey: "menu",
       title: "Browse Menu",
@@ -250,35 +212,32 @@ export default function GuestDashboard() {
     },
   ];
 
-  const ServiceCard = ({ iconKey, title, path }) => (
+  const PrimaryCard = ({ iconKey, title, path }) => (
     <button
       type="button"
       onClick={() => navigate(path)}
-      className="w-full rounded-[18px] bg-white/65 shadow-[0_10px_22px_rgba(0,0,0,0.06)] backdrop-blur-md px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
+      className={`w-full rounded-[18px] bg-white/65 shadow-[0_10px_22px_rgba(0,0,0,0.06)] px-4 py-4 active:scale-[0.99] transition ${cardHoverClassName} focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
       aria-label={title}
     >
-      <div className="flex flex-col items-center text-center gap-2">
+      <div className="flex flex-col items-center text-center gap-3">
         <div
           className="h-11 w-11 rounded-[16px] bg-white/75 shadow-[0_8px_16px_rgba(0,0,0,0.04)] flex items-center justify-center"
           style={{ color: "var(--text-muted)" }}
         >
           {icons[iconKey]}
         </div>
-        <div
-          className="text-[12px] leading-tight"
-          style={{ color: "var(--text-muted)" }}
-        >
+        <div className="text-sm font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
           {title}
         </div>
       </div>
     </button>
   );
 
-  const ActionTile = ({ iconKey, title, subtitle, path }) => (
+  const SecondaryCard = ({ iconKey, title, subtitle, path }) => (
     <button
       type="button"
       onClick={() => navigate(path)}
-      className={`group w-full text-left rounded-[18px] bg-white/55 shadow-[0_10px_26px_rgba(0,0,0,0.06)] backdrop-blur-md ${cardHoverClassName} px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
+      className={`group shrink-0 w-[280px] rounded-[18px] bg-white/60 shadow-[0_10px_22px_rgba(0,0,0,0.06)] ${cardHoverClassName} px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
       aria-label={title}
     >
       <div className="flex items-center gap-3">
@@ -292,14 +251,9 @@ export default function GuestDashboard() {
           <div className="text-sm font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
             {title}
           </div>
-          {subtitle ? (
-            <div
-              className="mt-2 text-xs leading-snug"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {subtitle}
-            </div>
-          ) : null}
+          <div className="mt-2 text-xs leading-snug" style={{ color: "var(--text-muted)" }}>
+            {subtitle}
+          </div>
         </div>
         <div
           className="transition-transform group-hover:translate-x-0.5"
@@ -338,7 +292,7 @@ export default function GuestDashboard() {
               <button
                 key={item.key}
                 type="button"
-                onClick={() => handleBottomNav(item)}
+                onClick={() => navigate(item.path)}
                 className="rounded-[18px] px-2 py-2 transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
                 style={{
                   backgroundColor: active ? "rgba(164,0,93,0.08)" : "transparent",
@@ -395,10 +349,6 @@ export default function GuestDashboard() {
             <div className="relative px-4 pt-10 pb-8">
               <div className="max-w-xl mx-auto">
                 <div className="max-w-[20rem]">
-                  <div className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    Welcome{guestFirstName && guestFirstName !== "Guest" ? ` ${guestFirstName}` : ""}
-                  </div>
-
                   <h1
                     className="mt-2 text-[34px] leading-[1.05] font-display"
                     style={{ color: "var(--text-primary)" }}
@@ -410,32 +360,29 @@ export default function GuestDashboard() {
 
                   <div className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
                     Room {guest?.roomNumber || "—"}
-                    {guestLastName && guestLastName !== guestFirstName ? `  |  ${guestLastName}` : ""}
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <div className="h-8" />
-
-          <div className="mt-6" ref={inRoomRef}>
+          <div className="mt-6">
             <SectionHeader
               title="In-Room Services"
               subtitle="Everything you need during your stay"
             />
-            <div className="mt-4 grid grid-cols-4 gap-3">
-              {inRoomServices.map((item) => (
-                <ServiceCard key={item.title} {...item} />
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              {primaryActions.map((item) => (
+                <PrimaryCard key={item.title} {...item} />
               ))}
             </div>
           </div>
 
-          <div className="mt-6" ref={moreRef}>
+          <div className="mt-6">
             <SectionHeader title="More" subtitle="Explore the hotel" />
-            <div className="mt-4 grid grid-cols-1 gap-4">
-              {moreItems.map((item) => (
-                <ActionTile key={item.title} {...item} />
+            <div className="mt-4 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {secondaryActions.map((item) => (
+                <SecondaryCard key={item.title} {...item} />
               ))}
             </div>
           </div>
