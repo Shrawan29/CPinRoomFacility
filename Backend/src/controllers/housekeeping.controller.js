@@ -3,11 +3,14 @@ import ServiceRequest from "../models/ServiceRequest.js";
 import HotelInfo from "../models/HotelInfo.js";
 
 const resolveHotelId = async () => {
-  const hotel = await HotelInfo.findOne().select("_id");
+  let hotel = await HotelInfo.findOne().select("_id");
   if (!hotel) {
-    const error = new Error("HotelInfo not configured");
-    error.statusCode = 500;
-    throw error;
+    const name = String(process.env.HOTEL_NAME || "Hotel").trim() || "Hotel";
+    hotel = await HotelInfo.create({
+      basicInfo: {
+        name,
+      },
+    });
   }
   return hotel._id;
 };
