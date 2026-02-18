@@ -278,95 +278,45 @@ export default function GuestDashboard() {
     </div>
   );
 
-  const BottomNav = () => (
-    <nav
-      className="fixed bottom-0 inset-x-0 z-50 border-t border-black/10 bg-white/55 backdrop-blur-md shadow-[0_-12px_28px_rgba(0,0,0,0.06)]"
-      aria-label="Bottom navigation"
-    >
-      <div className="max-w-xl mx-auto px-2">
-        <div className="grid grid-cols-4 gap-2 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]">
-          {bottomNav.map((item) => {
-            const active = isNavActive(item);
-
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => navigate(item.path)}
-                className="rounded-[18px] px-2 py-2 transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
-                style={{
-                  backgroundColor: active ? "rgba(164,0,93,0.08)" : "transparent",
-                }}
-              >
-                <div className="flex flex-col items-center gap-1">
-                  <div
-                    className="h-9 w-9 rounded-[18px] flex items-center justify-center"
-                    style={{
-                      color: active ? "var(--brand)" : "var(--text-muted)",
-                      backgroundColor: active ? "rgba(255,255,255,0.55)" : "transparent",
-                      border: active ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
-                    }}
-                  >
-                    {icons[item.iconKey]}
-                  </div>
-                  <div
-                    className="text-[11px] tracking-wide"
-                    style={{ color: active ? "var(--brand)" : "var(--text-muted)" }}
-                  >
-                    {item.label}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </nav>
-  );
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-primary)" }}>
       <GuestHeader />
-
-      <main className="flex-1 px-4 pt-4 pb-24">
+      {/* Remove extra top/bottom padding, attach hero to header */}
+      <main className="flex-1 px-4 pt-0 pb-0">
         <div className="max-w-xl mx-auto">
+          {/* Hero Section */}
           <section
             className="relative overflow-hidden -mx-4"
             style={{
               backgroundImage: `url(${hotelbg})`,
               backgroundSize: "cover",
-              backgroundPosition: "right center",
+              backgroundPosition: "center center",
+              minHeight: 180,
             }}
           >
             <div
-              className="absolute inset-0 backdrop-blur-[2px]"
+              className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(90deg, rgba(246,234,219,0.97) 0%, rgba(246,234,219,0.90) 52%, rgba(246,234,219,0.22) 100%)",
+                  "linear-gradient(0deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.10) 60%, rgba(246,234,219,0.0) 100%)",
               }}
             />
-
-            <div className="relative px-4 pt-10 pb-8">
-              <div className="max-w-xl mx-auto">
-                <div className="max-w-[20rem]">
-                  <h1
-                    className="mt-2 text-[34px] leading-[1.05] font-display"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    Make yourself
-                    <br />
-                    at home
-                  </h1>
-
-                  <div className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
-                    Room {guest?.roomNumber || "—"}
-                  </div>
-                </div>
+            <div className="relative px-6 py-6 flex flex-col justify-end min-h-[180px]" style={{ zIndex: 1 }}>
+              <h1
+                className="text-[30px] leading-[1.1] font-display font-semibold text-white drop-shadow-md"
+                style={{ textShadow: "0 2px 12px rgba(0,0,0,0.18)" }}
+              >
+                Make yourself at home
+              </h1>
+              <div className="mt-2 text-sm font-medium text-white/80" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.12)" }}>
+                Room {guest?.roomNumber || "—"}
               </div>
             </div>
           </section>
 
-          <div className="mt-6">
+          {/* In-Room Services */}
+          <div className="mt-8">
             <SectionHeader
               title="In-Room Services"
               subtitle="Everything you need during your stay"
@@ -378,7 +328,8 @@ export default function GuestDashboard() {
             </div>
           </div>
 
-          <div className="mt-6">
+          {/* More Section */}
+          <div className="mt-8">
             <SectionHeader title="More" subtitle="Explore the hotel" />
             <div className="mt-4 flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {secondaryActions.map((item) => (
@@ -388,8 +339,6 @@ export default function GuestDashboard() {
           </div>
         </div>
       </main>
-
-      <BottomNav />
     </div>
   );
 }
