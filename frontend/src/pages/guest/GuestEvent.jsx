@@ -59,7 +59,7 @@ export default function GuestEvents() {
             🎉 Hotel Events
           </h1>
           <p className="text-sm text-[var(--text-muted)]">
-            What's happening during your stay
+            Tap an event to view details
           </p>
         </div>
 
@@ -127,12 +127,6 @@ export default function GuestEvents() {
                     {event.eventTime && `@ ${event.eventTime}`}
                   </div>
                 </div>
-
-                {event.description ? (
-                  <p className="mt-3 text-sm text-[var(--text-primary)] opacity-80 line-clamp-2">
-                    {event.description}
-                  </p>
-                ) : null}
 
                 <div
                   className="mt-4 text-sm font-semibold"
