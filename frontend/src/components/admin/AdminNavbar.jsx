@@ -10,7 +10,7 @@ export default function AdminNavbar() {
       {/* Page Title */}
       <h1 className="text-lg font-semibold text-[var(--text-primary)]">
         {role === "SUPER_ADMIN"
-          ? "Reports"
+          ? "Super Admin Dashboard"
           : role === "HOUSEKEEPING_ADMIN"
           ? "Housekeeping"
           : "Kitchen Dashboard"}

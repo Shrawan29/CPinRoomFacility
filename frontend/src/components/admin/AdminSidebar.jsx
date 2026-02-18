@@ -10,9 +10,15 @@ export default function AdminSidebar() {
   /* ---------------- ROLE BASED MENUS ---------------- */
 
   const superAdminMenu = [
+    { label: "Dashboard", path: "/admin/super/dashboard" },
     { label: "Create Admin", path: "/admin/super/create-admin" },
     { label: "Manage Admins", path: "/admin/super/admins" },
+    { label: "Rooms", path: "/admin/super/rooms" },
+    { label: "QR Codes", path: "/admin/qr-codes" },
+    { label: "Hotel Info", path: "/admin/hotel-info" },
+    { label: "Events", path: "/admin/events" },
     { label: "Reports", path: "/admin/reports" },
+    { label: "Housekeeping", path: "/admin/housekeeping" },
   ];
 
   const diningAdminMenu = [

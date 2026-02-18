@@ -29,11 +29,9 @@ export default function AdminLogin() {
       console.log("Token stored in localStorage:", storedToken ? "✅ Yes" : "❌ No");
 
       if (data.admin.role === "SUPER_ADMIN") {
-        navigate("/admin/reports");
+        navigate("/admin/super/dashboard");
       } else if (data.admin.role === "DINING_ADMIN") {
         navigate("/admin/kitchen/dashboard");
-      } else if (data.admin.role === "HOUSEKEEPING_ADMIN") {
-        navigate("/admin/housekeeping");
       }
     } catch (err) {
       console.error("Login error:", err);

@@ -8,7 +8,7 @@ export const createAdmin = async (req, res) => {
   try {
     const { name, email, phone, password, role } = req.body;
 
-    const allowedRoles = ["DINING_ADMIN", "HOUSEKEEPING_ADMIN"];
+    const allowedRoles = ["DINING_ADMIN"];
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({
         message: "Invalid admin role",
@@ -107,13 +107,7 @@ export const updateAdmin = async (req, res) => {
     return res.status(400).json({ message: "Cannot modify Super Admin" });
   }
 
-  if (role) {
-    const allowedRoles = ["DINING_ADMIN", "HOUSEKEEPING_ADMIN"];
-    if (!allowedRoles.includes(role)) {
-      return res.status(400).json({ message: "Invalid admin role" });
-    }
-    admin.role = role;
-  }
+  if (role) admin.role = role;
   if (phone) admin.phone = phone;
 
   await admin.save();
