@@ -8,6 +8,7 @@ import {
   updateEvent,
   deleteEvent,
 } from "../../services/event.service";
+import { normalizeExternalUrl } from "../../services/url.util";
 
 export default function AdminEvents() {
   const [events, setEvents] = useState([]);
@@ -162,7 +163,11 @@ export default function AdminEvents() {
 
     try {
       setLoading(true);
-      await createEvent(form);
+      const payload = {
+        ...form,
+        link: normalizeExternalUrl(form.link),
+      };
+      await createEvent(payload);
 
       setMessage("Event added successfully");
       setForm({
@@ -481,7 +486,7 @@ export default function AdminEvents() {
 
                           {event.link && (
                             <a
-                              href={event.link}
+                              href={normalizeExternalUrl(event.link)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[var(--brand)] font-semibold hover:underline truncate"

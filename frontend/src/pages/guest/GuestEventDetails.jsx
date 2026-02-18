@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import GuestHeader from "../../components/guest/GuestHeader";
 import { getGuestEventById } from "../../services/event.service";
+import { normalizeExternalUrl } from "../../services/url.util";
 
 const formatDateDDMMYYYY = (dateString) => {
   const date = new Date(dateString);
@@ -120,7 +121,7 @@ export default function GuestEventDetails() {
             {event.link ? (
               <div className="mt-4">
                 <a
-                  href={event.link}
+                  href={normalizeExternalUrl(event.link)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-white px-3 py-2 rounded-lg font-semibold"
