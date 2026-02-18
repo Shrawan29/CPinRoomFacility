@@ -29,14 +29,14 @@ router.get("/", housekeepingAuth, validateStatusQuery, listHousekeepingRequests)
 router.patch(
   "/:id/accept",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN"),
+  allowRoles("HOUSEKEEPING_ADMIN"),
   acceptHousekeepingRequest
 );
 
 router.patch(
   "/:id/complete",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN"),
+  allowRoles("HOUSEKEEPING_ADMIN"),
   completeHousekeepingRequest
 );
 

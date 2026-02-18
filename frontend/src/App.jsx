@@ -117,7 +117,7 @@ function App() {
       <Route
         path="/admin/housekeeping"
         element={
-          <ProtectedRoute allowedRoles={["HOUSEKEEPING_ADMIN", "SUPER_ADMIN"]}>
+          <ProtectedRoute allowedRoles={["HOUSEKEEPING_ADMIN"]}>
             <HousekeepingDashboard />
           </ProtectedRoute>
         }
