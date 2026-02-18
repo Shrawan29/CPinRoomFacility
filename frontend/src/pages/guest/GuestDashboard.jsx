@@ -19,7 +19,7 @@ export default function GuestDashboard() {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.75"
+      strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -37,20 +37,22 @@ export default function GuestDashboard() {
       </Icon>
     ),
     housekeeping: (
-      <Icon className="w-5 h-5">
-        <path d="M4 20h10" />
-        <path d="M7 20V10" />
-        <path d="M7 10l8-6" />
-        <path d="M15 4l5 5" />
+      <Icon className="w-6 h-6">
+        <path d="M6 3l12 12" />
+        <path d="M10 7l-2 2" />
+        <path d="M14 11l-2 2" />
+        <path d="M4 20h7" />
+        <path d="M4 20c1.2-3.4 3.6-5.8 7-7" />
+        <path d="M11 13c1.2 0 2.7 1.1 3.6 2.1" />
       </Icon>
     ),
     food: (
-      <Icon className="w-5 h-5">
-        <path d="M4 3v8" />
-        <path d="M7 3v8" />
-        <path d="M5.5 3v8" />
-        <path d="M10 7h2" />
-        <path d="M14 3v8c0 1.5 1 2 2 2v8" />
+      <Icon className="w-6 h-6">
+        <path d="M6 18h12" />
+        <path d="M7 18v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1" />
+        <path d="M8 12h8" />
+        <path d="M5 12a7 7 0 0 1 14 0" />
+        <path d="M12 9v-1" />
       </Icon>
     ),
     menu: (
@@ -106,18 +108,18 @@ export default function GuestDashboard() {
     ),
     spa: (
       <Icon className="w-6 h-6">
-        <path d="M12 21c3 0 6-2.2 6-5.2 0-2.6-2-4.1-4.3-5.5C12.5 9.6 12 8.8 12 7.7c0 1.1-.5 1.9-1.7 2.6C8 11.7 6 13.2 6 15.8 6 18.8 9 21 12 21z" />
-        <path d="M9 7c0-2 1.3-3.5 3-5 1.7 1.5 3 3 3 5" />
+        <path d="M12 20c4-2 6-5 6-8-3 0-5 1.2-6 3-1-1.8-3-3-6-3 0 3 2 6 6 8z" />
+        <path d="M12 15c0-3-1.4-6-4-8" />
+        <path d="M12 15c0-3 1.4-6 4-8" />
       </Icon>
     ),
     laundry: (
       <Icon className="w-6 h-6">
-        <path d="M7 3h10a2 2 0 0 1 2 2v16H5V5a2 2 0 0 1 2-2z" />
-        <path d="M9 7h.01" />
-        <path d="M12 7h.01" />
-        <path d="M15 7h.01" />
-        <path d="M12 18a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" />
-        <path d="M10.5 14.5c.6 1 1.7 1.7 3 1.8" />
+        <path d="M6 9h12" />
+        <path d="M7 9l1.2-3.5A2 2 0 0 1 10.1 4h3.8a2 2 0 0 1 1.9 1.5L17 9" />
+        <path d="M6 9v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9" />
+        <path d="M9 13h6" />
+        <path d="M9 16h6" />
       </Icon>
     ),
     assistance: (
