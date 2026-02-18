@@ -17,22 +17,22 @@ export default function GuestHeader() {
 
   return (
     <header
-      className="px-4 py-3 shadow-sm flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm"
-      style={{ backgroundColor: "var(--bg-secondary)" }}
+      className="px-4 py-3 flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm border-b border-black/5"
+      style={{ backgroundColor: "rgba(239,225,207,0.85)" }}
     >
       {/* LEFT: LOGO + HOTEL NAME */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-white/70 backdrop-blur-sm flex items-center justify-center shadow-sm border border-black/5">
+        <div className="w-11 h-11 rounded-xl bg-white/70 backdrop-blur-sm flex items-center justify-center border border-black/5">
           <img
             src={logo}
             alt="Hotel Logo"
-            className="w-10 h-10 object-contain"
+            className="w-9 h-9 object-contain"
           />
         </div>
 
         <div className="flex flex-col">
           <h1
-            className="text-base font-bold leading-tight"
+            className="text-[15px] font-semibold leading-tight tracking-wide"
             style={{ color: "var(--text-primary)" }}
           >
             Hotel Centre Point
@@ -62,7 +62,7 @@ export default function GuestHeader() {
 
         <button
           onClick={handleLogout}
-          className="text-sm px-4 py-2 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-95 shadow-sm border border-black/10"
+          className="text-sm px-4 py-2 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-[0.99] border border-black/10"
           style={{
             backgroundColor: "var(--brand)",
             color: "white",
