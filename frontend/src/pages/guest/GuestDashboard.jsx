@@ -99,6 +99,11 @@ export default function GuestDashboard() {
         <path d="M12 13a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" />
       </Icon>
     ),
+    chevronRight: (
+      <Icon className="w-5 h-5">
+        <path d="M10 7l5 5-5 5" />
+      </Icon>
+    ),
     assistance: (
       <Icon className="w-5 h-5">
         <path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" />
@@ -106,6 +111,10 @@ export default function GuestDashboard() {
       </Icon>
     ),
   };
+
+  const cardClassName =
+    "rounded-[18px] border border-black/10 bg-white/45 shadow-[0_10px_26px_rgba(0,0,0,0.05)] backdrop-blur-md";
+  const cardHoverClassName = "hover:bg-white/60 hover:shadow-[0_14px_34px_rgba(0,0,0,0.06)]";
 
   const bottomNav = [
     {
@@ -189,7 +198,8 @@ export default function GuestDashboard() {
     <button
       type="button"
       onClick={() => navigate(path)}
-      className="group w-full text-left rounded-[18px] border border-black/10 bg-white/45 px-4 py-4 shadow-[0_10px_26px_rgba(0,0,0,0.05)] backdrop-blur-md hover:bg-white/60 hover:shadow-[0_14px_34px_rgba(0,0,0,0.06)] active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
+      className={`group w-full text-left ${cardClassName} ${cardHoverClassName} px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
+      aria-label={title}
     >
       <div className="flex items-center gap-3">
         <div
@@ -212,10 +222,10 @@ export default function GuestDashboard() {
           ) : null}
         </div>
         <div
-          className="text-lg leading-none transition-transform group-hover:translate-x-0.5"
+          className="transition-transform group-hover:translate-x-0.5"
           style={{ color: "var(--text-muted)" }}
         >
-          →
+          {icons.chevronRight}
         </div>
       </div>
     </button>
@@ -249,7 +259,7 @@ export default function GuestDashboard() {
       aria-label="Bottom navigation"
     >
       <div className="max-w-xl mx-auto px-2">
-        <div className="grid grid-cols-4 gap-2 py-2">
+        <div className="grid grid-cols-4 gap-2 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]">
           {bottomNav.map((item) => {
             const active = isNavActive(item);
 
@@ -354,7 +364,7 @@ export default function GuestDashboard() {
           </div>
 
           <div
-            className="p-4 rounded-[18px] border border-black/10 bg-white/45 shadow-[0_10px_26px_rgba(0,0,0,0.05)] backdrop-blur-md"
+            className={`p-4 ${cardClassName}`}
             style={{ backgroundColor: "rgba(239,225,207,0.55)" }}
           >
             <div className="flex items-start gap-3">
