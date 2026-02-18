@@ -10,6 +10,16 @@
   --text-muted: #6B6B6B;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  letter-spacing: 0.01em;
+}
+
 /* Custom styles for react-datepicker */
 .react-datepicker {
   background-color: #ffffff;

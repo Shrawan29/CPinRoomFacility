@@ -1,29 +1,18 @@
-
-// ============================================
-// GuestDashboard.jsx - Enhanced Version
-// ============================================
-
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import hotelbg from "../../assets/hotel-bg.jpg";
 import GuestHeader from "../../components/guest/GuestHeader";
 
 export default function GuestDashboard() {
-  const { guest, logout } = useGuestAuth();
+  const { guest } = useGuestAuth();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  // Extract guest name - check multiple possible property names
-  const guestFirstName = 
-    guest?.name 
-      ? guest.name.split(" ")[0]
-      : guest?.guestName
-      ? guest.guestName.split(" ")[0]
-      : "Guest";
-
-  const handleLogout = () => {
-    logout();
-    navigate("/guest/access-fallback");
-  };
+  const guestFirstName = guest?.name
+    ? guest.name.split(" ")[0]
+    : guest?.guestName
+    ? guest.guestName.split(" ")[0]
+    : "Guest";
 
   const Icon = ({ children, className = "" }) => (
     <svg
@@ -41,8 +30,14 @@ export default function GuestDashboard() {
   );
 
   const icons = {
+    home: (
+      <Icon className="w-5 h-5">
+        <path d="M3 10.5l9-7 9 7" />
+        <path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" />
+      </Icon>
+    ),
     housekeeping: (
-      <Icon className="w-5 h-5" >
+      <Icon className="w-5 h-5">
         <path d="M4 20h10" />
         <path d="M7 20V10" />
         <path d="M7 10l8-6" />
@@ -63,6 +58,15 @@ export default function GuestDashboard() {
         <path d="M6 7h12" />
         <path d="M6 12h12" />
         <path d="M6 17h12" />
+      </Icon>
+    ),
+    services: (
+      <Icon className="w-5 h-5">
+        <path d="M4 7h7" />
+        <path d="M4 17h7" />
+        <path d="M13 7h7" />
+        <path d="M13 17h7" />
+        <path d="M4 12h16" />
       </Icon>
     ),
     events: (
@@ -89,6 +93,12 @@ export default function GuestDashboard() {
         <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
       </Icon>
     ),
+    profile: (
+      <Icon className="w-5 h-5">
+        <path d="M20 21a8 8 0 1 0-16 0" />
+        <path d="M12 13a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" />
+      </Icon>
+    ),
     assistance: (
       <Icon className="w-5 h-5">
         <path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" />
@@ -97,15 +107,53 @@ export default function GuestDashboard() {
     ),
   };
 
+  const bottomNav = [
+    {
+      key: "home",
+      label: "Home",
+      iconKey: "home",
+      path: "/guest/dashboard",
+      match: ["/guest/dashboard"],
+    },
+    {
+      key: "orders",
+      label: "Orders",
+      iconKey: "orders",
+      path: "/guest/orders",
+      match: ["/guest/orders"],
+    },
+    {
+      key: "services",
+      label: "Services",
+      iconKey: "services",
+      path: "/guest/menu",
+      match: ["/guest/menu", "/guest/cart", "/guest/housekeeping"],
+    },
+    {
+      key: "profile",
+      label: "Profile",
+      iconKey: "profile",
+      path: "/guest/hotel-info",
+      match: ["/guest/hotel-info"],
+    },
+  ];
+
+  const isNavActive = (navItem) =>
+    navItem.match.some(
+      (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
+    );
+
   const inRoomServices = [
     {
       iconKey: "housekeeping",
       title: "Housekeeping",
+      subtitle: "Cleaning, towels & amenities",
       path: "/guest/housekeeping",
     },
     {
       iconKey: "food",
       title: "Food Order",
+      subtitle: "Order meals to your room",
       path: "/guest/menu",
     },
   ];
@@ -114,91 +162,182 @@ export default function GuestDashboard() {
     {
       iconKey: "menu",
       title: "Browse Menu",
+      subtitle: "All food & beverages",
       path: "/guest/menu",
     },
     {
       iconKey: "events",
       title: "Events",
+      subtitle: "What’s happening today",
       path: "/guest/events",
     },
     {
       iconKey: "orders",
       title: "My Orders",
+      subtitle: "Track your orders",
       path: "/guest/orders",
     },
     {
       iconKey: "info",
       title: "Hotel Info",
+      subtitle: "Amenities & Wi‑Fi",
       path: "/guest/hotel-info",
     },
   ];
 
-  const ActionTile = ({ iconKey, title, path }) => (
+  const ActionTile = ({ iconKey, title, subtitle, path }) => (
     <button
       type="button"
       onClick={() => navigate(path)}
-      className="w-full text-left rounded-card border border-black/10 bg-white/40 px-4 py-3 shadow-[0_6px_20px_rgba(0,0,0,0.05)] hover:bg-white/55 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] active:scale-[0.99] transition"
+      className="group w-full text-left rounded-[18px] border border-black/10 bg-white/45 px-4 py-4 shadow-[0_10px_26px_rgba(0,0,0,0.05)] backdrop-blur-md hover:bg-white/60 hover:shadow-[0_14px_34px_rgba(0,0,0,0.06)] active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
     >
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/70 flex items-center justify-center border border-black/5" style={{ color: "var(--text-muted)" }}>
+        <div
+          className="w-11 h-11 rounded-[18px] bg-white/75 flex items-center justify-center border border-black/5 shadow-[0_8px_16px_rgba(0,0,0,0.04)]"
+          style={{ color: "var(--text-muted)" }}
+        >
           {icons[iconKey]}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-medium tracking-wide text-[var(--text-primary)] truncate">
+          <div className="font-semibold tracking-wide text-[var(--text-primary)] truncate">
             {title}
           </div>
+          {subtitle ? (
+            <div
+              className="mt-1 text-xs tracking-wide truncate"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {subtitle}
+            </div>
+          ) : null}
         </div>
-        <div className="text-lg leading-none" style={{ color: "var(--text-muted)" }}>→</div>
+        <div
+          className="text-lg leading-none transition-transform group-hover:translate-x-0.5"
+          style={{ color: "var(--text-muted)" }}
+        >
+          →
+        </div>
       </div>
     </button>
   );
 
-  return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "var(--bg-primary)" }}
-    >
-      {/* HEADER WITH LOGO + HOTEL NAME */}
-      <GuestHeader />
-
-      {/* HERO / WELCOME */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          backgroundImage: `url(${hotelbg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-[var(--bg-primary)]/88" />
-        <div className="relative px-4 py-7">
-          <div className="max-w-4xl mx-auto">
-            <p className="text-sm tracking-wide" style={{ color: "var(--text-muted)" }}>
-              Welcome {guestFirstName}.
-            </p>
-            <h2
-              className="mt-2 text-3xl font-semibold leading-tight tracking-wide"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Make yourself
-              <br />
-              comfortable
-            </h2>
-            <p className="mt-2 text-xs tracking-wide" style={{ color: "var(--text-muted)" }}>
-              Room {guest?.roomNumber || "—"}
-            </p>
+  const SectionHeader = ({ title, subtitle }) => (
+    <div className="flex items-end justify-between gap-3">
+      <div>
+        <div className="flex items-center gap-2">
+          <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--brand)" }} />
+          <div
+            className="text-xs tracking-[0.18em] uppercase"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {title}
           </div>
         </div>
-      </section>
+        {subtitle ? (
+          <div className="mt-1 text-sm" style={{ color: "var(--text-primary)" }}>
+            {subtitle}
+          </div>
+        ) : null}
+      </div>
+      <div className="h-px flex-1 max-w-24" style={{ backgroundColor: "rgba(0,0,0,0.08)" }} />
+    </div>
+  );
 
-      {/* MAIN */}
-      <main className="flex-1 px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+  const BottomNav = () => (
+    <nav
+      className="fixed bottom-0 inset-x-0 z-50 border-t border-black/10 bg-white/55 backdrop-blur-md shadow-[0_-12px_28px_rgba(0,0,0,0.06)]"
+      aria-label="Bottom navigation"
+    >
+      <div className="max-w-xl mx-auto px-2">
+        <div className="grid grid-cols-4 gap-2 py-2">
+          {bottomNav.map((item) => {
+            const active = isNavActive(item);
+
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => navigate(item.path)}
+                className="rounded-[18px] px-2 py-2 transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
+                style={{
+                  backgroundColor: active ? "rgba(164,0,93,0.08)" : "transparent",
+                }}
+              >
+                <div className="flex flex-col items-center gap-1">
+                  <div
+                    className="h-9 w-9 rounded-[18px] flex items-center justify-center"
+                    style={{
+                      color: active ? "var(--brand)" : "var(--text-muted)",
+                      backgroundColor: active ? "rgba(255,255,255,0.55)" : "transparent",
+                      border: active ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
+                    }}
+                  >
+                    {icons[item.iconKey]}
+                  </div>
+                  <div
+                    className="text-[11px] tracking-wide"
+                    style={{ color: active ? "var(--brand)" : "var(--text-muted)" }}
+                  >
+                    {item.label}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </nav>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-primary)" }}>
+      <GuestHeader />
+
+      <main className="flex-1 px-4 pt-4 pb-24">
+        <div className="max-w-xl mx-auto">
+          <section
+            className="rounded-[18px] overflow-hidden border border-black/10 bg-white/35 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.06)]"
+            style={{
+              backgroundImage: `url(${hotelbg})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="relative">
+              <div className="absolute inset-0" style={{ backgroundColor: "rgba(246,234,219,0.88)" }} />
+              <div className="relative p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
+                      Welcome
+                    </div>
+                    <div className="mt-1 text-xl font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
+                      Hello, {guestFirstName}
+                    </div>
+                    <div className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+                      How can we help today?
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <span
+                      className="inline-flex items-center rounded-full px-3 py-1 text-xs tracking-wide border border-black/10"
+                      style={{ backgroundColor: "rgba(255,255,255,0.55)", color: "var(--text-muted)" }}
+                    >
+                      Room {guest?.roomNumber || "—"}
+                    </span>
+                    <span className="h-1 w-10 rounded-full" style={{ backgroundColor: "var(--brand)" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="h-4" />
+
           <div className="mb-8">
-            <h3 className="text-base font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
-              In-Room Services
-            </h3>
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <SectionHeader title="In‑Room Services" subtitle="Essentials for your room" />
+            <div className="mt-4 grid grid-cols-2 gap-4">
               {inRoomServices.map((item) => (
                 <ActionTile key={item.title} {...item} />
               ))}
@@ -206,26 +345,30 @@ export default function GuestDashboard() {
           </div>
 
           <div className="mb-8">
-            <h3 className="text-base font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
-              Quick Access
-            </h3>
-            <div className="mt-3 grid grid-cols-2 gap-3">
+            <SectionHeader title="Quick Access" subtitle="Explore the hotel" />
+            <div className="mt-4 grid grid-cols-2 gap-4">
               {quickAccess.map((item) => (
                 <ActionTile key={item.title} {...item} />
               ))}
             </div>
           </div>
 
-          <div className="p-5 rounded-xl border border-black/10" style={{ backgroundColor: "rgba(239,225,207,0.55)" }}>
+          <div
+            className="p-4 rounded-[18px] border border-black/10 bg-white/45 shadow-[0_10px_26px_rgba(0,0,0,0.05)] backdrop-blur-md"
+            style={{ backgroundColor: "rgba(239,225,207,0.55)" }}
+          >
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white/70 border border-black/5 flex items-center justify-center" style={{ color: "var(--text-muted)" }}>
+              <div
+                className="w-10 h-10 rounded-[18px] bg-white/70 border border-black/5 flex items-center justify-center"
+                style={{ color: "var(--text-muted)" }}
+              >
                 {icons.assistance}
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
                   Need Assistance?
                 </h4>
-                <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+                <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--text-muted)" }}>
                   Our team is available 24/7. Dial 0 from your room phone or visit the reception desk.
                 </p>
               </div>
@@ -234,8 +377,7 @@ export default function GuestDashboard() {
         </div>
       </main>
 
-      {/* SAFE BOTTOM SPACE */}
-      <div className="h-6" />
+      <BottomNav />
     </div>
   );
 }
