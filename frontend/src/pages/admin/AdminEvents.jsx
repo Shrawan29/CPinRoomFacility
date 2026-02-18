@@ -365,11 +365,16 @@ export default function AdminEvents() {
                     className="w-full text-sm"
                   />
                   {form.image ? (
-                    <img
-                      src={form.image}
-                      alt="Event"
-                      className="mt-3 w-full max-h-48 object-cover rounded-lg border border-black/10"
-                    />
+                    <div
+                      className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)]"
+                      style={{ aspectRatio: "9 / 16" }}
+                    >
+                      <img
+                        src={form.image}
+                        alt="Event"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   ) : null}
                 </div>
 
@@ -434,13 +439,21 @@ export default function AdminEvents() {
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
                       {event.image ? (
-                        <img
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full sm:w-40 h-40 object-cover rounded-lg border border-black/10"
-                        />
+                        <div
+                          className="w-full sm:w-32 rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)] shrink-0"
+                          style={{ aspectRatio: "9 / 16" }}
+                        >
+                          <img
+                            src={event.image}
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       ) : (
-                        <div className="w-full sm:w-40 h-40 rounded-lg border border-dashed border-black/10 bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)]">
+                        <div
+                          className="w-full sm:w-32 rounded-lg border border-dashed border-black/10 bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)] shrink-0"
+                          style={{ aspectRatio: "9 / 16" }}
+                        >
                           No image
                         </div>
                       )}

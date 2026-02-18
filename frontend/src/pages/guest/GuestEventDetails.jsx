@@ -74,11 +74,16 @@ export default function GuestEventDetails() {
         {!loading && !error && event && (
           <div className="bg-white rounded-xl shadow-sm p-4">
             {event.image ? (
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full max-h-64 object-cover rounded-lg mb-4"
-              />
+              <div
+                className="w-full rounded-lg overflow-hidden mb-4 bg-[var(--bg-secondary)] border border-black/10"
+                style={{ aspectRatio: "9 / 16" }}
+              >
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             ) : null}
 
             <div className="flex justify-between items-start gap-3 mb-2">

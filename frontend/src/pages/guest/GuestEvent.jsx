@@ -85,33 +85,49 @@ export default function GuestEvents() {
               to={`/guest/events/${event._id}`}
               className="bg-white rounded-xl shadow-sm p-4"
             >
-              {event.image ? (
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full max-h-44 object-cover rounded-lg mb-3"
-                />
-              ) : null}
+              <div className="flex gap-3">
+                {event.image ? (
+                  <div
+                    className="w-24 rounded-lg overflow-hidden bg-[var(--bg-secondary)] border border-black/10 shrink-0"
+                    style={{ aspectRatio: "9 / 16" }}
+                  >
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="w-24 rounded-lg overflow-hidden bg-[var(--bg-secondary)] border border-dashed border-black/10 shrink-0 flex items-center justify-center text-xs text-[var(--text-muted)]"
+                    style={{ aspectRatio: "9 / 16" }}
+                  >
+                    No image
+                  </div>
+                )}
 
-              <div className="flex justify-between items-start gap-3 mb-2">
-                <h2 className="font-semibold text-lg text-[var(--text-primary)]">
-                  {event.title}
-                </h2>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(event.status)}`}>
-                  {event.status}
-                </span>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-3 mb-2">
+                    <h2 className="font-semibold text-lg text-[var(--text-primary)] truncate">
+                      {event.title}
+                    </h2>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full border whitespace-nowrap ${getStatusColor(event.status)}`}>
+                      {event.status}
+                    </span>
+                  </div>
 
-              <p className="text-sm text-[var(--text-muted)] mt-1">
-                📍 {event.location || "Hotel Premises"}
-              </p>
+                  <p className="text-sm text-[var(--text-muted)] mt-1">
+                    📍 {event.location || "Hotel Premises"}
+                  </p>
 
-              <p className="text-sm text-[var(--text-muted)]">
-                📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
-              </p>
+                  <p className="text-sm text-[var(--text-muted)]">
+                    📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
+                  </p>
 
-              <div className="mt-3 text-sm font-semibold" style={{ color: "var(--brand)" }}>
-                View details
+                  <div className="mt-3 text-sm font-semibold" style={{ color: "var(--brand)" }}>
+                    View details
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
