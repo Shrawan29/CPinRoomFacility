@@ -201,7 +201,6 @@ class DataSyncService {
                     source: "HOTEL_SYNC",
                     guestName: normalizedGuest,
                     roomNumber,
-                    status: "ACTIVE",
                   },
                 },
                 upsert: true,
