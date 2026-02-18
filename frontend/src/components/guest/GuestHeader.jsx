@@ -32,7 +32,7 @@ export default function GuestHeader() {
 
         <div className="flex flex-col">
           <h1
-            className="text-[15px] font-semibold leading-tight tracking-wide"
+            className="text-[15px] leading-tight tracking-wide font-display"
             style={{ color: "var(--text-primary)" }}
           >
             Hotel Centre Point
@@ -62,7 +62,7 @@ export default function GuestHeader() {
 
         <button
           onClick={handleLogout}
-          className="text-sm px-4 py-2 rounded-xl font-semibold transition-all hover:opacity-90 active:scale-[0.99] border border-black/10"
+          className="text-sm px-5 py-2 rounded-[18px] font-semibold transition-all hover:opacity-95 active:scale-[0.99] shadow-[0_8px_18px_rgba(0,0,0,0.10)]"
           style={{
             backgroundColor: "var(--brand)",
             color: "white",

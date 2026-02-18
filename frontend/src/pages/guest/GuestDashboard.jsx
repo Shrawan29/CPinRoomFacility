@@ -8,6 +8,7 @@ export default function GuestDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const guestLastName = guest?.name ? guest.name.trim().split(/\s+/).slice(-1)[0] : "";
   const guestFirstName = guest?.name
     ? guest.name.split(" ")[0]
     : guest?.guestName
@@ -224,17 +225,20 @@ export default function GuestDashboard() {
     <button
       type="button"
       onClick={() => navigate(path)}
-      className={`w-full rounded-[18px] bg-white/60 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-md px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
+      className="w-full rounded-[18px] bg-white/65 shadow-[0_10px_22px_rgba(0,0,0,0.06)] backdrop-blur-md px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30"
       aria-label={title}
     >
-      <div className="flex flex-col items-center text-center gap-3">
+      <div className="flex flex-col items-center text-center gap-2">
         <div
-          className="h-12 w-12 rounded-[18px] bg-white/70 shadow-[0_8px_16px_rgba(0,0,0,0.04)] flex items-center justify-center"
+          className="h-11 w-11 rounded-[16px] bg-white/75 shadow-[0_8px_16px_rgba(0,0,0,0.04)] flex items-center justify-center"
           style={{ color: "var(--text-muted)" }}
         >
           {icons[iconKey]}
         </div>
-        <div className="text-sm font-semibold tracking-wide leading-tight" style={{ color: "var(--text-primary)" }}>
+        <div
+          className="text-[12px] leading-tight"
+          style={{ color: "var(--text-muted)" }}
+        >
           {title}
         </div>
       </div>
@@ -351,35 +355,36 @@ export default function GuestDashboard() {
             style={{
               backgroundImage: `url(${hotelbg})`,
               backgroundSize: "cover",
-              backgroundPosition: "center",
+              backgroundPosition: "right center",
             }}
           >
             <div
               className="absolute inset-0 backdrop-blur-[2px]"
               style={{
                 background:
-                  "linear-gradient(90deg, rgba(246,234,219,0.96) 0%, rgba(246,234,219,0.88) 48%, rgba(246,234,219,0.30) 100%)",
+                  "linear-gradient(90deg, rgba(246,234,219,0.97) 0%, rgba(246,234,219,0.90) 52%, rgba(246,234,219,0.22) 100%)",
               }}
             />
 
             <div className="relative px-4 pt-10 pb-8">
               <div className="max-w-xl mx-auto">
-                <div className="max-w-[18rem]">
-                  <div className="text-xs tracking-wide" style={{ color: "var(--text-muted)" }}>
+                <div className="max-w-[20rem]">
+                  <div className="text-sm" style={{ color: "var(--text-muted)" }}>
                     Welcome{guestFirstName && guestFirstName !== "Guest" ? ` ${guestFirstName}` : ""}
                   </div>
 
                   <h1
-                    className="mt-2 text-[30px] font-semibold leading-tight"
+                    className="mt-2 text-[34px] leading-[1.05] font-display"
                     style={{ color: "var(--text-primary)" }}
                   >
                     Make yourself
                     <br />
-                    comfortable
+                    at home
                   </h1>
 
-                  <div className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
                     Room {guest?.roomNumber || "—"}
+                    {guestLastName && guestLastName !== guestFirstName ? `  |  ${guestLastName}` : ""}
                   </div>
                 </div>
               </div>
@@ -393,7 +398,7 @@ export default function GuestDashboard() {
               title="In-Room Services"
               subtitle="Everything you need during your stay"
             />
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-4 gap-3">
               {inRoomServices.map((item) => (
                 <ServiceCard key={item.title} {...item} />
               ))}
