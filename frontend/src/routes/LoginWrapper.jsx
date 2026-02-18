@@ -13,10 +13,13 @@ export default function LoginWrapper() {
   // Already logged in → redirect by role
   if (admin) {
     if (admin.role === "SUPER_ADMIN") {
-      return <Navigate to="/admin/super/dashboard" replace />;
+      return <Navigate to="/admin/reports" replace />;
     }
     if (admin.role === "DINING_ADMIN") {
       return <Navigate to="/admin/kitchen/dashboard" replace />;
+    }
+    if (admin.role === "HOUSEKEEPING_ADMIN") {
+      return <Navigate to="/admin/housekeeping" replace />;
     }
   }
 

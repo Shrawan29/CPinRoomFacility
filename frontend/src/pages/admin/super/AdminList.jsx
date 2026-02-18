@@ -309,6 +309,7 @@ export default function AdminList() {
                 className="w-full border rounded px-3 py-2 mb-6"
               >
                 <option value="DINING_ADMIN">Kitchen Admin</option>
+                <option value="HOUSEKEEPING_ADMIN">Housekeeping Admin</option>
               </select>
 
               <div className="flex justify-end gap-3">

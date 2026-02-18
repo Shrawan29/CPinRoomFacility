@@ -54,7 +54,7 @@ export default function CreateAdmin() {
           Create New Admin
         </h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">
-          Add a new admin or dining manager for hotel operations
+          Add a new kitchen or housekeeping admin
         </p>
       </div>
 
@@ -165,10 +165,11 @@ export default function CreateAdmin() {
                   "
                 >
                   <option value="DINING_ADMIN">Kitchen Admin</option>
+                  <option value="HOUSEKEEPING_ADMIN">Housekeeping Admin</option>
                 </select>
 
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Kitchen Admin can manage menu items and order statuses
+                  Kitchen Admin manages food orders; Housekeeping Admin manages housekeeping requests
                 </p>
               </div>
 

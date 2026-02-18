@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
 
 // Super Admin
-import SuperAdminDashboard from "./pages/admin/super/SuperAdminDashboard";
 import CreateAdmin from "./pages/admin/super/CreateAdmin";
 import AdminList from "./pages/admin/super/AdminList";
 import RoomsList from "./pages/admin/super/RoomsList";
@@ -52,7 +51,7 @@ function App() {
         path="/admin/super/dashboard"
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-            <SuperAdminDashboard />
+            <Reports />
           </ProtectedRoute>
         }
       />
