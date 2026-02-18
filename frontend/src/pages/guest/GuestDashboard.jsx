@@ -152,7 +152,7 @@ export default function GuestDashboard() {
       (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     );
 
-  const inRoomServices = [
+  const actionItems = [
     {
       iconKey: "housekeeping",
       title: "Housekeeping",
@@ -165,9 +165,6 @@ export default function GuestDashboard() {
       subtitle: "Order meals to your room",
       path: "/guest/menu",
     },
-  ];
-
-  const quickAccess = [
     {
       iconKey: "menu",
       title: "Browse Menu",
@@ -188,7 +185,7 @@ export default function GuestDashboard() {
     },
     {
       iconKey: "info",
-      title: "Hotel Info",
+      title: "Hotel Information",
       subtitle: "Amenities & Wi‑Fi",
       path: "/guest/hotel-info",
     },
@@ -198,7 +195,7 @@ export default function GuestDashboard() {
     <button
       type="button"
       onClick={() => navigate(path)}
-      className={`group w-full text-left ${cardClassName} ${cardHoverClassName} px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
+      className={`group w-full text-left rounded-[18px] bg-white/55 shadow-[0_10px_26px_rgba(0,0,0,0.06)] backdrop-blur-md ${cardHoverClassName} px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
       aria-label={title}
     >
       <div className="flex items-center gap-3">
@@ -208,13 +205,13 @@ export default function GuestDashboard() {
         >
           {icons[iconKey]}
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold tracking-wide text-[var(--text-primary)] truncate">
+        <div className="flex-1">
+          <div className="font-semibold tracking-wide leading-tight" style={{ color: "var(--text-primary)" }}>
             {title}
           </div>
           {subtitle ? (
             <div
-              className="mt-1 text-xs tracking-wide truncate"
+              className="mt-1 text-xs tracking-wide leading-snug"
               style={{ color: "var(--text-muted)" }}
             >
               {subtitle}
@@ -231,25 +228,12 @@ export default function GuestDashboard() {
     </button>
   );
 
-  const SectionHeader = ({ title, subtitle }) => (
-    <div className="flex items-end justify-between gap-3">
-      <div>
-        <div className="flex items-center gap-2">
-          <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--brand)" }} />
-          <div
-            className="text-xs tracking-[0.18em] uppercase"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {title}
-          </div>
-        </div>
-        {subtitle ? (
-          <div className="mt-1 text-sm" style={{ color: "var(--text-primary)" }}>
-            {subtitle}
-          </div>
-        ) : null}
+  const SectionHeader = ({ title }) => (
+    <div className="flex items-center gap-3">
+      <div className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
+        {title}
       </div>
-      <div className="h-px flex-1 max-w-24" style={{ backgroundColor: "rgba(0,0,0,0.08)" }} />
+      <div className="h-px flex-1" style={{ backgroundColor: "rgba(0,0,0,0.08)" }} />
     </div>
   );
 
@@ -306,82 +290,42 @@ export default function GuestDashboard() {
       <main className="flex-1 px-4 pt-4 pb-24">
         <div className="max-w-xl mx-auto">
           <section
-            className="rounded-[18px] overflow-hidden border border-black/10 bg-white/35 backdrop-blur-md shadow-[0_14px_34px_rgba(0,0,0,0.06)]"
+            className="relative overflow-hidden -mx-4"
             style={{
               backgroundImage: `url(${hotelbg})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           >
-            <div className="relative">
-              <div className="absolute inset-0" style={{ backgroundColor: "rgba(246,234,219,0.88)" }} />
-              <div className="relative p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
-                      Welcome
-                    </div>
-                    <div className="mt-1 text-xl font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
-                      Hello, {guestFirstName}
-                    </div>
-                    <div className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-                      How can we help today?
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-2">
-                    <span
-                      className="inline-flex items-center rounded-full px-3 py-1 text-xs tracking-wide border border-black/10"
-                      style={{ backgroundColor: "rgba(255,255,255,0.55)", color: "var(--text-muted)" }}
-                    >
-                      Room {guest?.roomNumber || "—"}
-                    </span>
-                    <span className="h-1 w-10 rounded-full" style={{ backgroundColor: "var(--brand)" }} />
-                  </div>
+            <div className="absolute inset-0" style={{ backgroundColor: "rgba(246,234,219,0.82)" }} />
+            <div className="relative px-4 pt-10 pb-8">
+              <div className="max-w-xl mx-auto">
+                <div className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
+                  Welcome, {guestFirstName}
+                </div>
+                <div
+                  className="mt-3 text-[28px] font-semibold leading-tight tracking-wide"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Make yourself
+                  <br />
+                  comfortable
+                </div>
+                <div className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
+                  Room {guest?.roomNumber || "—"}
                 </div>
               </div>
             </div>
           </section>
 
-          <div className="h-4" />
+          <div className="h-8" />
 
-          <div className="mb-8">
-            <SectionHeader title="In‑Room Services" subtitle="Essentials for your room" />
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              {inRoomServices.map((item) => (
+          <div>
+            <SectionHeader title="Services" />
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {actionItems.map((item) => (
                 <ActionTile key={item.title} {...item} />
               ))}
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <SectionHeader title="Quick Access" subtitle="Explore the hotel" />
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              {quickAccess.map((item) => (
-                <ActionTile key={item.title} {...item} />
-              ))}
-            </div>
-          </div>
-
-          <div
-            className={`p-4 ${cardClassName}`}
-            style={{ backgroundColor: "rgba(239,225,207,0.55)" }}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className="w-10 h-10 rounded-[18px] bg-white/70 border border-black/5 flex items-center justify-center"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {icons.assistance}
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
-                  Need Assistance?
-                </h4>
-                <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                  Our team is available 24/7. Dial 0 from your room phone or visit the reception desk.
-                </p>
-              </div>
             </div>
           </div>
         </div>
