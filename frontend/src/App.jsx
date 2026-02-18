@@ -30,6 +30,10 @@ import GuestCart from "./pages/guest/GuestCart";
 import GuestOrders from "./pages/guest/GuestOrders";
 import GuestEvent from "./pages/guest/GuestEvent";
 import GuestHotelInfo from "./pages/guest/GuestHotelInfo";
+import GuestHousekeeping from "./pages/guest/GuestHousekeeping";
+
+// Housekeeping admin
+import HousekeepingDashboard from "./pages/admin/housekeeping/HousekeepingDashboard";
 
 
 // Routes
@@ -109,6 +113,16 @@ function App() {
         }
       />
 
+      {/* HOUSEKEEPING */}
+      <Route
+        path="/admin/housekeeping"
+        element={
+          <ProtectedRoute allowedRoles={["HOUSEKEEPING_ADMIN", "SUPER_ADMIN"]}>
+            <HousekeepingDashboard />
+          </ProtectedRoute>
+        }
+      />
+
       {/* QR MANAGER */}
       <Route
         path="/admin/qr-codes"
@@ -183,6 +197,15 @@ function App() {
         element={
           <GuestProtectedRoute>
             <GuestHotelInfo />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/housekeeping"
+        element={
+          <GuestProtectedRoute>
+            <GuestHousekeeping />
           </GuestProtectedRoute>
         }
       />

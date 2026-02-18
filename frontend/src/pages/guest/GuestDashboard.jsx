@@ -49,6 +49,12 @@ export default function GuestDashboard() {
       title: "Hotel Information",
       description: "Amenities  & Wi-Fi ",
       path: "/guest/hotel-info"
+    },
+    {
+      icon: "🧹",
+      title: "Housekeeping",
+      description: "Request towels or cleaning",
+      path: "/guest/housekeeping"
     }
   ];
 

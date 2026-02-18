@@ -27,8 +27,10 @@ const guestAuth = async (req, res, next) => {
 
     // Attach guest context
     req.guest = {
+      id: session._id,
+      sessionId: session.sessionId,
       guestName: session.guestName,
-      roomNumber: session.roomNumber
+      roomNumber: session.roomNumber,
     };
 
     next();

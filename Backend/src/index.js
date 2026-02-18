@@ -23,6 +23,7 @@ import menuRoutes from "./routes/menu.routes.js";
 import qrRoutes from "./routes/qr.routes.js";
 import hotelInfoRoutes from "./routes/hotelInfo.routes.js";
 import eventRoutes from "./routes/event.routes.js";
+import housekeepingRoutes from "./routes/housekeeping.routes.js";
 
 // models (used in debug routes)
 import Room from "./models/Room.js";
@@ -113,6 +114,9 @@ app.use("/menu", menuRoutes);
 app.use("/qr", qrRoutes);
 app.use("/hotel-info", hotelInfoRoutes);
 app.use("/guest/events", guestEventRoutes);
+
+// housekeeping
+app.use("/api/housekeeping", housekeepingRoutes);
 
 /* =========================================================
    TEST & DEBUG ROUTES
