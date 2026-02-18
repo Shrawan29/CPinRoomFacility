@@ -7,6 +7,8 @@ import {
 } from "../../../services/housekeeping.service";
 import notificationSound from "../../../assets/notification.mp3";
 
+const SOUND_STORAGE_KEY = "housekeeping_sound_enabled";
+
 const formatDateTime = (value) => {
   try {
     const d = new Date(value);
@@ -40,6 +42,14 @@ export default function HousekeepingDashboard() {
   const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState(null);
   const [requests, setRequests] = useState([]);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return localStorage.getItem(SOUND_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [soundBlocked, setSoundBlocked] = useState(false);
 
   const audioRef = useRef(null);
   const didInitRef = useRef(false);
@@ -76,15 +86,18 @@ export default function HousekeepingDashboard() {
           })
           .catch((e) => {
             console.debug("[Housekeeping] Audio prime failed", e);
+            setSoundBlocked(true);
           });
       }
     } catch (e) {
       // Autoplay policies vary; real notifications will still attempt to play.
       console.debug("[Housekeeping] Audio prime failed", e);
+      setSoundBlocked(true);
     }
   };
 
   const playNotification = async () => {
+    if (!soundEnabled) return;
     try {
       if (!audioRef.current) {
         audioRef.current = new Audio(notificationSound);
@@ -96,11 +109,28 @@ export default function HousekeepingDashboard() {
       if (playPromise && typeof playPromise.catch === "function") {
         playPromise.catch((e) => {
           console.debug("[Housekeeping] Notification sound blocked", e);
+          setSoundBlocked(true);
         });
       }
     } catch (e) {
       // Some browsers block autoplay until user interaction.
       console.debug("[Housekeeping] Notification sound blocked", e);
+      setSoundBlocked(true);
+    }
+  };
+
+  const onToggleSound = async (nextEnabled) => {
+    setSoundEnabled(nextEnabled);
+    setSoundBlocked(false);
+    try {
+      localStorage.setItem(SOUND_STORAGE_KEY, nextEnabled ? "1" : "0");
+    } catch {
+      // ignore
+    }
+
+    if (nextEnabled) {
+      await primeAudioOnce();
+      await playNotification();
     }
   };
 
@@ -137,7 +167,9 @@ export default function HousekeepingDashboard() {
 
   useEffect(() => {
     const onFirstInteraction = () => {
-      primeAudioOnce();
+      if (soundEnabled) {
+        primeAudioOnce();
+      }
       window.removeEventListener("pointerdown", onFirstInteraction);
       window.removeEventListener("keydown", onFirstInteraction);
     };
@@ -201,6 +233,16 @@ export default function HousekeepingDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-[var(--text-primary)] select-none">
+            <input
+              type="checkbox"
+              checked={soundEnabled}
+              onChange={(e) => onToggleSound(e.target.checked)}
+              className="h-4 w-4"
+            />
+            Enable sound
+          </label>
+
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -211,6 +253,12 @@ export default function HousekeepingDashboard() {
           </select>
         </div>
       </div>
+
+      {soundEnabled && soundBlocked && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-lg">
+          Sound is blocked by the browser/device. Try clicking once on the page, and make sure the site isn’t muted.
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
