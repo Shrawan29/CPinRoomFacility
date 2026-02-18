@@ -104,6 +104,22 @@ export default function GuestDashboard() {
         <path d="M10 7l5 5-5 5" />
       </Icon>
     ),
+    spa: (
+      <Icon className="w-6 h-6">
+        <path d="M12 21c3 0 6-2.2 6-5.2 0-2.6-2-4.1-4.3-5.5C12.5 9.6 12 8.8 12 7.7c0 1.1-.5 1.9-1.7 2.6C8 11.7 6 13.2 6 15.8 6 18.8 9 21 12 21z" />
+        <path d="M9 7c0-2 1.3-3.5 3-5 1.7 1.5 3 3 3 5" />
+      </Icon>
+    ),
+    laundry: (
+      <Icon className="w-6 h-6">
+        <path d="M7 3h10a2 2 0 0 1 2 2v16H5V5a2 2 0 0 1 2-2z" />
+        <path d="M9 7h.01" />
+        <path d="M12 7h.01" />
+        <path d="M15 7h.01" />
+        <path d="M12 18a4 4 0 1 0-4-4 4 4 0 0 0 4 4z" />
+        <path d="M10.5 14.5c.6 1 1.7 1.7 3 1.8" />
+      </Icon>
+    ),
     assistance: (
       <Icon className="w-5 h-5">
         <path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" />
@@ -152,19 +168,30 @@ export default function GuestDashboard() {
       (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`)
     );
 
-  const actionItems = [
+  const inRoomServices = [
     {
       iconKey: "housekeeping",
       title: "Housekeeping",
-      subtitle: "Cleaning, towels & amenities",
       path: "/guest/housekeeping",
     },
     {
       iconKey: "food",
       title: "Food Order",
-      subtitle: "Order meals to your room",
       path: "/guest/menu",
     },
+    {
+      iconKey: "spa",
+      title: "Spa",
+      path: "/guest/hotel-info",
+    },
+    {
+      iconKey: "laundry",
+      title: "Laundry",
+      path: "/guest/hotel-info",
+    },
+  ];
+
+  const moreItems = [
     {
       iconKey: "menu",
       title: "Browse Menu",
@@ -190,6 +217,27 @@ export default function GuestDashboard() {
       path: "/guest/hotel-info",
     },
   ];
+
+  const ServiceCard = ({ iconKey, title, path }) => (
+    <button
+      type="button"
+      onClick={() => navigate(path)}
+      className={`w-full rounded-[18px] bg-white/60 shadow-[0_10px_24px_rgba(0,0,0,0.06)] backdrop-blur-md px-4 py-4 active:scale-[0.99] transition focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/30`}
+      aria-label={title}
+    >
+      <div className="flex flex-col items-center text-center gap-3">
+        <div
+          className="h-12 w-12 rounded-[18px] bg-white/70 shadow-[0_8px_16px_rgba(0,0,0,0.04)] flex items-center justify-center"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {icons[iconKey]}
+        </div>
+        <div className="text-sm font-semibold tracking-wide leading-tight" style={{ color: "var(--text-primary)" }}>
+          {title}
+        </div>
+      </div>
+    </button>
+  );
 
   const ActionTile = ({ iconKey, title, subtitle, path }) => (
     <button
@@ -228,12 +276,19 @@ export default function GuestDashboard() {
     </button>
   );
 
-  const SectionHeader = ({ title }) => (
-    <div className="flex items-center gap-3">
-      <div className="text-xs tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
-        {title}
+  const SectionHeader = ({ title, subtitle }) => (
+    <div>
+      <div className="flex items-center gap-3">
+        <div className="text-sm font-semibold tracking-wide" style={{ color: "var(--text-primary)" }}>
+          {title}
+        </div>
+        <div className="h-px flex-1" style={{ backgroundColor: "rgba(0,0,0,0.08)" }} />
       </div>
-      <div className="h-px flex-1" style={{ backgroundColor: "rgba(0,0,0,0.08)" }} />
+      {subtitle ? (
+        <div className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+          {subtitle}
+        </div>
+      ) : null}
     </div>
   );
 
@@ -320,10 +375,22 @@ export default function GuestDashboard() {
 
           <div className="h-8" />
 
-          <div>
-            <SectionHeader title="Services" />
+          <div className="mt-2">
+            <SectionHeader
+              title="In-Room Services"
+              subtitle="Everything you need during your stay"
+            />
             <div className="mt-6 grid grid-cols-2 gap-4">
-              {actionItems.map((item) => (
+              {inRoomServices.map((item) => (
+                <ServiceCard key={item.title} {...item} />
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <SectionHeader title="More" subtitle="Explore the hotel" />
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {moreItems.map((item) => (
                 <ActionTile key={item.title} {...item} />
               ))}
             </div>
