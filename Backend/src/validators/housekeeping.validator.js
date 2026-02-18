@@ -97,7 +97,7 @@ export const validateStatusQuery = (req, res, next) => {
   const { status } = req.query;
   if (!status) return next();
 
-  const allowed = new Set(["pending", "accepted", "completed"]);
+  const allowed = new Set(["pending", "accepted", "completed", "active"]);
   if (!allowed.has(String(status))) {
     return res.status(400).json({
       message: "Validation failed",

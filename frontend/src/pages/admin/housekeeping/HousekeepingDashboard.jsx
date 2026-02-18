@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import {
   acceptHousekeepingRequest,
   completeHousekeepingRequest,
   getHousekeepingRequestsAdmin,
 } from "../../../services/housekeeping.service";
+import notificationSound from "../../../assets/notification.mp3";
 
 const formatDateTime = (value) => {
   try {
@@ -34,32 +35,75 @@ const StatusPill = ({ status }) => {
 };
 
 export default function HousekeepingDashboard() {
-  const [status, setStatus] = useState("pending");
+  const [status, setStatus] = useState("active");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
   const [error, setError] = useState(null);
   const [requests, setRequests] = useState([]);
 
-  const statusParam = useMemo(() => {
-    if (!status || status === "all") return undefined;
-    return status;
-  }, [status]);
+  const audioRef = useRef(null);
+  const didInitRef = useRef(false);
+  const lastPendingIdsRef = useRef(new Set());
 
-  const load = async () => {
-    setLoading(true);
+  const statusParam = useMemo(() => status, [status]);
+
+  const playNotification = async () => {
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(notificationSound);
+      }
+      audioRef.current.currentTime = 0;
+      await audioRef.current.play();
+    } catch {
+      // Some browsers block autoplay until user interaction.
+    }
+  };
+
+  const load = async ({ showLoading } = {}) => {
+    if (showLoading) setLoading(true);
     setError(null);
     try {
       const data = await getHousekeepingRequestsAdmin({ status: statusParam });
-      setRequests(data?.requests || []);
+      const nextRequests = data?.requests || [];
+      setRequests(nextRequests);
+
+      // Notify on *new* pending requests after first successful load.
+      const nextPendingIds = new Set(
+        nextRequests.filter((r) => r.status === "pending").map((r) => r._id)
+      );
+
+      if (didInitRef.current) {
+        for (const id of nextPendingIds) {
+          if (!lastPendingIdsRef.current.has(id)) {
+            await playNotification();
+            break;
+          }
+        }
+      }
+
+      lastPendingIdsRef.current = nextPendingIds;
+      didInitRef.current = true;
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load requests");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    load();
+    didInitRef.current = false;
+    lastPendingIdsRef.current = new Set();
+    setLoading(true);
+    load({ showLoading: true });
+
+    const intervalMs = 5000;
+    const interval = setInterval(() => {
+      load({ showLoading: false });
+    }, intervalMs);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [statusParam]);
 
   const accept = async (id) => {
@@ -67,7 +111,7 @@ export default function HousekeepingDashboard() {
     setError(null);
     try {
       await acceptHousekeepingRequest(id);
-      await load();
+      await load({ showLoading: false });
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to accept request");
     } finally {
@@ -80,7 +124,7 @@ export default function HousekeepingDashboard() {
     setError(null);
     try {
       await completeHousekeepingRequest(id);
-      await load();
+      await load({ showLoading: false });
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to complete request");
     } finally {
@@ -96,7 +140,7 @@ export default function HousekeepingDashboard() {
             Housekeeping Requests
           </h1>
           <p className="text-sm text-[var(--text-muted)]">
-            Filter by status and update request progress.
+            Pending/accepted requests show here; completed requests are in history.
           </p>
         </div>
 
@@ -106,23 +150,9 @@ export default function HousekeepingDashboard() {
             onChange={(e) => setStatus(e.target.value)}
             className="px-3 py-2 rounded-lg border border-black/10 bg-[var(--bg-secondary)]"
           >
-            <option value="pending">Pending</option>
-            <option value="accepted">Accepted</option>
-            <option value="completed">Completed</option>
-            <option value="all">All</option>
+            <option value="active">Active (Pending + Accepted)</option>
+            <option value="completed">History (Completed)</option>
           </select>
-
-          <button
-            onClick={load}
-            className="text-sm px-4 py-2 rounded-lg border"
-            style={{
-              backgroundColor: "var(--bg-secondary)",
-              borderColor: "rgba(0,0,0,0.08)",
-              color: "var(--text-primary)",
-            }}
-          >
-            Refresh
-          </button>
         </div>
       </div>
 

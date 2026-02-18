@@ -106,7 +106,11 @@ export const listHousekeepingRequests = async (req, res) => {
     const status = req.query.status ? String(req.query.status) : undefined;
 
     const baseQuery = { hotelId };
-    if (status) baseQuery.status = status;
+    if (status === "active") {
+      baseQuery.status = { $in: ["pending", "accepted"] };
+    } else if (status) {
+      baseQuery.status = status;
+    }
 
     // Admin view: all hotel requests
     if (req.admin) {
