@@ -214,7 +214,7 @@ export default function AdminEvents() {
 
   return (
     <AdminLayout>
-      <div className="max-w-6xl mx-auto h-screen flex flex-col overflow-hidden">
+      <div className="max-w-6xl mx-auto h-screen flex flex-col overflow-hidden px-2 sm:px-4">
         {/* PAGE HEADER */}
         <div className="mb-4 shrink-0">
           <h1 className="text-3xl font-bold text-[var(--text-primary)]">
@@ -246,16 +246,19 @@ export default function AdminEvents() {
           )}
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
+        <div className="grid lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
           <div className="lg:col-span-1 overflow-hidden">
-            <div className="bg-[var(--bg-secondary)] bg-opacity-50 rounded-xl shadow-sm p-4 -y-auto">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
+            <div className="bg-[var(--bg-secondary)] rounded-xl border border-black/5 p-6 h-full overflow-y-auto">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
                 Add New Event
               </h2>
+              <p className="text-sm text-[var(--text-muted)] mb-4">
+                Title and date are required. Optional image max 1MB.
+              </p>
 
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
                       Event Title *
@@ -263,7 +266,7 @@ export default function AdminEvents() {
                     <input
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="Enter event title"
                     />
                   </div>
@@ -284,7 +287,7 @@ export default function AdminEvents() {
                       }}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="DD/MM/YYYY"
-                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       calendarClassName="shadow-lg rounded-lg"
                       wrapperClassName="w-full"
                     />
@@ -303,12 +306,12 @@ export default function AdminEvents() {
                       type="time"
                       value={form.eventTime}
                       onChange={(e) => setForm({ ...form, eventTime: e.target.value })}
-                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                       Location
@@ -316,7 +319,7 @@ export default function AdminEvents() {
                     <input
                       value={form.location}
                       onChange={(e) => setForm({ ...form, location: e.target.value })}
-                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="e.g. Rooftop / Banquet Hall"
                     />
                   </div>
@@ -328,7 +331,7 @@ export default function AdminEvents() {
                     <input
                       value={form.contact}
                       onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                      className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                       placeholder="e.g. +91-9876543210"
                     />
                   </div>
@@ -341,7 +344,7 @@ export default function AdminEvents() {
                   <input
                     value={form.link}
                     onChange={(e) => setForm({ ...form, link: e.target.value })}
-                    className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
                     placeholder="e.g. https://example.com/event-details"
                   />
                 </div>
@@ -354,13 +357,13 @@ export default function AdminEvents() {
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleImageFile(e.target.files?.[0])}
-                    className="w-full text-base"
+                    className="w-full text-sm"
                   />
                   {form.image ? (
                     <img
                       src={form.image}
                       alt="Event"
-                      className="mt-2 w-full max-h-40 object-cover rounded-lg border"
+                      className="mt-3 w-full max-h-48 object-cover rounded-lg border border-black/10"
                     />
                   ) : null}
                 </div>
@@ -374,13 +377,11 @@ export default function AdminEvents() {
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    className="w-full text-base border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
-                    rows={2}
+                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
+                    rows={3}
                     placeholder="Event details and description..."
                   />
                 </div>
-
-                
 
                 <button
                   onClick={submitEvent}
@@ -397,8 +398,7 @@ export default function AdminEvents() {
                     disabled:opacity-60
                     disabled:cursor-not-allowed
                     transition-all
-                    transform
-                    active:scale-95
+                    active:opacity-95
                   "
                 >
                   {loading ? "Adding Event..." : "+ Add Event"}
@@ -408,114 +408,135 @@ export default function AdminEvents() {
           </div>
 
           {/* EVENT LIST */}
-          <div className="lg:col-span-1 overflow-y-auto h-full">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-                All Events ({events.length})
-              </h2>
-            </div>
+          <div className="lg:col-span-1 h-full overflow-hidden">
+            <div className="bg-[var(--bg-secondary)] rounded-xl border border-black/5 p-6 h-full flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between mb-4 shrink-0">
+                <div>
+                  <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+                    All Events ({events.length})
+                  </h2>
+                  <p className="text-sm text-[var(--text-muted)] mt-1">
+                    Change image or delete events from the list.
+                  </p>
+                </div>
+              </div>
 
-            <div className="space-y-4">
-              {events.map((event) => (
-                <div
-                  key={event._id}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100"
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
+              <div className="space-y-4 overflow-y-auto pr-1">
+                {events.map((event) => (
+                  <div
+                    key={event._id}
+                    className="bg-[var(--bg-primary)] rounded-xl border border-black/5 p-4"
+                  >
+                    <div className="flex flex-col sm:flex-row gap-4">
                       {event.image ? (
                         <img
                           src={event.image}
                           alt={event.title}
-                          className="w-full max-h-44 object-cover rounded-lg mb-4 border"
+                          className="w-full sm:w-40 h-40 object-cover rounded-lg border border-black/10"
                         />
-                      ) : null}
-
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-1">
-                            {event.title}
-                          </h3>
-                          <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
-                            <span className="flex items-center gap-1">
-                              📍 {event.location || "Location TBD"}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
-                            </span>
-                          </div>
+                      ) : (
+                        <div className="w-full sm:w-40 h-40 rounded-lg border border-dashed border-black/10 bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)]">
+                          No image
                         </div>
-                        <span className={`text-xs font-medium px-3 py-1.5 rounded-full border ${getStatusColor(event.status)}`}>
-                          {event.status}
-                        </span>
-                      </div>
-
-                      {event.description && (
-                        <p className="text-sm text-[var(--text-muted)] mb-4 line-clamp-2">
-                          {event.description}
-                        </p>
                       )}
 
-                      {event.contact && (
-                        <p className="text-sm text-[var(--text-muted)] mb-2">
-                          📞 Contact: <span className="font-semibold text-[var(--text-primary)]">{event.contact}</span>
-                        </p>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-semibold text-lg text-[var(--text-primary)] truncate">
+                              {event.title}
+                            </h3>
+                            <div className="mt-1 text-sm text-[var(--text-muted)] flex flex-col gap-1">
+                              <span>
+                                📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
+                              </span>
+                              <span>📍 {event.location || "Location TBD"}</span>
+                            </div>
+                          </div>
 
-                      {event.link && (
-                        <p className="text-sm mb-3">
-                          <a
-                            href={event.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[var(--brand)] font-semibold hover:underline inline-flex items-center gap-1"
+                          <span
+                            className={`text-xs font-medium px-3 py-1.5 rounded-full border whitespace-nowrap ${getStatusColor(
+                              event.status
+                            )}`}
                           >
-                            🔗 {event.link}
-                          </a>
-                        </p>
-                      )}
+                            {event.status}
+                          </span>
+                        </div>
 
-                      <div className="flex items-center gap-2 pt-3 border-t border-gray-100 justify-between">
-                        <p className="text-xs text-[var(--text-muted)]">
-                          📝 Status updates automatically based on event date
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <label className="text-xs px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer"
-                            style={{ color: "var(--brand)" }}
-                          >
-                            🖼 Change Image
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => updateEventImage(event._id, e.target.files?.[0])}
-                              className="hidden"
-                            />
-                          </label>
+                        {event.description && (
+                          <p className="text-sm text-[var(--text-muted)] mt-3 line-clamp-2">
+                            {event.description}
+                          </p>
+                        )}
 
-                          <button
-                            onClick={() => handleDelete(event._id)}
-                            className="text-xs px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-md font-medium transition-all"
-                          >
-                            🗑 Delete
-                          </button>
+                        <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
+                          {event.contact && (
+                            <div className="text-[var(--text-muted)]">
+                              📞 Contact:{" "}
+                              <span className="font-semibold text-[var(--text-primary)]">
+                                {event.contact}
+                              </span>
+                            </div>
+                          )}
+
+                          {event.link && (
+                            <a
+                              href={event.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[var(--brand)] font-semibold hover:underline truncate"
+                              title={event.link}
+                            >
+                              🔗 {event.link}
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between gap-2">
+                          <p className="text-xs text-[var(--text-muted)]">
+                            Status updates automatically based on event date
+                          </p>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <label
+                              className="text-xs px-3 py-1.5 rounded-lg border border-black/10 bg-[var(--bg-secondary)] font-semibold cursor-pointer"
+                              style={{ color: "var(--brand)" }}
+                            >
+                              Change Image
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  updateEventImage(event._id, e.target.files?.[0])
+                                }
+                                className="hidden"
+                              />
+                            </label>
+
+                            <button
+                              onClick={() => handleDelete(event._id)}
+                              className="text-xs px-3 py-1.5 rounded-lg border border-black/10 bg-[var(--bg-secondary)] font-semibold text-red-600 hover:bg-red-50 transition"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {events.length === 0 && (
-                <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                  <div className="text-4xl mb-3">📅</div>
-                  <p className="text-[var(--text-muted)] font-medium">
-                    No events created yet
-                  </p>
-                  <p className="text-sm text-[var(--text-muted)] mt-1">
-                    Create your first event using the form
-                  </p>
-                </div>
-              )}
+                {events.length === 0 && (
+                  <div className="text-center py-12 bg-[var(--bg-primary)] rounded-xl border border-dashed border-black/10">
+                    <p className="text-[var(--text-muted)] font-medium">
+                      No events created yet
+                    </p>
+                    <p className="text-sm text-[var(--text-muted)] mt-1">
+                      Create your first event using the form
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
