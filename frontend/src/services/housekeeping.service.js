@@ -33,6 +33,17 @@ export const getHousekeepingRequests = async ({ status } = {}) => {
   return res.data;
 };
 
+export const getHousekeepingRequestsAdmin = async ({ status } = {}) => {
+  const token = getAdminToken();
+  const res = await adminClient.get("/api/housekeeping", {
+    params: status ? { status } : {},
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
 export const acceptHousekeepingRequest = async (id) => {
   const token = getAdminToken();
   const res = await adminClient.patch(`/api/housekeeping/${id}/accept`, null, {

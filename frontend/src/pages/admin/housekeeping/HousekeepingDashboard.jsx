@@ -3,7 +3,7 @@ import AdminLayout from "../../../layouts/AdminLayout";
 import {
   acceptHousekeepingRequest,
   completeHousekeepingRequest,
-  getHousekeepingRequests,
+  getHousekeepingRequestsAdmin,
 } from "../../../services/housekeeping.service";
 
 const formatDateTime = (value) => {
@@ -49,7 +49,7 @@ export default function HousekeepingDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getHousekeepingRequests({ status: statusParam });
+      const data = await getHousekeepingRequestsAdmin({ status: statusParam });
       setRequests(data?.requests || []);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load requests");
