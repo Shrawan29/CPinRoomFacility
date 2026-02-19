@@ -58,9 +58,10 @@ export default function KitchenMenu() {
   /* ============================
      FILTER MENU
      ============================ */
-  const filteredMenu = menu.filter(
-    (item) => item.category === selectedCategory
-  );
+  const filteredMenu =
+    selectedCategory === "All" || !selectedCategory
+      ? menu
+      : menu.filter((item) => item.category === selectedCategory);
 
   /* ============================
      ACTIONS
@@ -140,6 +141,17 @@ export default function KitchenMenu() {
         <div className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden">
           {/* CATEGORY FILTER */}
           <div className="flex gap-2 mb-4 flex-wrap">
+            <button
+              key="All"
+              onClick={() => setSelectedCategory("All")}
+              className={`px-4 py-1 rounded-full text-sm transition ${
+                selectedCategory === "All"
+                  ? "bg-[var(--brand)] text-white"
+                  : "bg-white text-[var(--text-muted)] hover:bg-black/5"
+              }`}
+            >
+              All
+            </button>
             {categories.map((cat) => (
               <button
                 key={cat}
