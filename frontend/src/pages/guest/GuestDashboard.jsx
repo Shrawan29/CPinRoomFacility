@@ -5,6 +5,368 @@ import GuestHeader from "../../components/guest/GuestHeader";
 import GlassCard from "../../components/guest/GlassCard";
 import { useEffect, useState } from "react";
 
+// ─── Inline styles (no new dependencies) ────────────────────────────────────
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  .gd-root {
+    --rose:       #8B1A4A;
+    --rose-dark:  #6e1039;
+    --gold:       #c9a96e;
+    --gold-light: #e8d5b0;
+    --cream:      #f5ede3;
+    --warm:       #faf6f1;
+    --text:       #1e1510;
+    --text-mid:   #5c4a3e;
+    --text-muted: #9e8276;
+    --border:     rgba(180,148,110,0.18);
+    --card:       #ffffff;
+    --shadow-rose: 0 4px 20px rgba(139,26,74,0.13);
+    --shadow-card: 0 2px 16px rgba(30,21,16,0.06);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── Hero ───────────────────────────────────────────── */
+  .gd-hero {
+    position: relative;
+    width: 100%;
+    height: 210px;
+    overflow: hidden;
+    border-radius: 0 0 28px 28px;
+  }
+  .gd-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gd-hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.03) 0%,
+      rgba(0,0,0,0.10) 55%,
+      rgba(245,237,227,0.98) 100%
+    );
+    border-radius: 0 0 28px 28px;
+  }
+  .gd-hero-pill {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.32);
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Welcome ─────────────────────────────────────────── */
+  .gd-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 6px 20px 0;
+    animation: gd-rise 0.6s cubic-bezier(.4,0,.2,1) both;
+  }
+  .gd-welcome h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .gd-room-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--rose);
+    color: white;
+    border-radius: 30px;
+    padding: 5px 15px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+  }
+  .gd-welcome-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Gold Divider ────────────────────────────────────── */
+  .gd-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 22px 20px 16px;
+  }
+  .gd-divider::before,
+  .gd-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0.45;
+  }
+  .gd-divider span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  /* ── Section label ───────────────────────────────────── */
+  .gd-section-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  /* ── Service Cards ───────────────────────────────────── */
+  .gd-service-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 18px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 11px;
+    text-decoration: none;
+  }
+  .gd-service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2.5px;
+    background: linear-gradient(90deg, var(--rose), var(--gold));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .gd-service-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-rose);
+  }
+  .gd-service-card:hover::before {
+    transform: scaleX(1);
+  }
+  .gd-service-card:active {
+    transform: scale(0.98);
+  }
+
+  .gd-icon-wrap {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rose);
+  }
+  .gd-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+  .gd-card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.4;
+  }
+  .gd-card-arrow {
+    margin-left: auto;
+    color: var(--gold);
+    font-size: 20px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  /* ── Orders Card ─────────────────────────────────────── */
+  .gd-orders-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 26px 20px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 4px;
+  }
+  .gd-orders-icon {
+    width: 54px;
+    height: 54px;
+    background: var(--cream);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 14px;
+    border: 1px solid var(--border);
+  }
+  .gd-orders-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 5px;
+  }
+  .gd-orders-sub {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .gd-order-btn {
+    display: block;
+    width: 100%;
+    background: var(--rose);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    margin-bottom: 13px;
+  }
+  .gd-order-btn:hover {
+    background: var(--rose-dark);
+    box-shadow: 0 6px 20px rgba(139,26,74,0.28);
+    transform: translateY(-1px);
+  }
+  .gd-order-btn:active {
+    transform: scale(0.98);
+  }
+  .gd-history-link {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .gd-history-link:hover {
+    color: var(--rose);
+  }
+
+  /* ── Ornament ─────────────────────────────────────────── */
+  .gd-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 24px 0 0;
+    opacity: 0.32;
+  }
+  .gd-orn-line {
+    width: 36px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .gd-orn-diamond {
+    width: 5px;
+    height: 5px;
+    background: var(--gold);
+    transform: rotate(45deg);
+  }
+
+  /* ── Explore Items ───────────────────────────────────── */
+  .gd-explore-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px;
+  }
+  .gd-explore-item:hover {
+    transform: translateX(4px);
+    border-color: var(--gold-light);
+    box-shadow: 0 4px 14px rgba(201,169,110,0.13);
+  }
+  .gd-explore-item:active {
+    transform: scale(0.98);
+  }
+  .gd-explore-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rose);
+    flex-shrink: 0;
+  }
+  .gd-explore-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+  .gd-explore-chevron {
+    color: var(--gold);
+    font-size: 20px;
+    opacity: 0.65;
+  }
+
+  /* ── Animations ──────────────────────────────────────── */
+  @keyframes gd-rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .gd-anim-1 { animation: gd-rise 0.55s cubic-bezier(.4,0,.2,1) 0.05s both; }
+  .gd-anim-2 { animation: gd-rise 0.55s cubic-bezier(.4,0,.2,1) 0.12s both; }
+  .gd-anim-3 { animation: gd-rise 0.55s cubic-bezier(.4,0,.2,1) 0.20s both; }
+  .gd-anim-4 { animation: gd-rise 0.55s cubic-bezier(.4,0,.2,1) 0.28s both; }
+`;
+
 export default function GuestDashboard() {
   const { guest } = useGuestAuth();
   const navigate = useNavigate();
@@ -14,7 +376,7 @@ export default function GuestDashboard() {
     setFadeIn(true);
   }, []);
 
-  // Icons
+  // Icons (unchanged from original)
   const icons = {
     food: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
@@ -53,7 +415,7 @@ export default function GuestDashboard() {
     ),
   };
 
-  // Service cards
+  // Service cards (unchanged)
   const services = [
     {
       icon: icons.food,
@@ -69,7 +431,7 @@ export default function GuestDashboard() {
     },
   ];
 
-  // Explore cards
+  // Explore cards (unchanged)
   const explore = [
     {
       icon: icons.events,
@@ -83,7 +445,7 @@ export default function GuestDashboard() {
     },
   ];
 
-  // Orders section placeholder (to be replaced with real data logic)
+  // Orders section placeholder (unchanged)
   const hasActiveOrder = false; // TODO: Replace with real check
   const activeOrder = {
     items: [
@@ -95,84 +457,138 @@ export default function GuestDashboard() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-[--bg-primary] transition-opacity duration-700 ${fadeIn ? "opacity-100" : "opacity-0"}`}
-      style={{ maxWidth: 420, margin: "0 auto", padding: "0 16px" }}
+      className={`min-h-screen flex flex-col bg-[--bg-primary] transition-opacity duration-700 ${fadeIn ? "opacity-100" : "opacity-0"} gd-root`}
+      style={{ maxWidth: 420, margin: "0 auto", padding: "0 0 32px" }}
     >
-      {/* Header */}
+      {/* Inject scoped styles */}
+      <style>{styles}</style>
+
+      {/* Header (unchanged component) */}
       <GuestHeader />
 
-      {/* Hero Image Section */}
-      <section
-        className="relative w-full"
-        style={{ height: "29vh", minHeight: 120, maxHeight: 180 }}
-      >
-        <img
-          src={hotelbg}
-          alt="Hotel Hero"
-          className="w-full h-full object-cover rounded-b-[28px] shadow-lg"
-          style={{ minHeight: 120, maxHeight: 180 }}
-        />
-        <div className="absolute bottom-0 left-0 w-full h-1/3 rounded-b-[28px]" style={{
-          background: "linear-gradient(0deg, rgba(0,0,0,0.18) 60%, rgba(0,0,0,0.0) 100%)"
-        }} />
-      </section>
+      {/* ── Hero Image ──────────────────────────────────────── */}
+      <div className="gd-hero" style={{ margin: "0 0 0 0" }}>
+        <img src={hotelbg} alt="Hotel Hero" />
+        <div className="gd-hero-gradient" />
+        <div className="gd-hero-pill">✦ Superior Room</div>
+      </div>
 
-      {/* Welcome Section */}
-      <section className="flex flex-col items-center text-center mt-6 mb-4 animate-fadein" style={{ animation: "fadein 1.2s" }}>
-        <h2 className="font-serif text-[28px] font-semibold mb-1" style={{ letterSpacing: "-0.5px" }}>
-          Welcome back
-        </h2>
-        <div className="text-[18px] text-[--text-muted] mb-1">Room {guest?.roomNumber || "207"}</div>
-        <div className="text-[15px] text-[--text-muted] font-light" style={{ marginBottom: 0 }}>
-          Enjoy your stay with us
+      {/* ── Welcome ─────────────────────────────────────────── */}
+      <div className="gd-welcome gd-anim-1">
+        <h2>Welcome back</h2>
+        <div className="gd-room-chip">
+          ✦ &nbsp;Room {guest?.roomNumber || "207"}
         </div>
-      </section>
+        <p className="gd-welcome-sub">Enjoy your stay with us</p>
+      </div>
 
-      {/* Glassmorphism Service Cards */}
-      <section className="flex flex-col gap-4 mt-2 mb-2">
-        {services.map((svc, i) => (
-          <GlassCard
+      {/* ── Gold Divider ─────────────────────────────────────── */}
+      <div className="gd-divider gd-anim-2">
+        <span>Our Services</span>
+      </div>
+
+      {/* ── Service Cards ─────────────────────────────────────── */}
+      <div style={{ padding: "0 16px" }} className="gd-anim-2">
+        {services.map((svc) => (
+          <div
             key={svc.title}
-            className="flex items-center gap-4 px-5 py-5 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
+            className="gd-service-card"
             onClick={svc.onClick}
-            style={{ borderRadius: 24, marginBottom: i === 0 ? 16 : 0 }}
           >
-            <div className="shrink-0 flex items-center justify-center w-14 h-14 rounded-[20px] bg-white/40 shadow" style={{ fontSize: 28 }}>
-              {svc.icon}
+            <div className="gd-icon-wrap">{svc.icon}</div>
+            <div style={{ flex: 1 }}>
+              <div className="gd-card-title">{svc.title}</div>
+              <div className="gd-card-sub">{svc.subtitle}</div>
             </div>
-            <div className="flex-1">
-              <div className="text-lg font-semibold mb-1" style={{ color: "var(--text-primary)" }}>{svc.title}</div>
-              <div className="text-sm text-[--text-muted] font-light">{svc.subtitle}</div>
-            </div>
-          </GlassCard>
+            <div className="gd-card-arrow">›</div>
+          </div>
         ))}
-      </section>
+      </div>
 
-      {/* Explore Section */}
-      <section className="mt-6 mb-8">
-        <div className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Explore</div>
-        <div className="flex flex-col gap-4">
-          {explore.map((item, i) => (
-            <GlassCard
-              key={item.title}
-              className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
-              onClick={item.onClick}
-              style={{ borderRadius: 18, minHeight: 56, marginBottom: i === 0 ? 16 : 0 }}
-            >
-              <div className="shrink-0 flex items-center justify-center w-11 h-11 rounded-2xl bg-white/40 shadow" style={{ fontSize: 22 }}>
-                {item.icon}
+      {/* ── Your Orders ───────────────────────────────────────── */}
+      <div style={{ padding: "0 16px" }} className="gd-anim-3">
+        <p className="gd-section-label">Your Orders</p>
+
+        {hasActiveOrder ? (
+          /* Active order state — same logic, improved card */
+          <div className="gd-orders-card" style={{ textAlign: "left" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, color: "var(--text)" }}>
+                Current Order
+              </span>
+              <span style={{
+                background: "var(--cream)",
+                color: "var(--rose)",
+                border: "1px solid var(--border)",
+                borderRadius: 20,
+                padding: "3px 12px",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.05em"
+              }}>
+                {activeOrder.status}
+              </span>
+            </div>
+            {activeOrder.items.map((item) => (
+              <div key={item.name} style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: 13,
+                color: "var(--text-mid)",
+                marginBottom: 6,
+                fontWeight: 300
+              }}>
+                <span>{item.name}</span>
+                <span style={{ color: "var(--text-muted)" }}>×{item.qty}</span>
               </div>
-              <div className="flex-1 text-base font-medium" style={{ color: "var(--text-primary)" }}>{item.title}</div>
-            </GlassCard>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        ) : (
+          /* Empty order state */
+          <div className="gd-orders-card">
+            <div className="gd-orders-icon">🍃</div>
+            <div className="gd-orders-title">No current orders</div>
+            <p className="gd-orders-sub">
+              Start by ordering something<br />delicious from our menu
+            </p>
+            <button
+              className="gd-order-btn"
+              onClick={() => navigate("/guest/menu")}
+            >
+              Order Now
+            </button>
+            <button
+              className="gd-history-link"
+              onClick={() => navigate("/guest/orders")}
+            >
+              View Order History &nbsp;→
+            </button>
+          </div>
+        )}
+      </div>
 
-      {/* Animations */}
-      <style>{`
-        @keyframes fadein { from { opacity: 0; transform: translateY(24px);} to { opacity: 1; transform: none; } }
-        .animate-fadein { animation: fadein 1.1s cubic-bezier(.4,0,.2,1); }
-      `}</style>
+      {/* ── Ornament ─────────────────────────────────────────── */}
+      <div className="gd-ornament">
+        <div className="gd-orn-line" />
+        <div className="gd-orn-diamond" />
+        <div className="gd-orn-line" />
+      </div>
+
+      {/* ── Explore ───────────────────────────────────────────── */}
+      <div style={{ padding: "22px 16px 0" }} className="gd-anim-4">
+        <p className="gd-section-label">Explore</p>
+        {explore.map((item) => (
+          <div
+            key={item.title}
+            className="gd-explore-item"
+            onClick={item.onClick}
+          >
+            <div className="gd-explore-icon">{item.icon}</div>
+            <div className="gd-explore-title">{item.title}</div>
+            <div className="gd-explore-chevron">›</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
