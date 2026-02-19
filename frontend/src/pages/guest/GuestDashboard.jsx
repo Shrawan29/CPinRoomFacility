@@ -30,9 +30,8 @@ const styles = `
   .gd-hero {
     position: relative;
     width: 100%;
-    height: 210px;
+    height: 180px;
     overflow: hidden;
-    border-radius: 0 0 28px 28px;
   }
   .gd-hero img {
     width: 100%;

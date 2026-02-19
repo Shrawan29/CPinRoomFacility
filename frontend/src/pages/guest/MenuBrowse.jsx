@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import { getGuestMenu, placeOrder } from "../../services/guest.service";
 import GuestHeader from "../../components/guest/GuestHeader"; // ✅ same header as dashboard
@@ -93,17 +94,13 @@ export default function MenuBrowse() {
     };
 
     return (
-        <>
+        <GuestLuxuryTheme>
             {/* ✅ SAME HEADER AS DASHBOARD */}
             <GuestHeader />
 
             <div
                 className="min-h-screen p-6 pb-28"
-                style={{
-                    background:
-                        "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
-                    color: "var(--text-primary)",
-                }}
+                style={{ color: "var(--text)" }}
             >
                 {/* SUCCESS MESSAGE */}
                 {successMessage && (
@@ -263,6 +260,6 @@ export default function MenuBrowse() {
                     </div>
                 </div>
             )}
-        </>
+        </GuestLuxuryTheme>
     );
 }

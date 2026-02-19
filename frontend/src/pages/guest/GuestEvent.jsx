@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getGuestEvents } from "../../services/event.service";
 import GuestHeader from "../../components/guest/GuestHeader";
+import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { Link } from "react-router-dom";
 
 export default function GuestEvents() {
@@ -45,20 +46,18 @@ export default function GuestEvents() {
   }, []);
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-primary)" }}
-    >
-      {/* HEADER */}
-      <GuestHeader />
+    <GuestLuxuryTheme>
+      <div className="min-h-screen">
+        {/* HEADER */}
+        <GuestHeader />
 
-      <div className="px-4 py-4 max-w-xl mx-auto">
-        {/* PAGE TITLE */}
-        <div className="mb-4">
-          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
-            🎉 Hotel Events
-          </h1>
-          <p className="text-sm text-[var(--text-muted)]">
+        <div className="px-4 py-4 max-w-xl mx-auto">
+          {/* PAGE TITLE */}
+          <div className="mb-4">
+            <h1 className="text-2xl font-semibold" style={{ color: "var(--text)" }}>
+              🎉 Hotel Events
+            </h1>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Tap an event to view details
           </p>
         </div>
@@ -66,13 +65,13 @@ export default function GuestEvents() {
       {/* STATES */}
         {/* STATES */}
         {loading && (
-          <p className="text-sm text-[var(--text-muted)]">Loading events…</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading events…</p>
         )}
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         {!loading && events.length === 0 && (
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             No upcoming events right now
           </p>
         )}
@@ -87,7 +86,8 @@ export default function GuestEvents() {
             >
               {event.image ? (
                 <div
-                  className="w-full bg-[var(--bg-secondary)]"
+                  className="w-full"
+                  style={{ background: "var(--cream)" }}
                   style={{ aspectRatio: "16 / 9" }}
                 >
                   <img
@@ -99,7 +99,8 @@ export default function GuestEvents() {
                 </div>
               ) : (
                 <div
-                  className="w-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)]"
+                  className="w-full flex items-center justify-center text-sm"
+                  style={{ background: "var(--cream)", color: "var(--text-muted)" }}
                   style={{ aspectRatio: "16 / 9" }}
                 >
                   No image
@@ -108,7 +109,7 @@ export default function GuestEvents() {
 
               <div className="p-4">
                 <div className="flex justify-between items-start gap-3">
-                  <h2 className="font-semibold text-lg text-[var(--text-primary)] leading-snug">
+                  <h2 className="font-semibold text-lg leading-snug" style={{ color: "var(--text)" }}>
                     {event.title}
                   </h2>
                   <span
@@ -120,7 +121,7 @@ export default function GuestEvents() {
                   </span>
                 </div>
 
-                <div className="mt-2 text-sm text-[var(--text-muted)] space-y-1">
+                <div className="mt-2 text-sm space-y-1" style={{ color: "var(--text-muted)" }}>
                   <div>📍 {event.location || "Hotel Premises"}</div>
                   <div>
                     📅 {formatDateDDMMYYYY(event.eventDate)}{" "}
@@ -139,6 +140,7 @@ export default function GuestEvents() {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </GuestLuxuryTheme>
   );
 }

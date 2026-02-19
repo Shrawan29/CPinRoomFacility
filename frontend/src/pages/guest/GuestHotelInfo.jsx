@@ -1,5 +1,6 @@
 import { useState } from "react";
 import GuestHeader from "../../components/guest/GuestHeader";
+import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 
 export default function GuestHotelInfo() {
@@ -81,122 +82,77 @@ export default function GuestHotelInfo() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)" }}>
-      {/* HEADER */}
-      <GuestHeader />
-
-      {/* MAIN CONTENT */}
-      <main className="px-4 py-6">
-        <div className="max-w-4xl mx-auto">
-          {/* TITLE */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-2" style={{ color: "var(--text-primary)" }}>
-              🏨 Hotel Information
-            </h1>
-            <p style={{ color: "var(--text-muted)" }}>
-              Everything you need during your stay
-            </p>
-            {guest?.roomNumber && (
-              <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>
-                Room {guest.roomNumber}
-              </p>
-            )}
-          </div>
-
-          {/* INFO SECTIONS */}
-          <div className="space-y-3">
-            {Object.entries(sections).map(([key, section]) => (
-              <div
+    <GuestLuxuryTheme>
+      <div className="min-h-screen pb-24">
+        <GuestHeader />
+        <div className="max-w-xl mx-auto px-4 pt-6">
+          <h1 className="text-2xl font-bold mb-4" style={{ color: "var(--text)" }}>
+            🏨 Hotel Information
+          </h1>
+          <div className="flex gap-2 mb-6 flex-wrap">
+            {Object.keys(sections).map((key) => (
+              <button
                 key={key}
-                className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100"
+                onClick={() => setExpandedSection(key)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${expandedSection === key ? "bg-rose-200 text-rose-900" : "bg-gray-100 text-gray-700"}`}
               >
-                {/* SECTION HEADER */}
-                <button
-                  onClick={() => toggleSection(key)}
-                  className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition"
-                >
-                  <h2 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {section.title}
-                  </h2>
-                  <span className="text-xl transition-transform" style={{
-                    transform: expandedSection === key ? "rotate(180deg)" : "rotate(0deg)"
-                  }}>
-                    ▼
-                  </span>
-                </button>
-
-                {/* SECTION CONTENT */}
-                {expandedSection === key && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
-                    {/* For amenities and services - grid layout */}
-                    {(key === "amenities" || key === "roomServices") && (
-                      <div className="grid grid-cols-2 gap-3 mt-4">
-                        {section.items.map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                            <span className="text-2xl">{item.icon}</span>
-                            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                              {item.name}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* For dining - list with times */}
-                    {key === "dining" && (
-                      <div className="space-y-3 mt-4">
-                        {section.items.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl">{item.icon}</span>
-                              <span className="font-medium" style={{ color: "var(--text-primary)" }}>
-                                {item.name}
-                              </span>
-                            </div>
-                            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                              {item.info}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* For key-value items */}
-                    {(key === "wifi" || key === "emergency" || key === "checkout") && (
-                      <div className="space-y-3 mt-4">
-                        {section.items.map((item, idx) => (
-                          <div key={idx} className="p-3 bg-gray-50 rounded-lg">
-                            <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
-                              {item.label}
-                            </p>
-                            <p className="text-base font-medium mt-1" style={{ color: "var(--text-primary)" }}>
-                              {item.value}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                {sections[key].title}
+              </button>
             ))}
           </div>
-
-          {/* HELPFUL TIPS */}
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <h3 className="font-semibold mb-2 text-blue-900">💡 Need Help?</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>✓ Dial 0 from your room phone to reach the front desk</li>
-              <li>✓ Press your room number on the phone for direct connection</li>
-              <li>✓ Use our mobile app for instant service requests</li>
-              <li>✓ Check the room directory for additional information</li>
-            </ul>
+          <div className="bg-white rounded-2xl shadow p-6">
+            {/* Section content */}
+            {expandedSection === "amenities" && (
+              <ul className="grid grid-cols-2 gap-3">
+                {sections.amenities.items.map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm">
+                    <span className="text-lg">{item.icon}</span> {item.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {expandedSection === "wifi" && (
+              <ul className="space-y-2">
+                {sections.wifi.items.map((item, i) => (
+                  <li key={i} className="flex justify-between text-sm">
+                    <span>{item.label}</span>
+                    <span className="font-semibold">{item.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {expandedSection === "roomServices" && (
+              <ul className="grid grid-cols-2 gap-3">
+                {sections.roomServices.items.map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm">
+                    <span className="text-lg">{item.icon}</span> {item.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {expandedSection === "emergency" && (
+              <ul className="space-y-2">
+                {sections.emergency.items.map((item, i) => (
+                  <li key={i} className="flex justify-between text-sm">
+                    <span>{item.label}</span>
+                    <span className="font-semibold">{item.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {expandedSection === "dining" && (
+              <ul className="grid grid-cols-2 gap-3">
+                {sections.dining.items.map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm">
+                    <span className="text-lg">{item.icon}</span> {item.name}
+                    <span className="ml-auto text-xs text-gray-500">{item.info}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-
-          {/* SAFE SPACE */}
-          <div className="h-6" />
         </div>
-      </main>
-    </div>
+      </div>
+    </GuestLuxuryTheme>
   );
 }
