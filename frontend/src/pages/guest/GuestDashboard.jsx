@@ -546,7 +546,6 @@ export default function GuestDashboard() {
         ) : (
           /* Empty order state */
           <div className="gd-orders-card">
-            <div className="gd-orders-icon">🍃</div>
             <div className="gd-orders-title">No current orders</div>
             <button
               className="gd-history-link"
