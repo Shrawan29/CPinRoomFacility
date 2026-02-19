@@ -470,12 +470,11 @@ export default function GuestDashboard() {
       <div className="gd-hero" style={{ margin: "0 0 0 0" }}>
         <img src={hotelbg} alt="Hotel Hero" />
         <div className="gd-hero-gradient" />
-        <div className="gd-hero-pill">✦ Superior Room</div>
       </div>
 
       {/* ── Welcome ─────────────────────────────────────────── */}
       <div className="gd-welcome gd-anim-1">
-        <h2>Welcome back</h2>
+        <h2>Welcome</h2>
         <div className="gd-room-chip">
           ✦ &nbsp;Room {guest?.roomNumber || "207"}
         </div>
@@ -548,15 +547,6 @@ export default function GuestDashboard() {
           <div className="gd-orders-card">
             <div className="gd-orders-icon">🍃</div>
             <div className="gd-orders-title">No current orders</div>
-            <p className="gd-orders-sub">
-              Start by ordering something<br />delicious from our menu
-            </p>
-            <button
-              className="gd-order-btn"
-              onClick={() => navigate("/guest/menu")}
-            >
-              Order Now
-            </button>
             <button
               className="gd-history-link"
               onClick={() => navigate("/guest/orders")}
