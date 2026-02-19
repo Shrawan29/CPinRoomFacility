@@ -8,6 +8,7 @@ import {
 } from "../../../services/menu.service.js";
 import MenuFormModal from "./MenuFormModal";
 import { exportMenuToExcel, importMenuFromExcel } from "../../../services/excelMenu.service";
+import api from "../../../services/api";
 
 export default function KitchenMenu() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -112,12 +113,19 @@ export default function KitchenMenu() {
               type="file"
               accept=".xlsx,.xls"
               className="hidden"
-              onChange={e => {
+              onChange={async e => {
                 const file = e.target.files[0];
                 if (file) {
-                  importMenuFromExcel(file, (json) => {
+                  importMenuFromExcel(file, async (json) => {
                     // Optionally validate json structure here
                     setMenu(json);
+                    // Bulk upload to backend
+                    try {
+                      await api.post("/menu/kitchen/bulk", { items: json });
+                      alert("Menu items uploaded successfully.");
+                    } catch (err) {
+                      alert("Bulk upload failed: " + (err.response?.data?.message || err.message));
+                    }
                   });
                 }
               }}
