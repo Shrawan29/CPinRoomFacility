@@ -3,11 +3,22 @@ import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
 
+function UsageCard({ label, value }) {
+  return (
+    <div className="bg-[var(--bg-secondary)] rounded-xl p-6">
+      <p className="text-sm text-[var(--text-muted)]">{label}</p>
+      <h2 className="text-2xl font-bold mt-2">{value}</h2>
+    </div>
+  );
+}
+
 export default function SuperAdminDashboard() {
   const { token, loading: authLoading } = useAdminAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [daily, setDaily] = useState(null);
+  const [monthly, setMonthly] = useState(null);
 
   useEffect(() => {
     if (authLoading || !token) {
@@ -28,7 +39,22 @@ export default function SuperAdminDashboard() {
       }
     };
 
+    const fetchReports = async () => {
+      try {
+        const dailyRes = await api.get("/admin/reports/daily");
+        setDaily(dailyRes.data);
+        const now = new Date();
+        const monthlyRes = await api.get(
+          `/admin/reports/monthly?year=${now.getFullYear()}&month=${now.getMonth() + 1}`
+        );
+        setMonthly(monthlyRes.data);
+      } catch (err) {
+        // ignore for now, can add error handling if needed
+      }
+    };
+
     fetchStats();
+    fetchReports();
   }, [token, authLoading]);
 
   if (loading) {
@@ -86,6 +112,25 @@ export default function SuperAdminDashboard() {
             {stats?.todayOrders || 0}
           </p>
         </div>
+      </div>
+
+      {/* Usage Report Section */}
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold mb-4 text-[var(--text-primary)]">Usage Report</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <UsageCard label="Today's Orders Placed" value={daily?.totalOrders ?? '—'} />
+          <UsageCard label="Today's Guest Sessions" value={daily?.newGuestSessions ?? '—'} />
+          <UsageCard label="Occupied Rooms Today" value={daily?.occupiedRooms ?? '—'} />
+        </div>
+        {monthly && (
+          <div className="mt-8">
+            <h4 className="text-lg font-semibold mb-2 text-[var(--text-primary)]">Monthly Summary</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <UsageCard label="Orders This Month" value={monthly?.monthlyOrders ?? '—'} />
+              <UsageCard label="Guest Sessions This Month" value={monthly?.monthlyGuestSessions ?? '—'} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Additional Info */}
