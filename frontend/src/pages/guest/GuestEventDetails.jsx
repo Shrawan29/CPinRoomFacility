@@ -78,8 +78,7 @@ export default function GuestEventDetails() {
             {event.image ? (
               <div
                 className="w-full"
-                style={{ background: "var(--cream)" }}
-                style={{ aspectRatio: "16 / 9" }}
+                style={{ background: "var(--cream)",aspectRatio: "16 / 9" }}
               >
                 <img
                   src={event.image}

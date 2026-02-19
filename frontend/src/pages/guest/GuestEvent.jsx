@@ -87,8 +87,7 @@ export default function GuestEvents() {
               {event.image ? (
                 <div
                   className="w-full"
-                  style={{ background: "var(--cream)" }}
-                  style={{ aspectRatio: "16 / 9" }}
+                  style={{ background: "var(--cream)", aspectRatio: "16 / 9" }}
                 >
                   <img
                     src={event.image}
@@ -100,8 +99,7 @@ export default function GuestEvents() {
               ) : (
                 <div
                   className="w-full flex items-center justify-center text-sm"
-                  style={{ background: "var(--cream)", color: "var(--text-muted)" }}
-                  style={{ aspectRatio: "16 / 9" }}
+                  style={{ background: "var(--cream)", color: "var(--text-muted)", aspectRatio: "16 / 9" }}
                 >
                   No image
                 </div>
