@@ -10,14 +10,14 @@ import {
   bulkUpsertMenuItems,
 } from "../controllers/menu.controller.js";
 
+const router = express.Router();
+
 router.post(
   "/kitchen/bulk",
   adminAuth,
   allowRoles("DINING_ADMIN"),
   bulkUpsertMenuItems
 );
-
-const router = express.Router();
 
 /* ===========================
    KITCHEN ADMIN (DINING_ADMIN)
