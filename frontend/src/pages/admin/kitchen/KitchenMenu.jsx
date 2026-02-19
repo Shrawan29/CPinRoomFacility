@@ -7,6 +7,7 @@ import {
   updateMenuItem,
 } from "../../../services/menu.service.js";
 import MenuFormModal from "./MenuFormModal";
+import { exportMenuToExcel, importMenuFromExcel } from "../../../services/excelMenu.service";
 
 export default function KitchenMenu() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -85,20 +86,44 @@ export default function KitchenMenu() {
      ============================ */
   return (
     <AdminLayout>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
           Menu Management
         </h1>
-
-        <button
-          onClick={() => {
-            setEditingItem(null);
-            setShowModal(true);
-          }}
-          className="bg-[var(--brand)] text-white px-4 py-2 rounded-xl"
-        >
-          + Add Item
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setEditingItem(null);
+              setShowModal(true);
+            }}
+            className="bg-[var(--brand)] text-white px-4 py-2 rounded-xl"
+          >
+            + Add Item
+          </button>
+          <button
+            onClick={() => exportMenuToExcel(menu)}
+            className="bg-green-600 text-white px-4 py-2 rounded-xl"
+          >
+            Export Excel
+          </button>
+          <label className="bg-blue-600 text-white px-4 py-2 rounded-xl cursor-pointer">
+            Import Excel
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files[0];
+                if (file) {
+                  importMenuFromExcel(file, (json) => {
+                    // Optionally validate json structure here
+                    setMenu(json);
+                  });
+                }
+              }}
+            />
+          </label>
+        </div>
       </div>
 
       {loading ? (
