@@ -7,7 +7,15 @@ import {
   deleteMenuItem,
   listAllMenuItems,
   listAvailableMenuItems,
+  bulkUpsertMenuItems,
 } from "../controllers/menu.controller.js";
+
+router.post(
+  "/kitchen/bulk",
+  adminAuth,
+  allowRoles("DINING_ADMIN"),
+  bulkUpsertMenuItems
+);
 
 const router = express.Router();
 

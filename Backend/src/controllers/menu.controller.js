@@ -1,3 +1,36 @@
+/**
+ * DINING_ADMIN → Bulk create/update menu items
+ */
+export const bulkUpsertMenuItems = async (req, res) => {
+  try {
+    const items = req.body.items;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "No items provided" });
+    }
+
+    const upserted = [];
+    for (const item of items) {
+      if (!item.name || !item.category || item.price == null) continue;
+      // Try to find by name+category, update if exists, else create
+      const updated = await MenuItem.findOneAndUpdate(
+        { name: item.name, category: item.category },
+        {
+          $set: {
+            price: item.price,
+            description: item.description || "",
+            isVeg: item.isVeg !== undefined ? item.isVeg : true,
+            isAvailable: item.isAvailable !== undefined ? item.isAvailable : true,
+          },
+        },
+        { new: true, upsert: true }
+      );
+      upserted.push(updated);
+    }
+    res.json({ message: "Bulk upsert complete", count: upserted.length });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 import MenuItem from "../models/MenuItem.js";
 
 /**
