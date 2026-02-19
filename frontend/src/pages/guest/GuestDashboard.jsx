@@ -96,7 +96,7 @@ export default function GuestDashboard() {
   return (
     <div
       className={`min-h-screen flex flex-col bg-[--bg-primary] transition-opacity duration-700 ${fadeIn ? "opacity-100" : "opacity-0"}`}
-      style={{ maxWidth: 420, margin: "0 auto" }}
+      style={{ maxWidth: 420, margin: "0 auto", padding: "0 16px" }}
     >
       {/* Header */}
       <GuestHeader />
@@ -104,38 +104,38 @@ export default function GuestDashboard() {
       {/* Hero Image Section */}
       <section
         className="relative w-full"
-        style={{ height: "43vh", minHeight: 220, maxHeight: 320 }}
+        style={{ height: "29vh", minHeight: 120, maxHeight: 180 }}
       >
         <img
           src={hotelbg}
           alt="Hotel Hero"
-          className="w-full h-full object-cover rounded-b-[30px] shadow-lg"
-          style={{ minHeight: 220, maxHeight: 320 }}
+          className="w-full h-full object-cover rounded-b-[28px] shadow-lg"
+          style={{ minHeight: 120, maxHeight: 180 }}
         />
-        <div className="absolute bottom-0 left-0 w-full h-1/3 rounded-b-[30px]" style={{
+        <div className="absolute bottom-0 left-0 w-full h-1/3 rounded-b-[28px]" style={{
           background: "linear-gradient(0deg, rgba(0,0,0,0.18) 60%, rgba(0,0,0,0.0) 100%)"
         }} />
       </section>
 
       {/* Welcome Section */}
-      <section className="flex flex-col items-center text-center mt-8 mb-6 px-6 animate-fadein" style={{ animation: "fadein 1.2s" }}>
-        <h2 className="font-serif text-[30px] font-semibold mb-1" style={{ letterSpacing: "-0.5px" }}>
+      <section className="flex flex-col items-center text-center mt-6 mb-4 animate-fadein" style={{ animation: "fadein 1.2s" }}>
+        <h2 className="font-serif text-[28px] font-semibold mb-1" style={{ letterSpacing: "-0.5px" }}>
           Welcome back
         </h2>
-        <div className="text-lg text-[--text-muted] mb-1">Room {guest?.roomNumber || "207"}</div>
-        <div className="text-base text-[--text-muted] font-light" style={{ marginBottom: 0 }}>
+        <div className="text-[18px] text-[--text-muted] mb-1">Room {guest?.roomNumber || "207"}</div>
+        <div className="text-[15px] text-[--text-muted] font-light" style={{ marginBottom: 0 }}>
           Enjoy your stay with us
         </div>
       </section>
 
       {/* Glassmorphism Service Cards */}
-      <section className="flex flex-col gap-6 px-4">
+      <section className="flex flex-col gap-4 mt-2 mb-2">
         {services.map((svc, i) => (
           <GlassCard
             key={svc.title}
             className="flex items-center gap-4 px-5 py-5 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
             onClick={svc.onClick}
-            style={{ borderRadius: 24 }}
+            style={{ borderRadius: 24, marginBottom: i === 0 ? 16 : 0 }}
           >
             <div className="shrink-0 flex items-center justify-center w-14 h-14 rounded-[20px] bg-white/40 shadow" style={{ fontSize: 28 }}>
               {svc.icon}
@@ -149,7 +149,7 @@ export default function GuestDashboard() {
       </section>
 
       {/* Orders Section */}
-      <section className="mt-10 px-4">
+      <section className="mt-6 mb-2">
         <div className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Your Orders</div>
         {hasActiveOrder ? (
           <GlassCard className="flex flex-col gap-3 px-5 py-5 animate-fadein" style={{ borderRadius: 20, boxShadow: "0 4px 18px rgba(0,0,0,0.07)" }}>
@@ -167,7 +167,7 @@ export default function GuestDashboard() {
             </div>
           </GlassCard>
         ) : (
-          <GlassCard className="flex flex-col items-center justify-center gap-2 px-5 py-7 animate-fadein" style={{ borderRadius: 20, boxShadow: "0 4px 18px rgba(0,0,0,0.07)" }}>
+          <GlassCard className="flex flex-col items-center justify-center gap-2 px-5 py-6 animate-fadein" style={{ borderRadius: 20, boxShadow: "0 4px 18px rgba(0,0,0,0.07)" }}>
             <div className="text-base font-semibold mb-1">No current orders</div>
             <div className="text-sm text-[--text-muted] mb-3">Start by ordering something delicious</div>
             <button
@@ -189,15 +189,15 @@ export default function GuestDashboard() {
       </section>
 
       {/* Explore Section */}
-      <section className="mt-10 px-4 mb-8">
+      <section className="mt-6 mb-8">
         <div className="text-lg font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Explore</div>
         <div className="flex flex-col gap-4">
-          {explore.map((item) => (
+          {explore.map((item, i) => (
             <GlassCard
               key={item.title}
               className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:scale-[1.02] transition-transform duration-300"
               onClick={item.onClick}
-              style={{ borderRadius: 18, minHeight: 64 }}
+              style={{ borderRadius: 18, minHeight: 56, marginBottom: i === 0 ? 16 : 0 }}
             >
               <div className="shrink-0 flex items-center justify-center w-11 h-11 rounded-2xl bg-white/40 shadow" style={{ fontSize: 22 }}>
                 {item.icon}
