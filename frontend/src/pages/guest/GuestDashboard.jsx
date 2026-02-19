@@ -32,6 +32,7 @@ const styles = `
     width: 100%;
     height: 180px;
     overflow: hidden;
+    border-radius: 0 0 28px 28px;
   }
   .gd-hero img {
     width: 100%;
@@ -44,9 +45,10 @@ const styles = `
     inset: 0;
     background: linear-gradient(
       to bottom,
-      rgba(0,0,0,0.03) 0%,
-      rgba(0,0,0,0.10) 55%,
-      rgba(245,237,227,0.98) 100%
+      rgba(0,0,0,0.02) 0%,
+      rgba(0,0,0,0.08) 40%,
+      rgba(245,237,227,0.85) 80%,
+      rgba(245,237,227,1.00) 100%
     );
     border-radius: 0 0 28px 28px;
   }
