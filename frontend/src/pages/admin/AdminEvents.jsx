@@ -75,7 +75,8 @@ export default function AdminEvents() {
           canvas.width,
           canvas.height
         );
-        const croppedDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+        // Compress image by lowering JPEG quality
+        const croppedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
         setForm((prev) => ({ ...prev, image: croppedDataUrl }));
       };
       img.onerror = () => setError("Failed to process image");
