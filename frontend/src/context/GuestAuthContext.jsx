@@ -12,9 +12,14 @@ export function GuestAuthProvider({ children }) {
     const storedToken = localStorage.getItem("guest_token");
     const storedGuest = localStorage.getItem("guest_data");
 
-    if (storedToken && storedGuest) {
+    if (storedToken && storedGuest && storedGuest !== "undefined") {
       setToken(storedToken);
-      setGuest(JSON.parse(storedGuest));
+      try {
+        setGuest(JSON.parse(storedGuest));
+      } catch (e) {
+        setGuest(null);
+        localStorage.removeItem("guest_data");
+      }
     }
 
     setLoading(false);
