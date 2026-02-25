@@ -476,10 +476,11 @@ export default function AdminEvents() {
                     key={event._id}
                     className="bg-[--bg-primary] rounded-xl border border-black/5 p-4"
                   >
-                    <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex flex-col gap-4">
+                      {/* Image on top */}
                       {event.image ? (
                         <div
-                          className="w-full sm:w-64 flex items-center justify-center rounded-lg border border-black/10 overflow-hidden bg-gradient-to-br from-[--bg-secondary] to-[--bg-primary] shrink-0"
+                          className="w-full flex items-center justify-center rounded-lg border border-black/10 overflow-hidden bg-gradient-to-br from-[--bg-secondary] to-[--bg-primary]"
                           style={{ aspectRatio: "16 / 9", minHeight: 120 }}
                         >
                           <img
@@ -492,13 +493,13 @@ export default function AdminEvents() {
                         </div>
                       ) : (
                         <div
-                          className="w-full sm:w-48 rounded-lg border border-dashed border-black/10 bg-[--bg-secondary] flex items-center justify-center text-sm text-[--text-muted] shrink-0"
-                           style={{ aspectRatio: "16 / 9" }}
+                          className="w-full rounded-lg border border-dashed border-black/10 bg-[--bg-secondary] flex items-center justify-center text-sm text-[--text-muted]"
+                          style={{ aspectRatio: "16 / 9" }}
                         >
                           No image
                         </div>
                       )}
-
+                      {/* Details below image */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
