@@ -67,7 +67,7 @@ export default function GuestLogin() {
           <div className="flex flex-col items-center w-full mb-6 flex-shrink-0">
 
             {/* Logo */}
-            <div className="w-28 h-28 rounded-full bg-[#1a0010] flex items-center justify-center mb-2 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
+            <div className="w-28 h-28 rounded-full bg-[#F6EADB] flex items-center justify-center mb-2 shadow-[0_4px_20px_rgba(164,0,93,0.3)]">
               <img src={logo} alt="In-Room Facility Logo" className="w-20 h-20 object-contain" />
             </div>
 
