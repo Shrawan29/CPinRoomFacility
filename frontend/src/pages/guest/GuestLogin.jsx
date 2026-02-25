@@ -65,20 +65,17 @@ export default function GuestLogin() {
           {/* ── HEADER ── */}
           <div className="flex flex-col items-center w-full mb-6 flex-shrink-0">
 
-            {/* Logo ring */}
-            <div className="w-[58px] h-[58px] rounded-full bg-white/15 border border-white/40 flex items-center justify-center backdrop-blur-md shadow-[0_4px_16px_rgba(164,0,93,0.28)] mb-2">
-              <span className="text-[26px]">🏨</span>
-            </div>
+            {/* Logo */}
+            <img
+              src="/assets/logo.png"
+              alt="Logo"
+              className="w-20 h-20 object-contain drop-shadow-[0_4px_12px_rgba(164,0,93,0.35)] mb-2"
+            />
 
             {/* Brand */}
             <p className="text-[10px] font-medium tracking-[0.28em] uppercase text-white/65 mb-1">
               In-Room Facility
             </p>
-
-            {/* Heading */}
-            <h1 className="text-[30px] font-bold text-white leading-tight tracking-tight">
-              Welcome Back
-            </h1>
 
             {/* Subtext */}
             <p className="text-[13px] font-light text-white/60 text-center mt-0.5">
