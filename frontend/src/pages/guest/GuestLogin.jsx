@@ -17,6 +17,29 @@ export default function GuestLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Handle guest login form submission
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      // Attempt login via service
+      const guest = await guestLoginByLastName(formData.lastName, formData.password);
+      if (guest) {
+        login(guest); // Save guest to context
+        // Optionally redirect to dashboard or intended page
+        const redirect = searchParams.get("redirect") || "/guest/dashboard";
+        navigate(redirect);
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <GuestLuxuryTheme>
       <div className="min-h-screen flex items-center justify-center">
