@@ -69,8 +69,8 @@ export default function GuestLogin() {
             {/* Logo */}
             <img
               src={logo}
-              alt="Logo"
-              className="w-20 h-20 object-contain drop-shadow-[0_4px_12px_rgba(164,0,93,0.35)] mb-2"
+              alt="In-Room Facility Logo"
+              className="w-24 h-24 object-contain brightness-0 invert drop-shadow-[0_4px_16px_rgba(255,255,255,0.25)] mb-2"
             />
 
             {/* Brand */}
