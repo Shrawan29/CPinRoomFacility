@@ -70,7 +70,7 @@ export default function GuestLogin() {
             <img
               src={logo}
               alt="In-Room Facility Logo"
-              className="w-24 h-24 object-contain brightness-0 invert drop-shadow-[0_4px_16px_rgba(255,255,255,0.25)] mb-2"
+              className="w-28 h-28 object-contain mix-blend-screen mb-2"
             />
 
             {/* Brand */}
