@@ -3,6 +3,7 @@ import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import { guestLoginByLastName } from "../../services/guest.service";
+import logo from "../../assets/logo.png";
 
 export default function GuestLogin() {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ export default function GuestLogin() {
 
             {/* Logo */}
             <img
-              src="/assets/logo.png"
+              src={logo}
               alt="Logo"
               className="w-20 h-20 object-contain drop-shadow-[0_4px_12px_rgba(164,0,93,0.35)] mb-2"
             />
