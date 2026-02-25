@@ -441,7 +441,7 @@ export default function AdminEvents() {
                       {event.image ? (
                         <div
                           className="w-full sm:w-48 rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary] shrink-0"
-                          style={{ aspectRatio: "9 / 16" }}
+                          style={{ aspectRatio: "16 / 9" }}
                         >
                           <img
                             src={event.image}
