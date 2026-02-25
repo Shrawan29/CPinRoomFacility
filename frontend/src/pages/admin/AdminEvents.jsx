@@ -479,13 +479,14 @@ export default function AdminEvents() {
                     <div className="flex flex-col sm:flex-row gap-4">
                       {event.image ? (
                         <div
-                          className="w-full sm:w-48 rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary] shrink-0"
-                           style={{ aspectRatio: "16 / 9" }}
+                          className="w-full sm:w-64 flex items-center justify-center rounded-lg border border-black/10 overflow-hidden bg-gradient-to-br from-[--bg-secondary] to-[--bg-primary] shrink-0"
+                          style={{ aspectRatio: "16 / 9", minHeight: 120 }}
                         >
                           <img
                             src={event.image}
                             alt={event.title}
-                            className="w-full h-full object-cover"
+                            className="max-h-full max-w-full object-contain transition-all duration-300"
+                            style={{ background: 'rgba(255,255,255,0.7)', borderRadius: '0.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
                             loading="lazy"
                           />
                         </div>
