@@ -6,7 +6,8 @@ import AdminLayout from "../../layouts/AdminLayout";
 export default function QRCodeManager() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [baseURL, setBaseURL] = useState("https://cpinroomfacility-production.up.railway.app");
+  // Updated default backend host to new Render URL
+  const [baseURL, setBaseURL] = useState("https://cpinroomfacility.onrender.com");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -40,23 +41,23 @@ export default function QRCodeManager() {
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">QR Code Manager</h1>
-          <p className="text-[var(--text-muted)]">Generate and print QR codes for each room</p>
+          <h1 className="text-3xl font-bold text-(--text-primary) mb-2">QR Code Manager</h1>
+          <p className="text-(--text-muted)">Generate and print QR codes for each room</p>
         </div>
 
         {/* CONFIG */}
         <div className="bg-white rounded-xl shadow p-6 mb-8">
-          <label className="block text-sm font-semibold text-[var(--text-primary)] mb-2">
+          <label className="block text-sm font-semibold text-(--text-primary) mb-2">
             Base URL for Guest Portal
           </label>
           <input
             type="url"
             value={baseURL}
             onChange={(e) => setBaseURL(e.target.value)}
-            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[var(--brand)]"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-(--brand)"
             placeholder="https://yourhotel.com"
           />
-          <p className="text-xs text-[var(--text-muted)] mt-2">
+          <p className="text-xs text-(--text-muted) mt-2">
             This URL will be used in the QR codes. Update for production.
           </p>
         </div>
@@ -64,14 +65,14 @@ export default function QRCodeManager() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* ROOM LIST */}
           <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">Rooms</h2>
+            <h2 className="text-lg font-bold text-(--text-primary) mb-4">Rooms</h2>
 
             {loading ? (
-              <div className="text-sm text-[var(--text-muted)]">Loading rooms…</div>
+              <div className="text-sm text-(--text-muted)">Loading rooms…</div>
             ) : error ? (
               <div className="text-sm text-red-600">{error}</div>
             ) : rooms.length === 0 ? (
-              <div className="text-sm text-[var(--text-muted)]">No rooms found</div>
+              <div className="text-sm text-(--text-muted)">No rooms found</div>
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {rooms.map((roomNumber) => (
@@ -80,8 +81,8 @@ export default function QRCodeManager() {
                     onClick={() => setSelectedRoom(roomNumber)}
                     className={`w-full px-4 py-2 rounded-lg font-semibold transition text-left ${
                       String(selectedRoom) === String(roomNumber)
-                        ? "bg-[var(--brand)] text-white"
-                        : "bg-gray-100 text-[var(--text-primary)] hover:bg-gray-200"
+                        ? "bg-(--brand) text-white"
+                        : "bg-gray-100 text-(--text-primary) hover:bg-gray-200"
                     }`}
                   >
                     Room #{roomNumber}

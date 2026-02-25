@@ -15,10 +15,11 @@ export default function QRCodeGenerator({ roomNumber, baseURL }) {
     setQrGenerated(false);
 
     // IMPORTANT: backend base URL (no trailing slash)
+    // Updated default backend host to new Render URL
     const API_BASE = (
       baseURL ||
       import.meta.env.VITE_API_URL ||
-      "http://localhost:5000"
+      "https://cpinroomfacility.onrender.com"
     ).replace(/\/$/, "");
 
     // QR MUST point to backend, not frontend
