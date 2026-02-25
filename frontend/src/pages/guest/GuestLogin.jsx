@@ -68,7 +68,7 @@ export default function GuestLogin() {
 
             {/* Logo */}
             <div className="w-28 h-28 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center mb-2 shadow-[0_4px_20px_rgba(255,255,255,0.15)]">
-              <img src={logo} alt="In-Room Facility Logo" className="w-20 h-20 object-contain mix-blend-screen" />
+              <img src={logo} alt="In-Room Facility Logo" className="w-20 h-20 object-contain z-10 mix-blend-screen" />
             </div>
 
             {/* Brand */}
