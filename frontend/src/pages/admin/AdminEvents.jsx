@@ -28,6 +28,7 @@ export default function AdminEvents() {
     status: "UPCOMING",
   });
 
+  // Crop image to 16:9 aspect ratio using canvas
   const handleImageFile = (file) => {
     setError("");
     if (!file) {
@@ -44,7 +45,41 @@ export default function AdminEvents() {
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = String(reader.result || "");
-      setForm((prev) => ({ ...prev, image: dataUrl }));
+      const img = new window.Image();
+      img.onload = () => {
+        // Calculate crop for 16:9
+        const aspect = 16 / 9;
+        let cropWidth = img.width;
+        let cropHeight = img.height;
+        if (img.width / img.height > aspect) {
+          // Too wide, crop width
+          cropWidth = img.height * aspect;
+        } else {
+          // Too tall, crop height
+          cropHeight = img.width / aspect;
+        }
+        const cropX = (img.width - cropWidth) / 2;
+        const cropY = (img.height - cropHeight) / 2;
+        const canvas = document.createElement("canvas");
+        canvas.width = 1600; // standard 16:9 size
+        canvas.height = 900;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(
+          img,
+          cropX,
+          cropY,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        const croppedDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+        setForm((prev) => ({ ...prev, image: croppedDataUrl }));
+      };
+      img.onerror = () => setError("Failed to process image");
+      img.src = dataUrl;
     };
     reader.onerror = () => {
       setError("Failed to read image");
@@ -364,6 +399,9 @@ export default function AdminEvents() {
                     onChange={(e) => handleImageFile(e.target.files?.[0])}
                     className="w-full text-sm focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                   />
+                  <div className="text-xs text-[--text-muted] mt-1">
+                    <b>Recommended:</b> Upload a horizontal (16:9) image for best display. E.g., 1600x900px
+                  </div>
                   {form.image ? (
                     <div
                       className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary]"
