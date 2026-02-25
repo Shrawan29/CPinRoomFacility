@@ -362,12 +362,12 @@ export default function AdminEvents() {
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleImageFile(e.target.files?.[0])}
-                    className="w-full text-sm"
+                    className="w-full text-sm focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                   />
                   {form.image ? (
                     <div
                       className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary]"
-                      style={{ aspectRatio: "9 / 16" }}
+                       style={{ aspectRatio: "16 / 9" }}
                     >
                       <img
                         src={form.image}
@@ -441,7 +441,7 @@ export default function AdminEvents() {
                       {event.image ? (
                         <div
                           className="w-full sm:w-48 rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary] shrink-0"
-                          style={{ aspectRatio: "16 / 9" }}
+                           style={{ aspectRatio: "16 / 9" }}
                         >
                           <img
                             src={event.image}
@@ -453,7 +453,7 @@ export default function AdminEvents() {
                       ) : (
                         <div
                           className="w-full sm:w-48 rounded-lg border border-dashed border-black/10 bg-[--bg-secondary] flex items-center justify-center text-sm text-[--text-muted] shrink-0"
-                          style={{ aspectRatio: "9 / 16" }}
+                           style={{ aspectRatio: "16 / 9" }}
                         >
                           No image
                         </div>

@@ -12,6 +12,7 @@ export default function GuestCart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [notes, setNotes] = useState("");
 
   const totalAmount = cart.reduce(
     (sum, item) => sum + item.price * item.qty,
@@ -46,6 +47,7 @@ export default function GuestCart() {
           menuItemId: item._id,
           qty: item.qty,
         })),
+        notes,
       };
 
       await api.post("/guest/orders", payload);
@@ -98,6 +100,18 @@ export default function GuestCart() {
                 <span>Total</span>
                 <span>₹{totalAmount}</span>
               </div>
+              <div className="mb-3">
+                <label className="block text-sm font-semibold mb-1" htmlFor="order-notes">Special Notes (optional)</label>
+                <textarea
+                  id="order-notes"
+                  className="w-full border rounded-lg p-2 text-sm"
+                  rows={2}
+                  placeholder="E.g. No onions, extra spicy, etc."
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  maxLength={250}
+                />
+              </div>
               <button
                 className="w-full py-3 rounded-lg text-white font-bold mt-2"
                 style={{ backgroundColor: "var(--rose)" }}
@@ -127,6 +141,11 @@ export default function GuestCart() {
                 </div>
                 <div className="mb-4 p-3 bg-red-50 rounded-lg border border-red-200">
                   <p className="text-xs text-red-700 font-semibold">⚠️ Once ordered, it cannot be cancelled</p>
+                  {notes && (
+                    <div className="mt-2 text-xs text-gray-700">
+                      <span className="font-semibold">Special Notes:</span> {notes}
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <button

@@ -17,6 +17,11 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    notes: {
+      type: String,
+      trim: true,
+      default: ""
+    },
     status: {
       type: String,
       enum: ["PLACED", "PREPARING", "READY", "DELIVERED"],

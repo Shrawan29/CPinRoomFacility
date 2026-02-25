@@ -6,7 +6,7 @@ import MenuItem from "../models/MenuItem.js";
  */
 export const placeOrder = async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items, notes } = req.body;
     const { roomNumber } = req.guest; // injected by GuestAuth middleware
 
     if (!items || items.length === 0) {
@@ -44,6 +44,7 @@ export const placeOrder = async (req, res) => {
       roomNumber,
       items: orderItems,
       totalAmount,
+      notes: notes || ""
     });
 
     res.status(201).json({
