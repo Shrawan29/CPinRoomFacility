@@ -222,10 +222,10 @@ export default function AdminEvents() {
       <div className="max-w-6xl mx-auto h-screen flex flex-col overflow-hidden px-2 sm:px-4">
         {/* PAGE HEADER */}
         <div className="mb-4 shrink-0">
-          <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+          <h1 className="text-3xl font-bold text-[--text-primary]">
             Events Management
           </h1>
-          <p className="text-[var(--text-muted)] mt-2">
+          <p className="text-[--text-muted] mt-2">
             Create and manage hotel events and activities
           </p>
         </div>
@@ -254,30 +254,30 @@ export default function AdminEvents() {
         <div className="grid lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
           {/* ADD EVENT CARD */}
           <div className="lg:col-span-1 overflow-hidden">
-            <div className="bg-[var(--bg-secondary)] rounded-xl border border-black/5 p-6 h-full overflow-y-auto">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
+            <div className="bg-[--bg-secondary] rounded-xl border border-black/5 p-6 h-full overflow-y-auto">
+              <h2 className="text-lg font-semibold text-[--text-primary] mb-1">
                 Add New Event
               </h2>
-              <p className="text-sm text-[var(--text-muted)] mb-4">
+              <p className="text-sm text-[--text-muted] mb-4">
                 Title and date are required. Optional image max 1MB.
               </p>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-base font-medium text-[--text-primary] mb-1">
                       Event Title *
                     </label>
                     <input
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                       placeholder="Enter event title"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-base font-medium text-[--text-primary] mb-1">
                       Event Date * (DD/MM/YYYY)
                     </label>
                     <DatePicker
@@ -292,70 +292,70 @@ export default function AdminEvents() {
                       }}
                       dateFormat="dd/MM/yyyy"
                       placeholderText="DD/MM/YYYY"
-                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                       calendarClassName="shadow-lg rounded-lg"
                       wrapperClassName="w-full"
                     />
                     {form.eventDate && form.eventDate.includes('-') && (
-                      <p className="text-xs text-[var(--text-muted)] mt-1 font-semibold">
+                      <p className="text-xs text-[--text-muted] mt-1 font-semibold">
                         ✓ Selected: {formatDateDDMMYYYY(form.eventDate)}
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[--text-primary] mb-1">
                       Event Time
                     </label>
                     <input
                       type="time"
                       value={form.eventTime}
                       onChange={(e) => setForm({ ...form, eventTime: e.target.value })}
-                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[--text-primary] mb-1">
                       Location
                     </label>
                     <input
                       value={form.location}
                       onChange={(e) => setForm({ ...form, location: e.target.value })}
-                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                       placeholder="e.g. Rooftop / Banquet Hall"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                    <label className="block text-sm font-medium text-[--text-primary] mb-1">
                       Contact Information
                     </label>
                     <input
                       value={form.contact}
                       onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                      className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                       placeholder="e.g. +91-9876543210"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                  <label className="block text-sm font-medium text-[--text-primary] mb-1">
                     More Info Link
                   </label>
                   <input
                     value={form.link}
                     onChange={(e) => setForm({ ...form, link: e.target.value })}
-                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition"
+                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
                     placeholder="e.g. https://example.com/event-details"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                  <label className="block text-sm font-medium text-[--text-primary] mb-1">
                     Event Image
                   </label>
                   <input
@@ -366,8 +366,8 @@ export default function AdminEvents() {
                   />
                   {form.image ? (
                     <div
-                      className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)]"
-                      style={{ aspectRatio: "16 / 9" }}
+                      className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary]"
+                      style={{ aspectRatio: "9 / 16" }}
                     >
                       <img
                         src={form.image}
@@ -379,7 +379,7 @@ export default function AdminEvents() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                  <label className="block text-sm font-medium text-[--text-primary] mb-1">
                     Description
                   </label>
                   <textarea
@@ -387,7 +387,7 @@ export default function AdminEvents() {
                     onChange={(e) =>
                       setForm({ ...form, description: e.target.value })
                     }
-                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:border-transparent transition resize-none"
+                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition resize-none"
                     rows={3}
                     placeholder="Event details and description..."
                   />
@@ -398,7 +398,7 @@ export default function AdminEvents() {
                   disabled={loading}
                   className="
                     w-full
-                    bg-[var(--brand)]
+                    bg-[--brand]
                     text-white
                     py-2
                     rounded-lg
@@ -419,13 +419,13 @@ export default function AdminEvents() {
 
           {/* EVENT LIST */}
           <div className="lg:col-span-1 h-full overflow-hidden">
-            <div className="bg-[var(--bg-secondary)] rounded-xl border border-black/5 p-6 h-full flex flex-col overflow-hidden">
+            <div className="bg-[--bg-secondary] rounded-xl border border-black/5 p-6 h-full flex flex-col overflow-hidden">
               <div className="flex items-center justify-between mb-4 shrink-0">
                 <div>
-                  <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+                  <h2 className="text-xl font-semibold text-[--text-primary]">
                     All Events ({events.length})
                   </h2>
-                  <p className="text-sm text-[var(--text-muted)] mt-1">
+                  <p className="text-sm text-[--text-muted] mt-1">
                     Change image or delete events from the list.
                   </p>
                 </div>
@@ -435,13 +435,13 @@ export default function AdminEvents() {
                 {events.map((event) => (
                   <div
                     key={event._id}
-                    className="bg-[var(--bg-primary)] rounded-xl border border-black/5 p-4"
+                    className="bg-[--bg-primary] rounded-xl border border-black/5 p-4"
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
                       {event.image ? (
                         <div
-                          className="w-full sm:w-48 rounded-lg border border-black/10 overflow-hidden bg-[var(--bg-secondary)] shrink-0"
-                          style={{ aspectRatio: "16 / 9" }}
+                          className="w-full sm:w-48 rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary] shrink-0"
+                          style={{ aspectRatio: "9 / 16" }}
                         >
                           <img
                             src={event.image}
@@ -452,8 +452,8 @@ export default function AdminEvents() {
                         </div>
                       ) : (
                         <div
-                          className="w-full sm:w-48 rounded-lg border border-dashed border-black/10 bg-[var(--bg-secondary)] flex items-center justify-center text-sm text-[var(--text-muted)] shrink-0"
-                          style={{ aspectRatio: "16 / 9" }}
+                          className="w-full sm:w-48 rounded-lg border border-dashed border-black/10 bg-[--bg-secondary] flex items-center justify-center text-sm text-[--text-muted] shrink-0"
+                          style={{ aspectRatio: "9 / 16" }}
                         >
                           No image
                         </div>
@@ -462,10 +462,10 @@ export default function AdminEvents() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <h3 className="font-semibold text-lg text-[var(--text-primary)] truncate">
+                            <h3 className="font-semibold text-lg text-[--text-primary] truncate">
                               {event.title}
                             </h3>
-                            <div className="mt-1 text-sm text-[var(--text-muted)] flex flex-col gap-1">
+                            <div className="mt-1 text-sm text-[--text-muted] flex flex-col gap-1">
                               <span>
                                 📅 {formatDateDDMMYYYY(event.eventDate)} {event.eventTime && `@ ${event.eventTime}`}
                               </span>
@@ -483,16 +483,16 @@ export default function AdminEvents() {
                         </div>
 
                         {event.description && (
-                          <p className="text-sm text-[var(--text-muted)] mt-3 line-clamp-2">
+                          <p className="text-sm text-[--text-muted] mt-3 line-clamp-2">
                             {event.description}
                           </p>
                         )}
 
                         <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
                           {event.contact && (
-                            <div className="text-[var(--text-muted)]">
+                            <div className="text-[--text-muted]">
                               📞 Contact:{" "}
-                              <span className="font-semibold text-[var(--text-primary)]">
+                              <span className="font-semibold text-[--text-primary]">
                                 {event.contact}
                               </span>
                             </div>
@@ -503,7 +503,7 @@ export default function AdminEvents() {
                               href={normalizeExternalUrl(event.link)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[var(--brand)] font-semibold hover:underline truncate"
+                              className="text-[--brand] font-semibold hover:underline truncate"
                               title={event.link}
                             >
                               🔗 {event.link}
@@ -512,13 +512,13 @@ export default function AdminEvents() {
                         </div>
 
                         <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between gap-2">
-                          <p className="text-xs text-[var(--text-muted)]">
+                          <p className="text-xs text-[--text-muted]">
                             Status updates automatically based on event date
                           </p>
 
                           <div className="flex items-center gap-2 shrink-0">
                             <label
-                              className="text-xs px-3 py-1.5 rounded-lg border border-black/10 bg-[var(--bg-secondary)] font-semibold cursor-pointer"
+                              className="text-xs px-3 py-1.5 rounded-lg border border-black/10 bg-[--bg-secondary] font-semibold cursor-pointer"
                               style={{ color: "var(--brand)" }}
                             >
                               Change Image
@@ -534,7 +534,7 @@ export default function AdminEvents() {
 
                             <button
                               onClick={() => handleDelete(event._id)}
-                              className="text-xs px-3 py-1.5 rounded-lg border border-black/10 bg-[var(--bg-secondary)] font-semibold text-red-600 hover:bg-red-50 transition"
+                              className="text-xs px-3 py-1.5 rounded-lg border border-black/10 bg-[--bg-secondary] font-semibold text-red-600 hover:bg-red-50 transition"
                             >
                               Delete
                             </button>
@@ -546,11 +546,11 @@ export default function AdminEvents() {
                 ))}
 
                 {events.length === 0 && (
-                  <div className="text-center py-12 bg-[var(--bg-primary)] rounded-xl border border-dashed border-black/10">
-                    <p className="text-[var(--text-muted)] font-medium">
+                  <div className="text-center py-12 bg-[--bg-primary] rounded-xl border border-dashed border-black/10">
+                    <p className="text-[--text-muted] font-medium">
                       No events created yet
                     </p>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">
+                    <p className="text-sm text-[--text-muted] mt-1">
                       Create your first event using the form
                     </p>
                   </div>

@@ -1,0 +1,133 @@
+[33m20185db[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Upgrade React to v19 and update dependencies
+[33mf9b2fe9[m Fix npm dependency conflict and update packages
+[33me8a49f7[m Push latest changes
+[33m7bfa18b[m Push latest changes
+[33m6be95ad[m Push latest changes
+[33m2204bd5[m User code edits
+[33me32c6e7[m User code edits
+[33mf4e540f[m Session durations updated, guest order notes, browser notifications, and kitchen/housekeeping improvements
+[33m7a95b75[m Fix duplicate style props for event image containers in GuestEvent and GuestEventDetails
+[33mad5f095[m Update GuestDashboard.jsx
+[33mf31eed1[m Update GuestDashboard.jsx
+[33m3c7466c[m Apply luxury theme to all guest pages
+[33mcb613a0[m Update GuestDashboard.jsx
+[33ma13525f[m Update GuestDashboard.jsx
+[33m955efd3[m Luxury-inspired guest dashboard hero: gold divider, refined typography
+[33m4fe0c89[m feat: luxury guest dashboard UI full HTML fidelity
+[33md5c2d8b[m refactor: guest dashboard UI for real mobile proportions, compact hero, premium layout, phone-first
+[33m5c58f3f[m feat: ultra-modern luxury guest dashboard UI (mobile-first, glassmorphism, no spa/laundry/duplicate menu)
+[33m145895f[m fix: add 'All' filter and improve category filter in kitchen menu
+[33md0039ba[m fix: add xlsx dependency for frontend Excel import/export support
+[33m2e0fa11[m fix: move router initialization above route definitions in menu.routes.js
+[33m5864c66[m fix: ensure Import Excel button is present and visible in kitchen menu management
+[33md7056a0[m feat: bulk upload menu items to backend on Excel import (kitchen menu)
+[33me6844d3[m feat: add Excel import/export for kitchen menu management
+[33me9f4277[m feat: add usage report to superadmin dashboard (orders, interactions, monthly summary)
+[33meedb101[m style: make QR dashboard match admin dashboard layout and style for superadmin
+[33m7377fca[m Remove bottom nav, fix header-hero gap, clean up dashboard layout
+[33m4c574e7[m Redesign guest dashboard for modern hospitality UX
+[33mff9b5f0[m Clean up guest dashboard sections
+[33mb9245ae[m Update guest dashboard typography and layout
+[33m783854d[m Update in-room service icons
+[33m713fe4b[m Adjust guest dashboard hero overlay
+[33m6067396[m Refine in-room services UI
+[33m9f9789b[m Refactor guest dashboard hero and services
+[33m928d9fb[m Polish guest dashboard navigation
+[33m1df3bd4[m Refine guest dashboard mobile UI
+[33mc3581a5[m Polish guest dashboard premium UI
+[33m561a445[m Restyle guest dashboard home
+[33m66ad2e8[m Use 16:9 event images in admin dashboard
+[33m9130855[m Hide guest event details in list
+[33m2577fff[m Update guest events UI (16:9 images)
+[33m6afb6fa[m Use 9:16 frame for event images
+[33mef4764c[m Fix event links missing protocol
+[33m871cd13[m Polish super admin events UI
+[33mbe1234e[m feat: event images and guest event details
+[33mebe5027[m fix: add test sound and stabilize notification audio
+[33m4c29e62[m feat: add enable sound toggle for housekeeping notifications
+[33m82288d5[m fix: improve notification sound playback
+[33m1dda161[m fix: unlock housekeeping notification sound
+[33m4573962[m feat: housekeeping dashboard auto-refresh and notification
+[33m4518aef[m fix: create default HotelInfo for housekeeping
+[33m6a462d0[m fix: use admin token for housekeeping list
+[33m1651c71[m fix: datasync upsert status path conflict
+[33m98ad2e9[m fix: redirect housekeeping admins after login
+[33m0bf9f64[m feat: allow superadmin to create housekeeping admin
+[33m3a5bcd5[m fix: keep superadmin unchanged; restrict housekeeping to housekeeping admin
+[33me8e2be4[m Revert "chore: add housekeeping admin creation and superadmin order reports"
+[33m8c95dba[m chore: add housekeeping admin creation and superadmin order reports
+[33mf3a6bdb[m feat: add housekeeping module
+[33mb0e4a37[m Auto-refresh rooms list
+[33maa11060[m Fix available room guest display and QR flow
+[33m8f8996a[m Sync guest credentials password updates
+[33m5e99e67[m Fix last-name login password verification
+[33m81bdb39[m Require password for last-name guest login
+[33mb95d04d[m Change guest password to room_lastname
+[33m3981912[m Add guest login by last name
+[33mf605ab6[m Remove super admin guests page and prettify room guest names
+[33md2fce63[m Backfill guest credentials and fix normalization
+[33m8945088[m Canonicalize guest names and login hints
+[33m6996f82[m Add QR Codes link to super admin sidebar
+[33m9838eb1[m Update QR manager to use synced rooms
+[33m9d174ad[m Show grouped guests per room in Rooms list
+[33m7be4b0a[m Mirror hotel rooms into test (delete missing rooms)
+[33m6bdb35a[m Add sync status endpoint for Railway
+[33m7610381[m Fix dashboard list sorting for synced data
+[33m69a127a[m Sync hotel.rooms into test: upsert rooms + guests every 10s
+[33mf5833b2[m chore: stop tracking env files (add .gitignore and env example)
+[33m1850705[m Add automatic data sync service: Rooms and guests sync every 10 seconds
+[33m7328660[m Add guests and rooms management: Create GuestsList and RoomsList pages, update dashboard with real data, add sidebar links
+[33mc7d6317[m Fix: Update MongoDB credentials in .env - change password to Shrawan29
+[33maf65619[m Fix: Remove duplicate schema index on token field in QRToken model
+[33m914d6bc[m Remove ADMIN role from frontend: Update UI, routes, and role selectors
+[33m9b53ac4[m Remove ADMIN role: Keep only SUPER_ADMIN and DINING_ADMIN (Kitchen Admin)
+[33mb9b7941[m Final cleanup: Remove all orphaned OTP and AdminStay code (276 lines). Delete: otp.service.js, GuestOtp.js, ActiveStay.js, adminStay.routes.js, adminStay.controller.js
+[33m16b390d[m improving dashboard
+[33mc7e76c8[m improving dashboard
+[33m54e5b5d[m Make event form more compact - no scrolling needed for button
+[33m2ea33f5[m Make events management page static - only event list scrollable
+[33m2e5f15c[m Add event time field - display date and time for events
+[33mf61533e[m Fix guest events date filtering with UTC and improve event display with DD/MM/YYYY format and status badges
+[33mb10f178[m Fix event scheduler date comparison using UTC and add manual trigger endpoint
+[33m81a6792[m Remove manual status update UI - automatic scheduler now handles all status changes
+[33m680f60a[m Add automatic event status scheduler: UPCOMING->ACTIVE->COMPLETED->DELETE
+[33m358c93b[m Add react-datepicker with DD/MM/YYYY format and theme styling
+[33mdc46607[m Add react-datepicker with DD/MM/YYYY format and theme styling
+[33m1890212[m Change date input to Indian format DD/MM/YYYY with auto-formatting
+[33mf80e19c[m Add clarification note for date format in event form
+[33md0363c9[m Add DD/MM/YYYY date format display in event form
+[33mc0680cc[m Fix MenuBrowse JSX syntax error and update AdminEvents date format to DD/MM/YYYY
+[33m1b4ed0e[m Make event form and list columns equal 50-50 layout
+[33m57a72c1[m Make event form and list columns equal 50-50 layout
+[33m4aa6290[m Make event form and list columns equal 50-50 layout
+[33mbd27658[m Reorganize event form fields into two-column layout
+[33m37675be[m Make admin events management page non-scrollable with internal scrolling
+[33m97ce7bf[m Add contact and link fields to events
+[33mbb9ce3c[m Add order confirmation modal with cancellation warning
+[33m8b56e55[m improving dashboard
+[33mad466fd[m improving dashboard
+[33m031710f[m improving dashboard
+[33md54a453[m improving dashboard
+[33ma27cafc[m improving dashboard
+[33ma6ee06d[m improving dashboard
+[33mdec0f02[m Qr-codes
+[33mc1f083b[m Qr-codes
+[33m21344f6[m Qr-codes
+[33mda0dde2[m Qr-codes
+[33m3f68bf1[m Qr-codes
+[33m33a18da[m Qr-codes
+[33m11d43dd[m Qr-codes
+[33mf976f94[m Qr-codes
+[33m9007554[m Qr-codes
+[33m328a5fb[m Qr-codes
+[33mc00d5ad[m Qr-codes
+[33m81bf3e9[m Qr-codes
+[33m021f87c[m Qr-codes
+[33mdebe517[m Qr-codes
+[33m1bb819b[m Qr-codes
+[33m71aaa40[m improving dashboard
+[33m42b17d2[m improving dashboard
+[33m56885bc[m improving dashboard
+[33me861bfd[m improving dashboard
+[33m3623649[m improving dashboard
+[

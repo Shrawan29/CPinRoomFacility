@@ -2,7 +2,11 @@ import { useEffect, useState, useRef } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
+
 import notificationSound from "../../../assets/notification.mp3";
+
+
+const SOUND_STORAGE_KEY = "kitchen_sound_enabled";
 
 export default function KitchenDashboard() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -10,9 +14,96 @@ export default function KitchenDashboard() {
   const [updating, setUpdating] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newOrderAlert, setNewOrderAlert] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false);
-  
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    try {
+      return localStorage.getItem(SOUND_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [soundBlocked, setSoundBlocked] = useState(false);
   const audioRef = useRef(null);
+  const didInitRef = useRef(false);
+  const lastPlacedIdsRef = useRef(new Set());
+  const audioPrimedRef = useRef(false);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  const primeAudioOnce = async () => {
+    if (audioPrimedRef.current) return;
+    audioPrimedRef.current = true;
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(notificationSound);
+      }
+      const audio = audioRef.current;
+      audio.muted = false;
+      audio.volume = 0.05;
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise
+          .then(() => {
+            setTimeout(() => {
+              try {
+                audio.pause();
+                audio.currentTime = 0;
+              } catch {}
+            }, 50);
+          })
+          .catch((e) => {
+            setSoundBlocked(true);
+          });
+      }
+    } catch (e) {
+      setSoundBlocked(true);
+    }
+  };
+
+  const playNotification = async () => {
+    if (!soundEnabledRef.current) return;
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(notificationSound);
+      }
+      audioRef.current.muted = false;
+      audioRef.current.volume = 1;
+      audioRef.current.currentTime = 0;
+      const playPromise = audioRef.current.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => setSoundBlocked(true));
+      }
+    } catch (e) {
+      setSoundBlocked(true);
+    }
+  };
+
+  const onToggleSound = async (nextEnabled) => {
+    setSoundEnabled(nextEnabled);
+    soundEnabledRef.current = nextEnabled;
+    setSoundBlocked(false);
+    try {
+      localStorage.setItem(SOUND_STORAGE_KEY, nextEnabled ? "1" : "0");
+    } catch {}
+    if (nextEnabled) {
+      await primeAudioOnce();
+      await playNotification();
+    }
+  };
+
+  const onTestSound = () => {
+    setSoundBlocked(false);
+    setSoundEnabled(true);
+    soundEnabledRef.current = true;
+    try {
+      localStorage.setItem(SOUND_STORAGE_KEY, "1");
+    } catch {}
+    primeAudioOnce();
+    playNotification();
+  };
 
   // Initialize notification sound
   useEffect(() => {
@@ -35,7 +126,7 @@ export default function KitchenDashboard() {
     }
   };
 
-  // Fetch orders with auto-refresh
+  // Fetch orders with auto-refresh and notification logic
   useEffect(() => {
     if (authLoading || !token) return;
 
@@ -43,36 +134,47 @@ export default function KitchenDashboard() {
       try {
         const res = await api.get("/admin/kitchen/orders");
         const newOrders = res.data || [];
-        
-        // Check for new PLACED orders
-        const newPlacedOrders = newOrders.filter(o => o.status === "PLACED");
-        const previousPlacedCount = orders.filter(o => o.status === "PLACED").length;
-        
-        if (orders.length > 0 && newPlacedOrders.length > previousPlacedCount) {
-          // Play sound
-          if (audioRef.current && audioEnabled) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(err => console.error("Audio play failed:", err));
+        // Find PLACED order ids
+        const nextPlacedIds = new Set(newOrders.filter(o => o.status === "PLACED").map(o => o._id));
+        if (didInitRef.current) {
+          for (const id of nextPlacedIds) {
+            if (!lastPlacedIdsRef.current.has(id)) {
+              await playNotification();
+              setNewOrderAlert(true);
+              setTimeout(() => setNewOrderAlert(false), 3000);
+              break;
+            }
           }
-          
-          // Show visual alert
-          setNewOrderAlert(true);
-          setTimeout(() => setNewOrderAlert(false), 3000);
         }
-        
+        lastPlacedIdsRef.current = nextPlacedIds;
+        didInitRef.current = true;
         setOrders(newOrders);
         setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch orders:", error);
         setLoading(false);
       }
     };
 
+    const onFirstInteraction = () => {
+      if (soundEnabledRef.current) {
+        primeAudioOnce();
+      }
+      window.removeEventListener("pointerdown", onFirstInteraction);
+      window.removeEventListener("keydown", onFirstInteraction);
+    };
+    window.addEventListener("pointerdown", onFirstInteraction);
+    window.addEventListener("keydown", onFirstInteraction);
+    didInitRef.current = false;
+    lastPlacedIdsRef.current = new Set();
+    setLoading(true);
     fetchOrders();
     const interval = setInterval(fetchOrders, 5000);
-
-    return () => clearInterval(interval);
-  }, [token, authLoading, audioEnabled, orders]);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("pointerdown", onFirstInteraction);
+      window.removeEventListener("keydown", onFirstInteraction);
+    };
+  }, [token, authLoading, soundEnabled]);
 
   const updateStatus = async (orderId, status) => {
     setUpdating(orderId);
@@ -95,40 +197,57 @@ export default function KitchenDashboard() {
 
   return (
     <AdminLayout>
-      {/* Audio Enable Button */}
-      {!audioEnabled && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3">
-          <span>🔔 Click to enable sound notifications</span>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Kitchen Orders
+          </h1>
+          <p className="text-sm text-[--text-muted]">
+            Auto-refreshing every 5s
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-[--text-primary] select-none">
+            <input
+              type="checkbox"
+              checked={soundEnabled}
+              onChange={(e) => onToggleSound(e.target.checked)}
+              className="h-4 w-4"
+            />
+            Enable sound
+          </label>
           <button
-            onClick={enableAudio}
-            className="bg-white text-yellow-600 px-4 py-1 rounded font-semibold hover:bg-yellow-50"
+            type="button"
+            onClick={onTestSound}
+            className="text-sm px-4 py-2 rounded-lg border"
+            style={{
+              backgroundColor: "var(--bg-secondary)",
+              borderColor: "rgba(0,0,0,0.08)",
+              color: "var(--text-primary)",
+            }}
           >
-            Enable Sound
+            Test sound
           </button>
+        </div>
+      </div>
+
+      {soundEnabled && soundBlocked && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-lg">
+          Sound is blocked by the browser/device. Try clicking once on the page, and make sure the site isn’t muted.
         </div>
       )}
 
-      {/* New Order Alert */}
       {newOrderAlert && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50">
           🔔 New Order Received!
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">
-          Kitchen Orders
-        </h1>
-        <div className="text-sm text-[var(--text-muted)]">
-          Auto-refreshing every 5s
-        </div>
-      </div>
-
       <div className="space-y-4">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[var(--bg-secondary)] p-5 rounded-xl animate-pulse">
+              <div key={i} className="bg-[--bg-secondary] p-5 rounded-xl animate-pulse">
                 <div className="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
                 <div className="h-3 bg-gray-300 rounded w-1/3 mb-3"></div>
                 <div className="h-3 bg-gray-300 rounded w-1/2"></div>
@@ -136,14 +255,14 @@ export default function KitchenDashboard() {
             ))}
           </div>
         ) : orders.length === 0 ? (
-          <p className="text-[var(--text-muted)] text-center py-8">
+          <p className="text-[--text-muted] text-center py-8">
             No active orders
           </p>
         ) : (
           orders.map((order) => (
             <div
               key={order._id}
-              className="bg-[var(--bg-secondary)] p-5 rounded-xl shadow-sm border-l-4"
+              className="bg-[--bg-secondary] p-5 rounded-xl shadow-sm border-l-4"
               style={{
                 borderLeftColor: 
                   order.status === "PLACED" ? "#f59e0b" :
@@ -156,7 +275,7 @@ export default function KitchenDashboard() {
                   <h3 className="font-semibold text-lg">
                     Room {order.roomNumber}
                   </h3>
-                  <p className="text-sm text-[var(--text-muted)]">
+                  <p className="text-sm text-[--text-muted]">
                     Total ₹{order.totalAmount}
                   </p>
                 </div>
@@ -225,7 +344,7 @@ function Action({ label, onClick, loading }) {
     <button
       onClick={onClick}
       disabled={loading}
-      className="px-4 py-2 bg-[var(--brand)] text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+      className="px-4 py-2 bg-[--brand] text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
     >
       {loading ? "Updating..." : label}
     </button>
