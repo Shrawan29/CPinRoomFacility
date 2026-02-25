@@ -5,12 +5,19 @@ import logo from "../../assets/logo.png";
 import { useEffect, useState } from "react";
 
 export default function GuestDashboard() {
-  const { guest } = useGuestAuth();
+  const { guest, loading } = useGuestAuth();
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
 
   useEffect(() => { setFadeIn(true); }, []);
+
+  // Redirect to login if not authenticated (but only after loading is false)
+  useEffect(() => {
+    if (!loading && !guest) {
+      navigate("/guest/login");
+    }
+  }, [guest, loading, navigate]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
