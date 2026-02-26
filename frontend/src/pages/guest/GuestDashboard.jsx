@@ -597,83 +597,70 @@ export default function GuestDashboard() {
                           {/* Card content */}
                           <div style={{
                             position: "relative", zIndex: 2,
-                            padding: "16px 18px 18px",
+                            padding: "14px 16px 16px",
                             height: "100%", display: "flex", flexDirection: "column",
-                            justifyContent: "space-between",
+                            justifyContent: "flex-end",
                           }}>
 
-                            {/* ── TOP ROW: tag left, date-time pill right ── */}
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                              {ev.tag ? (
-                                <span style={{
-                                  fontSize: 8.5, fontWeight: 700, letterSpacing: "0.13em",
-                                  textTransform: "uppercase", padding: "5px 11px", borderRadius: 10,
-                                  background: "rgba(255,255,255,0.18)",
-                                  color: "#fff",
-                                  border: "1.5px solid rgba(255,255,255,0.32)",
-                                  backdropFilter: "blur(8px)",
-                                  whiteSpace: "nowrap",
-                                }}>
-                                  {ev.tag}
-                                </span>
-                              ) : <div />}
+                            {/* ── TOP: tag chip (absolute top-left) ── */}
+                            {ev.tag && (
+                              <div style={{
+                                position: "absolute", top: 14, left: 16,
+                                fontSize: 8, fontWeight: 700, letterSpacing: "0.14em",
+                                textTransform: "uppercase", padding: "4px 10px", borderRadius: 8,
+                                background: "rgba(255,255,255,0.15)",
+                                color: "rgba(255,255,255,0.9)",
+                                border: "1px solid rgba(255,255,255,0.25)",
+                                backdropFilter: "blur(8px)",
+                              }}>
+                                {ev.tag}
+                              </div>
+                            )}
 
-                              {/* Date + time pill */}
+                            {/* ── BOTTOM BLOCK: all details stacked cleanly ── */}
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+
+                              {/* Date + Time row — inline, compact */}
                               {(evDate || evTime) && (
-                                <div style={{
-                                  display: "flex", flexDirection: "column", alignItems: "flex-end",
-                                  background: "rgba(0,0,0,0.45)",
-                                  backdropFilter: "blur(12px)",
-                                  border: "1px solid rgba(255,255,255,0.2)",
-                                  borderRadius: 13, padding: "8px 14px",
-                                  flexShrink: 0,
-                                }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                   {evDate && (
                                     <span style={{
-                                      fontSize: 9.5, fontWeight: 700, color: "#F9A8D4",
-                                      letterSpacing: "0.14em", textTransform: "uppercase",
-                                      lineHeight: 1, marginBottom: evTime ? 4 : 0,
+                                      fontSize: 9, fontWeight: 700, color: "#F9A8D4",
+                                      letterSpacing: "0.16em", textTransform: "uppercase",
+                                      background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
+                                      border: "1px solid rgba(249,168,212,0.25)",
+                                      borderRadius: 6, padding: "3px 8px",
                                     }}>
                                       {evDate}
                                     </span>
                                   )}
                                   {evTime && (
                                     <span style={{
-                                      fontSize: 20, fontWeight: 700, color: "#fff",
-                                      lineHeight: 1, fontFamily: "'Cormorant Garamond', serif",
-                                      textShadow: "0 1px 6px rgba(0,0,0,0.4)",
+                                      fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.75)",
+                                      letterSpacing: "0.08em",
                                     }}>
                                       {evTime}
                                     </span>
                                   )}
                                 </div>
                               )}
-                            </div>
-
-                            {/* ── BOTTOM: emoji, title, desc, location ── */}
-                            <div>
-                              {!ev.image && ev.emoji && (
-                                <div style={{ fontSize: 38, marginBottom: 8, lineHeight: 1, filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))" }}>
-                                  {ev.emoji}
-                                </div>
-                              )}
 
                               {/* Title */}
                               <p style={{
                                 fontFamily: "'Cormorant Garamond', serif",
-                                fontSize: 26, fontWeight: 700, color: "#fff",
-                                lineHeight: 1.1, marginBottom: 7,
-                                textShadow: "0 2px 12px rgba(0,0,0,0.5)",
+                                fontSize: 22, fontWeight: 700, color: "#fff",
+                                lineHeight: 1.1, margin: 0,
+                                textShadow: "0 2px 14px rgba(0,0,0,0.6)",
                               }}>
                                 {ev.title || ev.name}
                               </p>
 
-                              {/* Description */}
+                              {/* Description — single line only in 16:9 */}
                               {ev.description && (
                                 <p style={{
-                                  fontSize: 12.5, color: "rgba(255,255,255,0.82)",
-                                  fontWeight: 400, lineHeight: 1.55, marginBottom: 10,
-                                  display: "-webkit-box", WebkitLineClamp: 2,
+                                  fontSize: 11.5, color: "rgba(255,255,255,0.72)",
+                                  fontWeight: 400, lineHeight: 1.4, margin: 0,
+                                  display: "-webkit-box", WebkitLineClamp: 1,
                                   WebkitBoxOrient: "vertical", overflow: "hidden",
                                   textShadow: "0 1px 4px rgba(0,0,0,0.4)",
                                 }}>
@@ -681,19 +668,14 @@ export default function GuestDashboard() {
                                 </p>
                               )}
 
-                              {/* Location */}
+                              {/* Location row */}
                               {(ev.location || ev.venue) && (
-                                <div style={{
-                                  display: "inline-flex", alignItems: "center", gap: 6,
-                                  background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
-                                  border: "1px solid rgba(255,255,255,0.18)",
-                                  borderRadius: 20, padding: "5px 12px",
-                                }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 12, height: 12, flexShrink: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 11, height: 11, flexShrink: 0 }}>
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                                     <circle cx="12" cy="10" r="3" />
                                   </svg>
-                                  <span style={{ fontSize: 11.5, color: "#fff", fontWeight: 500, textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>
+                                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>
                                     {ev.location || ev.venue}
                                   </span>
                                 </div>
