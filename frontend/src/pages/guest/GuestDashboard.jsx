@@ -311,15 +311,15 @@ export default function GuestDashboard() {
                   {greeting}
                 </p>
 
-                {/* Logo in frosted circle */}
+                {/* Logo in frosted circle (larger) */}
                 <div style={{
-                  width: 38, height: 38,
-                  background: "rgba(255,255,255,0.14)", backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255,255,255,0.28)", borderRadius: "50%",
+                  width: 54, height: 54,
+                  background: "rgba(255,255,255,0.18)", backdropFilter: "blur(16px)",
+                  border: "1.5px solid rgba(255,255,255,0.32)", borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                 }}>
                   <img src={logo} alt="Logo" style={{
-                    width: 24, height: 24, objectFit: "contain",
+                    width: 36, height: 36, objectFit: "contain",
                     filter: "brightness(0) invert(1)", opacity: 1,
                   }} />
                 </div>
@@ -513,32 +513,41 @@ export default function GuestDashboard() {
                           onClick={() => navigate("/guest/events")}
                           style={{
                             background: bg,
-                            boxShadow: "0 6px 24px rgba(0,0,0,0.18)",
+                            boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
                             animation: exploreVisible ? `cardIn 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms both` : "none",
+                            position: "relative",
+                            overflow: "hidden",
                           }}
                         >
+                          {/* Glassmorphism overlay */}
+                          <div style={{
+                            position: "absolute", inset: 0,
+                            background: "rgba(255,255,255,0.18)",
+                            backdropFilter: "blur(14px)",
+                            zIndex: 1,
+                          }} />
                           {/* Event image if available */}
                           {ev.image && (
                             <>
-                              <img src={ev.image} alt={ev.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.2) 45%,rgba(0,0,0,0.7) 100%)" }} />
+                              <img src={ev.image} alt={ev.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />
+                              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.2) 45%,rgba(0,0,0,0.7) 100%)", zIndex: 1 }} />
                             </>
                           )}
 
                           {/* Card content */}
-                          <div style={{ position: "relative", zIndex: 1, padding: "14px 15px 14px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 188 }}>
+                          <div style={{ position: "relative", zIndex: 2, padding: "18px 20px 16px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 188 }}>
 
                             {/* ── TOP ROW: availability tag + date/time block ── */}
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                               {/* Tag */}
                               {ev.tag && (
                                 <span style={{
-                                  fontSize: 7.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                                  padding: "4px 10px", borderRadius: 8,
-                                  background: ev.tagBg || "rgba(255,255,255,0.15)",
-                                  color: ev.tagColor || "#fff",
-                                  border: `1px solid ${ev.tagBorder || "rgba(255,255,255,0.25)"}`,
-                                  backdropFilter: "blur(6px)",
+                                  fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                                  padding: "5px 12px", borderRadius: 10,
+                                  background: ev.tagBg || "rgba(255,255,255,0.18)",
+                                  color: ev.tagColor || "#A4005D",
+                                  border: `1.5px solid ${ev.tagBorder || "rgba(255,255,255,0.25)"}`,
+                                  backdropFilter: "blur(8px)",
                                 }}>
                                   {ev.tag}
                                 </span>
@@ -547,22 +556,22 @@ export default function GuestDashboard() {
                               {/* Date + Time block — top right */}
                               <div style={{
                                 display: "flex", flexDirection: "column", alignItems: "flex-end",
-                                background: "rgba(0,0,0,0.28)", backdropFilter: "blur(8px)",
-                                border: "1px solid rgba(255,255,255,0.12)",
-                                borderRadius: 10, padding: "6px 10px", marginLeft: "auto",
-                                marginLeft: ev.tag ? 8 : "auto",
+                                background: "rgba(255,255,255,0.22)", backdropFilter: "blur(10px)",
+                                border: "1.5px solid rgba(255,255,255,0.18)",
+                                borderRadius: 12, padding: "8px 14px", marginLeft: "auto",
+                                marginLeft: ev.tag ? 10 : "auto",
                               }}>
                                 {/* Date */}
                                 <span style={{
-                                  fontSize: 8, fontWeight: 600, color: "rgba(255,255,255,0.7)",
-                                  letterSpacing: "0.08em", textTransform: "uppercase",
-                                  lineHeight: 1, marginBottom: 3,
+                                  fontSize: 11, fontWeight: 700, color: "#A4005D",
+                                  letterSpacing: "0.12em", textTransform: "uppercase",
+                                  lineHeight: 1, marginBottom: 4,
                                 }}>
                                   {evDate}
                                 </span>
                                 {/* Time */}
                                 <span style={{
-                                  fontSize: 15, fontWeight: 700, color: "#fff",
+                                  fontSize: 19, fontWeight: 700, color: "#1F1F1F",
                                   lineHeight: 1, fontFamily: "'Cormorant Garamond', serif",
                                 }}>
                                   {evTime}
@@ -573,15 +582,15 @@ export default function GuestDashboard() {
                             {/* ── BOTTOM: emoji/icon, title, description, location ── */}
                             <div>
                               {!ev.image && ev.emoji && (
-                                <div style={{ fontSize: 28, marginBottom: 6, lineHeight: 1 }}>{ev.emoji}</div>
+                                <div style={{ fontSize: 36, marginBottom: 8, lineHeight: 1 }}>{ev.emoji}</div>
                               )}
 
                               {/* Title */}
                               <p style={{
                                 fontFamily: "'Cormorant Garamond', serif",
-                                fontSize: 22, fontWeight: 600, color: "#fff",
-                                lineHeight: 1.05, marginBottom: 5,
-                                textShadow: "0 1px 8px rgba(0,0,0,0.5)",
+                                fontSize: 28, fontWeight: 700, color: "#1F1F1F",
+                                lineHeight: 1.08, marginBottom: 7,
+                                textShadow: "0 1px 8px rgba(255,255,255,0.18)",
                               }}>
                                 {ev.title || ev.name}
                               </p>
@@ -589,8 +598,8 @@ export default function GuestDashboard() {
                               {/* Description */}
                               {ev.description && (
                                 <p style={{
-                                  fontSize: 9.5, color: "rgba(255,255,255,0.62)",
-                                  fontWeight: 300, lineHeight: 1.55, marginBottom: 8,
+                                  fontSize: 13, color: "#6B6B6B",
+                                  fontWeight: 400, lineHeight: 1.6, marginBottom: 10,
                                   display: "-webkit-box", WebkitLineClamp: 2,
                                   WebkitBoxOrient: "vertical", overflow: "hidden",
                                 }}>
@@ -600,12 +609,12 @@ export default function GuestDashboard() {
 
                               {/* Location row */}
                               {(ev.location || ev.venue) && (
-                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 11, height: 11, flexShrink: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, flexShrink: 0 }}>
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                                     <circle cx="12" cy="10" r="3" />
                                   </svg>
-                                  <span style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", fontWeight: 400 }}>
+                                  <span style={{ fontSize: 12, color: "#A4005D", fontWeight: 500 }}>
                                     {ev.location || ev.venue}
                                   </span>
                                 </div>
