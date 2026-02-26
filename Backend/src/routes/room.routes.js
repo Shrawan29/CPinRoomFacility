@@ -49,4 +49,19 @@ router.get(
   }
 );
 
+
+// PUBLIC: Get status of a room by room number
+router.get("/status/:roomNumber", async (req, res) => {
+  try {
+    const { roomNumber } = req.params;
+    const room = await Room.findOne({ roomNumber });
+    if (!room) {
+      return res.status(404).json({ status: "NOT_FOUND" });
+    }
+    return res.json({ status: room.status });
+  } catch (error) {
+    res.status(500).json({ status: "ERROR", message: "Failed to fetch room status" });
+  }
+});
+
 export default router;
