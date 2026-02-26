@@ -17,6 +17,7 @@ export default function GuestDashboard() {
   const [sliderIndex, setSliderIndex] = useState(0);
   const sliderRef = useRef(null);
   const autoRef = useRef(null);
+  const isDragging = useRef(false);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
@@ -45,19 +46,14 @@ export default function GuestDashboard() {
 
   useEffect(() => {
     if (!sliderRef.current || upcomingEvents.length === 0) return;
-    const cardWidth = sliderRef.current.offsetWidth * 0.82 + 12;
+    const cardWidth = sliderRef.current.offsetWidth * 0.84 + 14;
     sliderRef.current.scrollTo({ left: sliderIndex * cardWidth, behavior: "smooth" });
   }, [sliderIndex]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
 
-  // Helper: format event date/time from DB fields
-  // Use eventDate and eventTime from DB
-  const formatEventTime = (ev) => {
-    if (ev.eventTime) return ev.eventTime;
-    return "";
-  };
+  const formatEventTime = (ev) => ev.eventTime || "";
   const formatEventDate = (ev) => {
     if (ev.eventDate) {
       const d = new Date(ev.eventDate);
@@ -69,13 +65,13 @@ export default function GuestDashboard() {
     }
     return "";
   };
-  // Fallback gradient if DB event has no gradient field
+
   const eventGradients = [
-    "linear-gradient(135deg,#3d1060,#8B4789)",
-    "linear-gradient(135deg,#6a003c,#A4005D)",
-    "linear-gradient(135deg,#0d3347,#1e6a8a)",
-    "linear-gradient(135deg,#3d2400,#8a5200)",
-    "linear-gradient(135deg,#1a3a1a,#2d6b2d)",
+    "linear-gradient(160deg,#2d0840 0%,#7B2D8B 100%)",
+    "linear-gradient(160deg,#5c001a 0%,#A4005D 100%)",
+    "linear-gradient(160deg,#082036 0%,#1a6a8a 100%)",
+    "linear-gradient(160deg,#2d1500 0%,#8a5200 100%)",
+    "linear-gradient(160deg,#0e2e0e 0%,#2d6b2d 100%)",
   ];
 
   // ── Icons ──────────────────────────────────────────────────────────────
@@ -142,9 +138,9 @@ export default function GuestDashboard() {
   ];
 
   const handleSliderScroll = () => {
-    if (!sliderRef.current) return;
+    if (!sliderRef.current || isDragging.current) return;
     clearInterval(autoRef.current);
-    const cardWidth = sliderRef.current.offsetWidth * 0.82 + 12;
+    const cardWidth = sliderRef.current.offsetWidth * 0.84 + 14;
     const idx = Math.round(sliderRef.current.scrollLeft / cardWidth);
     setSliderIndex(Math.max(0, Math.min(idx, upcomingEvents.length - 1)));
   };
@@ -167,21 +163,27 @@ export default function GuestDashboard() {
           50%      { transform:translate(-12px,14px) scale(1.07); }
         }
 
-        /* Wave — draw once on mount */
+        /* ─── Wave animations ─────────────────────────── */
+        /* 1) Draw the stroke on mount */
         @keyframes waveDraw {
-          0%   { stroke-dashoffset: 1200; opacity: 0; }
-          8%   { opacity: 1; }
+          0%   { stroke-dashoffset: 1400; opacity: 0; }
+          6%   { opacity: 1; }
           100% { stroke-dashoffset: 0;    opacity: 1; }
         }
-        /* Shimmer — bright spot racing across endlessly */
-        @keyframes waveRace {
-          0%   { stroke-dashoffset:  600; }
-          100% { stroke-dashoffset: -600; }
-        }
-        /* Slow pulse on the base glow line */
+        /* 2) Feather-light pulse on the base glow line */
         @keyframes waveGlow {
-          0%,100% { opacity: 0.45; }
-          50%      { opacity: 0.85; }
+          0%,100% { opacity: 0.5; }
+          50%      { opacity: 0.9; }
+        }
+        /* 3) Racing shimmer — seamless loop */
+        @keyframes waveRace {
+          0%   { stroke-dashoffset:  700; }
+          100% { stroke-dashoffset: -700; }
+        }
+        /* 4) Slow drift on the wide aura */
+        @keyframes waveAura {
+          0%,100% { opacity: 0.18; stroke-width: 10; }
+          50%      { opacity: 0.30; stroke-width: 14; }
         }
 
         @keyframes pulseDot {
@@ -210,47 +212,81 @@ export default function GuestDashboard() {
 
         /* Wave path classes */
         .wave-base {
-          stroke-dasharray: 1200;
-          stroke-dashoffset: 1200;
-          animation: waveDraw 1.6s cubic-bezier(0.4,0,0.2,1) 0.2s forwards;
+          stroke-dasharray: 1400;
+          stroke-dashoffset: 1400;
+          animation: waveDraw 1.8s cubic-bezier(0.4,0,0.2,1) 0.15s forwards;
         }
         .wave-glow {
-          animation: waveGlow 2.5s ease-in-out 1.9s infinite;
           opacity: 0;
+          animation: waveGlow 3s ease-in-out 2.1s infinite;
         }
-        /* After draw completes, glow fades in — handled by waveGlow delay */
+        .wave-aura {
+          opacity: 0;
+          animation: waveAura 4s ease-in-out 2.1s infinite;
+        }
         .wave-race {
-          /* short bright dash racing along the path */
-          stroke-dasharray: 90 1110;
-          stroke-dashoffset: 600;
-          animation: waveRace 1.8s linear 1.9s infinite;
-          opacity: 0.9;
+          stroke-dasharray: 110 1290;
+          stroke-dashoffset: 700;
+          opacity: 0;
+          animation: waveRace 2s linear 2.1s infinite;
         }
+        /* Fade in race + glow after draw completes */
+        @keyframes delayFadeIn {
+          0%   { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        .wave-race  { animation: waveRace 2s linear 2.1s infinite, delayFadeIn 0.4s ease 2s forwards; }
+        .wave-glow  { animation: waveGlow 3s ease-in-out 2.1s infinite, delayFadeIn 0.5s ease 2s forwards; }
+        .wave-aura  { animation: waveAura 4s ease-in-out 2.1s infinite, delayFadeIn 0.6s ease 2s forwards; }
 
-        /* Event slider */
+        /* ─── Event slider ──────────────────────────────── */
         .event-slider {
           display: flex;
-          gap: 12px;
+          gap: 14px;
           overflow-x: scroll;
           scroll-snap-type: x mandatory;
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
-          padding: 4px 20px 10px;
+          padding: 4px 20px 12px;
+          /* smooth momentum */
+          scroll-behavior: smooth;
         }
         .event-slider::-webkit-scrollbar { display:none; }
+
         .event-slide {
           scroll-snap-align: start;
           flex-shrink: 0;
-          width: 82%;
-          border-radius: 20px;
+          width: 84%;
+          border-radius: 22px;
           overflow: hidden;
           position: relative;
           cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          min-height: 188px;
+          transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s ease;
+          min-height: 210px;
+          will-change: transform;
         }
-        .event-slide:hover { transform:translateY(-3px); box-shadow:0 16px 36px rgba(0,0,0,0.22)!important; }
+        .event-slide:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 20px 48px rgba(0,0,0,0.28)!important; }
         .event-slide:last-child { margin-right: 20px; }
+
+        /* Crisp image base — no blur overlay on image */
+        .event-img {
+          position: absolute; inset: 0;
+          width: 100%; height: 100%;
+          object-fit: cover; object-position: center;
+          z-index: 0;
+        }
+        /* Dark gradient: strong bottom scrim, light top tint */
+        .event-scrim {
+          position: absolute; inset: 0;
+          background: linear-gradient(
+            to bottom,
+            rgba(0,0,0,0.28) 0%,
+            rgba(0,0,0,0.08) 30%,
+            rgba(0,0,0,0.55) 65%,
+            rgba(0,0,0,0.82) 100%
+          );
+          z-index: 1;
+        }
       `}</style>
 
       <div style={{
@@ -267,7 +303,7 @@ export default function GuestDashboard() {
         }}>
 
           {/* ══════════════════════════════════════════
-              HERO — compact, tight padding
+              HERO
           ══════════════════════════════════════════ */}
           <div style={{
             position: "relative", overflow: "hidden",
@@ -293,11 +329,11 @@ export default function GuestDashboard() {
               animation: "blob2 9s ease-in-out infinite", pointerEvents: "none",
             }} />
 
-            {/* ── COMPACT hero content — removed hotel pill, tighter padding ── */}
-            <div style={{ position: "relative", zIndex: 2, padding: "40px 20px 56px" }}>
+            {/* ── Hero content ── */}
+            <div style={{ position: "relative", zIndex: 2, padding: "40px 20px 62px" }}>
 
-              {/* Row: greeting left, logo right — both on same line */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              {/* Row: greeting left, logo right */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                 <p style={{
                   fontSize: 10, color: "rgba(255,255,255,0.88)",
                   fontWeight: 500, letterSpacing: "0.22em", textTransform: "uppercase",
@@ -307,7 +343,7 @@ export default function GuestDashboard() {
                   {greeting}
                 </p>
 
-                {/* Logo in frosted circle (larger) */}
+                {/* Logo */}
                 <div style={{
                   width: 54, height: 54,
                   background: "rgba(255,255,255,0.18)", backdropFilter: "blur(16px)",
@@ -321,17 +357,18 @@ export default function GuestDashboard() {
                 </div>
               </div>
 
-              {/* Guest name — tighter margin */}
+              {/* ── FIX 1: Guest name — zero margin top, tight gap from greeting ── */}
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: 32, fontWeight: 300, fontStyle: "italic",
-                color: "#fff", lineHeight: 1, margin: "0 0 10px",
+                color: "#fff", lineHeight: 1,
+                margin: "0 0 10px",   /* top=0 removes the gap */
                 textShadow: "0 2px 16px rgba(0,0,0,0.6)",
               }}>
                 {guest?.name || "Valued Guest"}
               </h1>
 
-              {/* Room badge only — hotel pill removed */}
+              {/* Room badge */}
               <div style={{
                 display: "inline-flex", alignItems: "center", gap: 6,
                 border: "1px solid rgba(255,255,255,0.22)",
@@ -353,76 +390,83 @@ export default function GuestDashboard() {
             </div>
 
             {/* ══════════════════════════════════════════
-                ENHANCED WAVE — 3-layer live gradient
+                FIX 3: ENHANCED WAVE — 4 layers, taller, more elegant
             ══════════════════════════════════════════ */}
             <div style={{ position: "absolute", bottom: -1, left: 0, right: 0, zIndex: 3, lineHeight: 0 }}>
               <svg
-                viewBox="0 0 430 64"
+                viewBox="0 0 430 80"
                 fill="none"
                 preserveAspectRatio="none"
-                style={{ width: "100%", height: 64, display: "block" }}
+                style={{ width: "100%", height: 80, display: "block" }}
               >
-                {/* Cream fill */}
+                {/* Cream fill — same undulating path but taller */}
                 <path
-                  d="M0 22 C60 58, 120 62, 180 40 C230 22, 280 8, 330 36 C370 58, 400 56, 430 34 L430 64 L0 64 Z"
+                  d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44 L430 80 L0 80 Z"
                   fill="#EFE1CF"
                 />
 
-                {/* Layer 1 — base brand line, draws on mount, then glows */}
+                {/* Layer 4 — wide soft aura (bottom-most stroke, subtle) */}
                 <path
-                  className="wave-base"
-                  d="M0 22 C60 58, 120 62, 180 40 C230 22, 280 8, 330 36 C370 58, 400 56, 430 34"
-                  fill="none"
-                  stroke="url(#wGrad1)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-
-                {/* Layer 2 — wider soft glow, pulses */}
-                <path
-                  className="wave-glow"
-                  d="M0 22 C60 58, 120 62, 180 40 C230 22, 280 8, 330 36 C370 58, 400 56, 430 34"
+                  className="wave-aura"
+                  d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
                   fill="none"
                   stroke="url(#wGrad2)"
-                  strokeWidth="6"
+                  strokeWidth="12"
                   strokeLinecap="round"
                 />
 
-                {/* Layer 3 — bright spark racing along endlessly */}
+                {/* Layer 1 — base brand line, draws on mount */}
+                <path
+                  className="wave-base"
+                  d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
+                  fill="none"
+                  stroke="url(#wGrad1)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                />
+
+                {/* Layer 2 — medium glow, pulses */}
+                <path
+                  className="wave-glow"
+                  d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
+                  fill="none"
+                  stroke="url(#wGrad2)"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                />
+
+                {/* Layer 3 — bright spark racing along */}
                 <path
                   className="wave-race"
-                  d="M0 22 C60 58, 120 62, 180 40 C230 22, 280 8, 330 36 C370 58, 400 56, 430 34"
+                  d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
                   fill="none"
                   stroke="url(#wGrad3)"
-                  strokeWidth="3.5"
+                  strokeWidth="4"
                   strokeLinecap="round"
                 />
 
                 <defs>
-                  {/* Base: full brand gradient */}
                   <linearGradient id="wGrad1" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
                     <stop offset="0%"   stopColor="transparent" />
-                    <stop offset="15%"  stopColor="#A4005D" stopOpacity="0.7" />
-                    <stop offset="45%"  stopColor="#C44A87" />
-                    <stop offset="75%"  stopColor="#A4005D" stopOpacity="0.8" />
+                    <stop offset="12%"  stopColor="#A4005D" stopOpacity="0.65" />
+                    <stop offset="42%"  stopColor="#D44F93" />
+                    <stop offset="72%"  stopColor="#A4005D" stopOpacity="0.75" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
 
-                  {/* Glow: wider, softer brand pink */}
                   <linearGradient id="wGrad2" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
                     <stop offset="0%"   stopColor="transparent" />
-                    <stop offset="20%"  stopColor="#A4005D" stopOpacity="0.25" />
-                    <stop offset="50%"  stopColor="#C44A87" stopOpacity="0.35" />
-                    <stop offset="80%"  stopColor="#A4005D" stopOpacity="0.2" />
+                    <stop offset="18%"  stopColor="#A4005D" stopOpacity="0.22" />
+                    <stop offset="50%"  stopColor="#D44F93" stopOpacity="0.32" />
+                    <stop offset="82%"  stopColor="#A4005D" stopOpacity="0.18" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
 
-                  {/* Racing spark: bright white-pink highlight */}
                   <linearGradient id="wGrad3" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
                     <stop offset="0%"   stopColor="transparent" />
-                    <stop offset="40%"  stopColor="#C44A87" stopOpacity="0.8" />
-                    <stop offset="55%"  stopColor="#ffffff" stopOpacity="0.95" />
-                    <stop offset="70%"  stopColor="#C44A87" stopOpacity="0.6" />
+                    <stop offset="38%"  stopColor="#C44A87" stopOpacity="0.7" />
+                    <stop offset="52%"  stopColor="#ffffff" stopOpacity="1" />
+                    <stop offset="66%"  stopColor="#C44A87" stopOpacity="0.55" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
                 </defs>
@@ -477,7 +521,7 @@ export default function GuestDashboard() {
             </div>
 
             {/* ══════════════════════════════════════════
-                UPCOMING EVENTS SLIDER — enhanced cards
+                FIX 2: UPCOMING EVENTS SLIDER — clearer images + details
             ══════════════════════════════════════════ */}
             <div style={{ paddingTop: 22 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", marginBottom: 14 }}>
@@ -509,84 +553,97 @@ export default function GuestDashboard() {
                           onClick={() => navigate("/guest/events")}
                           style={{
                             background: bg,
-                            boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
+                            boxShadow: "0 10px 40px rgba(0,0,0,0.26)",
                             animation: exploreVisible ? `cardIn 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms both` : "none",
-                            position: "relative",
-                            overflow: "hidden",
                           }}
                         >
-                          {/* Glassmorphism overlay */}
-                          <div style={{
-                            position: "absolute", inset: 0,
-                            background: "rgba(255,255,255,0.18)",
-                            backdropFilter: "blur(14px)",
-                            zIndex: 1,
-                          }} />
-                          {/* Event image if available */}
+                          {/* Clear event image (no blur) */}
                           {ev.image && (
                             <>
-                              <img src={ev.image} alt={ev.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />
-                              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.2) 45%,rgba(0,0,0,0.7) 100%)", zIndex: 1 }} />
+                              <img className="event-img" src={ev.image} alt={ev.title || ev.name} />
+                              {/* Strong directional scrim for readability */}
+                              <div className="event-scrim" />
                             </>
                           )}
 
-                          {/* Card content */}
-                          <div style={{ position: "relative", zIndex: 2, padding: "18px 20px 16px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 188 }}>
+                          {/* No-image: subtle noise/pattern overlay for depth */}
+                          {!ev.image && (
+                            <div style={{
+                              position: "absolute", inset: 0, zIndex: 1,
+                              background: "radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.12) 0%, transparent 60%)",
+                            }} />
+                          )}
 
-                            {/* ── TOP ROW: availability tag + date/time block ── */}
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                              {/* Tag */}
-                              {ev.tag && (
+                          {/* Card content */}
+                          <div style={{
+                            position: "relative", zIndex: 2,
+                            padding: "16px 18px 18px",
+                            height: "100%", display: "flex", flexDirection: "column",
+                            justifyContent: "space-between", minHeight: 210,
+                          }}>
+
+                            {/* ── TOP ROW: tag left, date-time pill right ── */}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                              {ev.tag ? (
                                 <span style={{
-                                  fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                                  padding: "5px 12px", borderRadius: 10,
-                                  background: ev.tagBg || "rgba(255,255,255,0.18)",
-                                  color: ev.tagColor || "#A4005D",
-                                  border: `1.5px solid ${ev.tagBorder || "rgba(255,255,255,0.25)"}`,
+                                  fontSize: 8.5, fontWeight: 700, letterSpacing: "0.13em",
+                                  textTransform: "uppercase", padding: "5px 11px", borderRadius: 10,
+                                  background: "rgba(255,255,255,0.18)",
+                                  color: "#fff",
+                                  border: "1.5px solid rgba(255,255,255,0.32)",
                                   backdropFilter: "blur(8px)",
+                                  whiteSpace: "nowrap",
                                 }}>
                                   {ev.tag}
                                 </span>
-                              )}
+                              ) : <div />}
 
-                              {/* Date + Time block — top right */}
-                              <div style={{
-                                display: "flex", flexDirection: "column", alignItems: "flex-end",
-                                background: "rgba(255,255,255,0.22)", backdropFilter: "blur(10px)",
-                                border: "1.5px solid rgba(255,255,255,0.18)",
-                                borderRadius: 12, padding: "8px 14px", marginLeft: "auto",
-                                marginLeft: ev.tag ? 10 : "auto",
-                              }}>
-                                {/* Date */}
-                                <span style={{
-                                  fontSize: 11, fontWeight: 700, color: "#A4005D",
-                                  letterSpacing: "0.12em", textTransform: "uppercase",
-                                  lineHeight: 1, marginBottom: 4,
+                              {/* Date + time pill */}
+                              {(evDate || evTime) && (
+                                <div style={{
+                                  display: "flex", flexDirection: "column", alignItems: "flex-end",
+                                  background: "rgba(0,0,0,0.45)",
+                                  backdropFilter: "blur(12px)",
+                                  border: "1px solid rgba(255,255,255,0.2)",
+                                  borderRadius: 13, padding: "8px 14px",
+                                  flexShrink: 0,
                                 }}>
-                                  {evDate}
-                                </span>
-                                {/* Time */}
-                                <span style={{
-                                  fontSize: 19, fontWeight: 700, color: "#1F1F1F",
-                                  lineHeight: 1, fontFamily: "'Cormorant Garamond', serif",
-                                }}>
-                                  {evTime}
-                                </span>
-                              </div>
+                                  {evDate && (
+                                    <span style={{
+                                      fontSize: 9.5, fontWeight: 700, color: "#F9A8D4",
+                                      letterSpacing: "0.14em", textTransform: "uppercase",
+                                      lineHeight: 1, marginBottom: evTime ? 4 : 0,
+                                    }}>
+                                      {evDate}
+                                    </span>
+                                  )}
+                                  {evTime && (
+                                    <span style={{
+                                      fontSize: 20, fontWeight: 700, color: "#fff",
+                                      lineHeight: 1, fontFamily: "'Cormorant Garamond', serif",
+                                      textShadow: "0 1px 6px rgba(0,0,0,0.4)",
+                                    }}>
+                                      {evTime}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
 
-                            {/* ── BOTTOM: emoji/icon, title, description, location ── */}
+                            {/* ── BOTTOM: emoji, title, desc, location ── */}
                             <div>
                               {!ev.image && ev.emoji && (
-                                <div style={{ fontSize: 36, marginBottom: 8, lineHeight: 1 }}>{ev.emoji}</div>
+                                <div style={{ fontSize: 38, marginBottom: 8, lineHeight: 1, filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))" }}>
+                                  {ev.emoji}
+                                </div>
                               )}
 
                               {/* Title */}
                               <p style={{
                                 fontFamily: "'Cormorant Garamond', serif",
-                                fontSize: 28, fontWeight: 700, color: "#1F1F1F",
-                                lineHeight: 1.08, marginBottom: 7,
-                                textShadow: "0 1px 8px rgba(255,255,255,0.18)",
+                                fontSize: 26, fontWeight: 700, color: "#fff",
+                                lineHeight: 1.1, marginBottom: 7,
+                                textShadow: "0 2px 12px rgba(0,0,0,0.5)",
                               }}>
                                 {ev.title || ev.name}
                               </p>
@@ -594,23 +651,29 @@ export default function GuestDashboard() {
                               {/* Description */}
                               {ev.description && (
                                 <p style={{
-                                  fontSize: 13, color: "#6B6B6B",
-                                  fontWeight: 400, lineHeight: 1.6, marginBottom: 10,
+                                  fontSize: 12.5, color: "rgba(255,255,255,0.82)",
+                                  fontWeight: 400, lineHeight: 1.55, marginBottom: 10,
                                   display: "-webkit-box", WebkitLineClamp: 2,
                                   WebkitBoxOrient: "vertical", overflow: "hidden",
+                                  textShadow: "0 1px 4px rgba(0,0,0,0.4)",
                                 }}>
                                   {ev.description}
                                 </p>
                               )}
 
-                              {/* Location row */}
+                              {/* Location */}
                               {(ev.location || ev.venue) && (
-                                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, flexShrink: 0 }}>
+                                <div style={{
+                                  display: "inline-flex", alignItems: "center", gap: 6,
+                                  background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
+                                  border: "1px solid rgba(255,255,255,0.18)",
+                                  borderRadius: 20, padding: "5px 12px",
+                                }}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 12, height: 12, flexShrink: 0 }}>
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                                     <circle cx="12" cy="10" r="3" />
                                   </svg>
-                                  <span style={{ fontSize: 12, color: "#A4005D", fontWeight: 500 }}>
+                                  <span style={{ fontSize: 11.5, color: "#fff", fontWeight: 500, textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>
                                     {ev.location || ev.venue}
                                   </span>
                                 </div>
@@ -623,12 +686,12 @@ export default function GuestDashboard() {
                   </div>
 
                   {/* Dot indicators */}
-                  <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4 }}>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4, marginTop: 2 }}>
                     {upcomingEvents.map((_, i) => (
                       <div key={i} onClick={() => setSliderIndex(i)} style={{
-                        width: i === sliderIndex ? 20 : 6, height: 6, borderRadius: 3,
+                        width: i === sliderIndex ? 22 : 6, height: 6, borderRadius: 3,
                         background: i === sliderIndex ? "#A4005D" : "rgba(164,0,93,0.22)",
-                        transition: "all 0.3s ease", cursor: "pointer",
+                        transition: "all 0.35s cubic-bezier(0.22,1,0.36,1)", cursor: "pointer",
                       }} />
                     ))}
                   </div>
