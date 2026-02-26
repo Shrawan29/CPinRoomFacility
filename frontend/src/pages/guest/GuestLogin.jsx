@@ -10,7 +10,7 @@ import logo from "../../assets/logo.png";
 
 export default function GuestLogin() {
   const navigate = useNavigate();
-  const { guest, login, logout, loading } = useGuestAuth();
+  const { guest, login, logout, loading: contextLoading } = useGuestAuth();
   const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
@@ -24,14 +24,14 @@ export default function GuestLogin() {
   // If already authenticated, but room number in URL is different, log out
   useEffect(() => {
     const roomFromUrl = searchParams.get("room") || searchParams.get("roomNumber");
-    if (!loading && guest) {
+    if (!contextLoading && guest) {
       if (roomFromUrl && guest.roomNumber && String(roomFromUrl) !== String(guest.roomNumber)) {
         logout();
       } else {
         navigate("/guest/dashboard");
       }
     }
-  }, [guest, loading, navigate, searchParams, logout]);
+  }, [guest, contextLoading, navigate, searchParams, logout]);
 
   // Check if room is occupied when room number is present in URL
   useEffect(() => {
@@ -53,13 +53,13 @@ export default function GuestLogin() {
     checkRoomOccupied();
   }, [searchParams]);
 
-  const [loading, setLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setLocalLoading(true);
     setError("");
     try {
       const guest = await guestLoginByLastName(
@@ -77,7 +77,7 @@ export default function GuestLogin() {
     } catch (err) {
       setError(err?.response?.data?.message || "Login failed. Please try again.");
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -208,10 +208,10 @@ export default function GuestLogin() {
               {/* Sign In button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={localLoading}
                 className="w-full h-[50px] bg-gradient-to-r from-[#A4005D] to-[#C44A87] text-white text-[15px] font-semibold tracking-wide rounded-[14px] shadow-[0_4px_18px_rgba(164,0,93,0.35)] active:scale-[0.98] active:shadow-[0_2px_8px_rgba(164,0,93,0.2)] disabled:opacity-65 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
               >
-                {loading ? (
+                {localLoading ? (
                   <>
                     <span className="w-[17px] h-[17px] border-2 border-white/35 border-t-white rounded-full animate-spin flex-shrink-0" />
                     Signing in…
