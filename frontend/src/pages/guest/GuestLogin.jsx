@@ -21,14 +21,16 @@ export default function GuestLogin() {
 
 
 
-  // If already authenticated, but room number in URL is different, log out
+  // Always logout before login to ensure new session
   useEffect(() => {
     const roomFromUrl = searchParams.get("room") || searchParams.get("roomNumber");
     if (!contextLoading && guest) {
-      if (roomFromUrl && guest.roomNumber && String(roomFromUrl) !== String(guest.roomNumber)) {
-        logout();
-      } else {
+      // If already authenticated for this room, redirect to dashboard
+      if (roomFromUrl && guest.roomNumber && String(roomFromUrl) === String(guest.roomNumber)) {
         navigate("/guest/dashboard");
+      } else {
+        // Otherwise, logout to allow new login
+        logout();
       }
     }
   }, [guest, contextLoading, navigate, searchParams, logout]);
@@ -62,13 +64,16 @@ export default function GuestLogin() {
     setLocalLoading(true);
     setError("");
     try {
-      const guest = await guestLoginByLastName(
+      // Always logout before login to clear previous session
+      logout();
+      const guestData = await guestLoginByLastName(
         formData.roomNumber,
         formData.lastName,
         formData.password
       );
-      if (guest) {
-        login(guest);
+      if (guestData) {
+        // The backend returns { token, guest }
+        login(guestData.token, guestData.guest);
         const redirect = searchParams.get("redirect") || "/guest/dashboard";
         navigate(redirect);
       } else {
