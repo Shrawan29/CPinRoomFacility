@@ -164,26 +164,31 @@ export default function GuestDashboard() {
         }
 
         /* ─── Wave animations ─────────────────────────── */
-        /* 1) Draw the stroke on mount */
+        /* 1) Draw the stroke on mount — slow, graceful reveal */
         @keyframes waveDraw {
           0%   { stroke-dashoffset: 1400; opacity: 0; }
-          6%   { opacity: 1; }
+          5%   { opacity: 1; }
           100% { stroke-dashoffset: 0;    opacity: 1; }
         }
-        /* 2) Feather-light pulse on the base glow line */
+        /* 2) Gentle breathe on the base glow line */
         @keyframes waveGlow {
-          0%,100% { opacity: 0.5; }
-          50%      { opacity: 0.9; }
+          0%,100% { opacity: 0.45; }
+          50%      { opacity: 0.88; }
         }
-        /* 3) Racing shimmer — seamless loop */
+        /* 3) Slow elegant shimmer sweep */
         @keyframes waveRace {
           0%   { stroke-dashoffset:  700; }
           100% { stroke-dashoffset: -700; }
         }
-        /* 4) Slow drift on the wide aura */
+        /* 4) Very slow drift on the wide aura */
         @keyframes waveAura {
-          0%,100% { opacity: 0.18; stroke-width: 10; }
-          50%      { opacity: 0.30; stroke-width: 14; }
+          0%,100% { opacity: 0.15; stroke-width: 10; }
+          50%      { opacity: 0.28; stroke-width: 15; }
+        }
+        /* 5) Subtle secondary shimmer in opposite direction */
+        @keyframes waveRace2 {
+          0%   { stroke-dashoffset: -400; }
+          100% { stroke-dashoffset:  400; }
         }
 
         @keyframes pulseDot {
@@ -214,30 +219,33 @@ export default function GuestDashboard() {
         .wave-base {
           stroke-dasharray: 1400;
           stroke-dashoffset: 1400;
-          animation: waveDraw 1.8s cubic-bezier(0.4,0,0.2,1) 0.15s forwards;
+          animation: waveDraw 2.8s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
         }
         .wave-glow {
           opacity: 0;
-          animation: waveGlow 3s ease-in-out 2.1s infinite;
         }
         .wave-aura {
           opacity: 0;
-          animation: waveAura 4s ease-in-out 2.1s infinite;
         }
         .wave-race {
-          stroke-dasharray: 110 1290;
+          stroke-dasharray: 130 1270;
           stroke-dashoffset: 700;
           opacity: 0;
-          animation: waveRace 2s linear 2.1s infinite;
         }
-        /* Fade in race + glow after draw completes */
+        .wave-race2 {
+          stroke-dasharray: 60 1340;
+          stroke-dashoffset: -400;
+          opacity: 0;
+        }
+        /* Fade in layers after draw completes */
         @keyframes delayFadeIn {
           0%   { opacity: 0; }
           100% { opacity: 1; }
         }
-        .wave-race  { animation: waveRace 2s linear 2.1s infinite, delayFadeIn 0.4s ease 2s forwards; }
-        .wave-glow  { animation: waveGlow 3s ease-in-out 2.1s infinite, delayFadeIn 0.5s ease 2s forwards; }
-        .wave-aura  { animation: waveAura 4s ease-in-out 2.1s infinite, delayFadeIn 0.6s ease 2s forwards; }
+        .wave-race  { animation: waveRace  3.2s linear 3.1s infinite, delayFadeIn 0.6s ease 3.0s forwards; }
+        .wave-race2 { animation: waveRace2 5.5s linear 3.3s infinite, delayFadeIn 0.7s ease 3.2s forwards; }
+        .wave-glow  { animation: waveGlow  4.5s ease-in-out 3.1s infinite, delayFadeIn 0.8s ease 3.0s forwards; }
+        .wave-aura  { animation: waveAura  6s ease-in-out 3.1s infinite, delayFadeIn 1s ease 3.0s forwards; }
 
         /* ─── Event slider ──────────────────────────────── */
         .event-slider {
@@ -262,7 +270,7 @@ export default function GuestDashboard() {
           position: relative;
           cursor: pointer;
           transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s ease;
-          min-height: 210px;
+          aspect-ratio: 16 / 9;
           will-change: transform;
         }
         .event-slide:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 20px 48px rgba(0,0,0,0.28)!important; }
@@ -332,16 +340,29 @@ export default function GuestDashboard() {
             {/* ── Hero content ── */}
             <div style={{ position: "relative", zIndex: 2, padding: "40px 20px 62px" }}>
 
-              {/* Row: greeting left, logo right */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <p style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.88)",
-                  fontWeight: 500, letterSpacing: "0.22em", textTransform: "uppercase",
-                  textShadow: "0 1px 10px rgba(0,0,0,0.9)",
-                  margin: 0,
-                }}>
-                  {greeting}
-                </p>
+              {/* Row: greeting+name left, logo right — all in one flex row */}
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
+
+                {/* Left: greeting + name stacked with zero gap */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <p style={{
+                    fontSize: 10, color: "rgba(255,255,255,0.88)",
+                    fontWeight: 500, letterSpacing: "0.22em", textTransform: "uppercase",
+                    textShadow: "0 1px 10px rgba(0,0,0,0.9)",
+                    margin: 0, padding: 0, lineHeight: 1,
+                  }}>
+                    {greeting}
+                  </p>
+                  <h1 style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 32, fontWeight: 300, fontStyle: "italic",
+                    color: "#fff", lineHeight: 1,
+                    margin: 0, padding: 0,
+                    textShadow: "0 2px 16px rgba(0,0,0,0.6)",
+                  }}>
+                    {guest?.name || "Valued Guest"}
+                  </h1>
+                </div>
 
                 {/* Logo */}
                 <div style={{
@@ -356,17 +377,6 @@ export default function GuestDashboard() {
                   }} />
                 </div>
               </div>
-
-              {/* ── FIX 1: Guest name — zero margin top, tight gap from greeting ── */}
-              <h1 style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: 32, fontWeight: 300, fontStyle: "italic",
-                color: "#fff", lineHeight: 1,
-                margin: "0 0 10px",   /* top=0 removes the gap */
-                textShadow: "0 2px 16px rgba(0,0,0,0.6)",
-              }}>
-                {guest?.name || "Valued Guest"}
-              </h1>
 
               {/* Room badge */}
               <div style={{
@@ -442,6 +452,16 @@ export default function GuestDashboard() {
                   fill="none"
                   stroke="url(#wGrad3)"
                   strokeWidth="4"
+                  strokeLinecap="round"
+                />
+
+                {/* Layer 5 — secondary soft shimmer, opposite direction */}
+                <path
+                  className="wave-race2"
+                  d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
+                  fill="none"
+                  stroke="url(#wGrad2)"
+                  strokeWidth="5"
                   strokeLinecap="round"
                 />
 
@@ -579,7 +599,7 @@ export default function GuestDashboard() {
                             position: "relative", zIndex: 2,
                             padding: "16px 18px 18px",
                             height: "100%", display: "flex", flexDirection: "column",
-                            justifyContent: "space-between", minHeight: 210,
+                            justifyContent: "space-between",
                           }}>
 
                             {/* ── TOP ROW: tag left, date-time pill right ── */}
