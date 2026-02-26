@@ -53,18 +53,14 @@ export default function GuestDashboard() {
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
 
   // Helper: format event date/time from DB fields
+  // Use eventDate and eventTime from DB
   const formatEventTime = (ev) => {
-    if (ev.time && ev.period) return `${ev.time} ${ev.period}`;
-    if (ev.startTime) {
-      const d = new Date(ev.startTime);
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    }
+    if (ev.eventTime) return ev.eventTime;
     return "";
   };
   const formatEventDate = (ev) => {
-    if (ev.date) return ev.date;
-    if (ev.startTime) {
-      const d = new Date(ev.startTime);
+    if (ev.eventDate) {
+      const d = new Date(ev.eventDate);
       const today = new Date();
       const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
       if (d.toDateString() === today.toDateString()) return "Today";
