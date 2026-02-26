@@ -620,24 +620,29 @@ export default function GuestDashboard() {
                             {/* ── BOTTOM BLOCK: all details stacked cleanly ── */}
                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
 
-                              {/* Date + Time row — inline, compact */}
+                               {/* Date + Time — single pill */}
                               {(evDate || evTime) && (
-                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div style={{
+                                  display: "inline-flex", alignItems: "center", gap: 6,
+                                  background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
+                                  border: "1px solid rgba(249,168,212,0.25)",
+                                  borderRadius: 6, padding: "4px 10px", alignSelf: "flex-start",
+                                }}>
                                   {evDate && (
                                     <span style={{
                                       fontSize: 9, fontWeight: 700, color: "#F9A8D4",
                                       letterSpacing: "0.16em", textTransform: "uppercase",
-                                      background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
-                                      border: "1px solid rgba(249,168,212,0.25)",
-                                      borderRadius: 6, padding: "3px 8px",
                                     }}>
                                       {evDate}
                                     </span>
                                   )}
+                                  {evDate && evTime && (
+                                    <span style={{ fontSize: 8, color: "rgba(249,168,212,0.4)", fontWeight: 300 }}>·</span>
+                                  )}
                                   {evTime && (
                                     <span style={{
-                                      fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.75)",
-                                      letterSpacing: "0.08em",
+                                      fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.8)",
+                                      letterSpacing: "0.06em",
                                     }}>
                                       {evTime}
                                     </span>
