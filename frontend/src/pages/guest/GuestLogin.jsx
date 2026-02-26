@@ -1,13 +1,16 @@
+
 import { useState, useEffect } from "react";
 import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import { guestLoginByLastName } from "../../services/guest.service";
+import api from "../../services/api";
 import logo from "../../assets/logo.png";
+
 
 export default function GuestLogin() {
   const navigate = useNavigate();
-  const { login } = useGuestAuth();
+  const { guest, login, logout, loading } = useGuestAuth();
   const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
@@ -16,11 +19,38 @@ export default function GuestLogin() {
     password: "",
   });
 
+
+
+  // If already authenticated, but room number in URL is different, log out
   useEffect(() => {
     const roomFromUrl = searchParams.get("room") || searchParams.get("roomNumber");
-    if (roomFromUrl) {
-      setFormData((prev) => ({ ...prev, roomNumber: roomFromUrl }));
+    if (!loading && guest) {
+      if (roomFromUrl && guest.roomNumber && String(roomFromUrl) !== String(guest.roomNumber)) {
+        logout();
+      } else {
+        navigate("/guest/dashboard");
+      }
     }
+  }, [guest, loading, navigate, searchParams, logout]);
+
+  // Check if room is occupied when room number is present in URL
+  useEffect(() => {
+    const checkRoomOccupied = async () => {
+      const roomFromUrl = searchParams.get("room") || searchParams.get("roomNumber");
+      if (roomFromUrl) {
+        setFormData((prev) => ({ ...prev, roomNumber: roomFromUrl }));
+        try {
+          // Call backend to check room status
+          const res = await api.get(`/room/status/${encodeURIComponent(roomFromUrl)}`);
+          if (!res.data || res.data.status !== "OCCUPIED") {
+            window.location.href = `/guest/access-fallback?reason=no-guest-registered`;
+          }
+        } catch (err) {
+          window.location.href = `/guest/access-fallback?reason=no-guest-registered`;
+        }
+      }
+    };
+    checkRoomOccupied();
   }, [searchParams]);
 
   const [loading, setLoading] = useState(false);
