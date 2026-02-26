@@ -4,22 +4,17 @@ import hotelbg from "../../assets/hotel-bg.jpg";
 import logo from "../../assets/logo.png";
 import { useEffect, useState } from "react";
 
-export default function GuestDashboard_Option3A() {
+export default function GuestDashboard_Option3B() {
   const { guest } = useGuestAuth();
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [expandedSection, setExpandedSection] = useState(null);
 
-  useEffect(() => { 
-    setFadeIn(true);
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-    return () => clearInterval(timer);
-  }, []);
+  useEffect(() => { setFadeIn(true); }, []);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
-  const timeString = currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
   // ── Icons ─────────────────────────────────────────────────────────────────
   const FoodIcon = () => (
@@ -69,10 +64,10 @@ export default function GuestDashboard_Option3A() {
   );
 
   const quickActions = [
-    { icon: <FoodIcon />, label: "Food", route: "/guest/menu", badge: "2", color: "from-[#A4005D] to-[#d4116f]" },
-    { icon: <HouseIcon />, label: "Service", route: "/guest/housekeeping", badge: null, color: "from-[#c9a96e] to-[#d4b878]" },
-    { icon: <EventsIcon />, label: "Events", route: "/guest/events", badge: "3", color: "from-[#8B4789] to-[#a456a2]" },
-    { icon: <AmenitiesIcon />, label: "Amenities", route: "/guest/hotel-info", badge: null, color: "from-[#5c8a8e] to-[#6d9fa3]" },
+    { icon: <FoodIcon />, label: "Food", route: "/guest/menu", category: "Dining", bgColor: "from-[#ff6b6b] to-[#ee5a6f]", ringColor: "ring-[#ff6b6b]/20" },
+    { icon: <HouseIcon />, label: "Service", route: "/guest/housekeeping", category: "Room", bgColor: "from-[#4ecdc4] to-[#44a8a0]", ringColor: "ring-[#4ecdc4]/20" },
+    { icon: <EventsIcon />, label: "Events", route: "/guest/events", category: "Activity", bgColor: "from-[#a29bfe] to-[#6c5ce7]", ringColor: "ring-[#a29bfe]/20" },
+    { icon: <AmenitiesIcon />, label: "Amenities", route: "/guest/hotel-info", category: "Facility", bgColor: "from-[#fdcb6e] to-[#f6b93b]", ringColor: "ring-[#fdcb6e]/20" },
   ];
 
   const hasActiveOrder = false;
@@ -84,8 +79,20 @@ export default function GuestDashboard_Option3A() {
   ];
 
   const exploreItems = [
-    { icon: <EventsIcon />, label: "Hotel Events", sub: "Check today's activities", route: "/guest/events" },
-    { icon: <AmenitiesIcon />, label: "Facilities", sub: "Gym, spa & pool access", route: "/guest/hotel-info" },
+    { 
+      icon: <EventsIcon />, 
+      label: "Hotel Events", 
+      sub: "Today's schedule",
+      route: "/guest/events",
+      details: ["Yoga Class - 7:00 AM", "Wine Tasting - 6:00 PM", "Live Jazz - 8:30 PM"]
+    },
+    { 
+      icon: <AmenitiesIcon />, 
+      label: "Facilities", 
+      sub: "Available now",
+      route: "/guest/hotel-info",
+      details: ["Gym: Open 24/7", "Pool: Heated, 6AM-10PM", "Spa: Book treatments"]
+    },
   ];
 
   return (
@@ -93,69 +100,63 @@ export default function GuestDashboard_Option3A() {
 
       <div className="flex-1 overflow-y-auto" style={{ maxWidth: 430, width: "100%", margin: "0 auto", paddingBottom: 70 }}>
 
-        {/* ── EXTRA LARGE IMMERSIVE HERO BANNER ───────────────────────── */}
-        <div className="relative mb-4" style={{ height: 220 }}>
+        {/* ── MEDIUM ANIMATED GRADIENT BANNER ─────────────────────────── */}
+        <div className="relative mb-4 overflow-hidden" style={{ height: 150 }}>
           <img src={hotelbg} alt="Hotel" className="w-full h-full object-cover" />
           
-          {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-[#A4005D]/35 to-black/70 animate-pulse-slow" />
+          {/* Animated multi-layer gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#A4005D]/70 via-purple-600/40 to-black/60 animate-gradient-shift" />
+          <div className="absolute inset-0 bg-gradient-to-tl from-[#c9a96e]/30 via-transparent to-[#A4005D]/20 animate-gradient-pulse" />
           
-          {/* Top overlay with guest info */}
-          <div className="absolute top-6 left-5 right-5 flex items-start justify-between">
+          {/* Header Content */}
+          <div className="absolute top-5 left-5 right-5 flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-white/95 text-[10px] font-light tracking-[0.16em] uppercase mb-1 animate-fade-in">{greeting}</p>
-              <h1 className="text-white text-[32px] font-bold leading-none drop-shadow-2xl animate-slide-up" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              <p className="text-white/95 text-[10px] font-light tracking-[0.16em] uppercase mb-1">{greeting}</p>
+              <h1 className="text-white text-[29px] font-bold leading-none drop-shadow-2xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 {guest?.name || "Valued Guest"}
               </h1>
-              <div className="inline-flex items-center gap-1.5 bg-white/25 backdrop-blur-xl border border-white/40 rounded-full px-3 py-1.5 mt-2.5 shadow-lg animate-fade-in-delay">
+              <div className="inline-flex items-center gap-1.5 bg-white/25 backdrop-blur-xl border border-white/40 rounded-full px-3 py-1 mt-2 shadow-lg">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span className="text-white text-[9px] font-bold tracking-[0.12em]">ROOM {guest?.roomNumber}</span>
               </div>
             </div>
-            <img src={logo} alt="Logo" className="w-12 h-12 object-contain opacity-95 drop-shadow-2xl flex-shrink-0 animate-fade-in" />
+            <img src={logo} alt="Logo" className="w-11 h-11 object-contain opacity-95 drop-shadow-2xl flex-shrink-0" />
           </div>
 
-          {/* Time display */}
-          <div className="absolute top-6 left-1/2 -translate-x-1/2">
-            <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-full px-4 py-1.5 shadow-lg">
-              <p className="text-white text-[10px] font-semibold tracking-wider">{timeString}</p>
+          {/* Bottom Content */}
+          <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
+            <div>
+              <p className="text-white text-[24px] font-bold leading-tight tracking-wide drop-shadow-xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                Grand Luxe Hotel
+              </p>
+              <p className="text-white/85 text-[9px] font-light tracking-[0.12em] uppercase mt-1">5-Star Experience</p>
             </div>
-          </div>
-
-          {/* Bottom banner content */}
-          <div className="absolute bottom-5 left-5 right-5">
-            <p className="text-white text-[26px] font-bold leading-tight tracking-wide drop-shadow-2xl animate-slide-up-delay" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-              Grand Luxe Hotel
-            </p>
-            <div className="flex items-center gap-2 mt-2">
-              <div className="h-px flex-1 bg-gradient-to-r from-white/60 via-white/30 to-transparent" />
-              <p className="text-white/90 text-[9px] font-light tracking-[0.14em] uppercase">Luxury Redefined</p>
+            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-3 py-1.5 shadow-lg">
+              <p className="text-white text-[8px] font-semibold tracking-[0.12em] uppercase">Premium</p>
             </div>
           </div>
         </div>
 
-        {/* ── ENHANCED 4-COLUMN GRID WITH BADGES & ANIMATIONS ─────────── */}
+        {/* ── COLOR-CODED 4-COLUMN GRID ───────────────────────────────── */}
         <div className="px-4 mb-4">
           <div className="grid grid-cols-4 gap-2.5">
             {quickActions.map((action, idx) => (
               <button
                 key={action.label}
                 onClick={() => navigate(action.route)}
-                className="relative bg-white rounded-[18px] p-3 flex flex-col items-center justify-center border border-[#A4005D]/6 shadow-[0_3px_16px_rgba(164,0,93,0.08)] active:scale-95 hover:shadow-[0_6px_24px_rgba(164,0,93,0.14)] transition-all duration-300 group"
+                className={`relative bg-white rounded-[18px] p-3 flex flex-col items-center justify-center border shadow-[0_3px_16px_rgba(0,0,0,0.06)] active:scale-95 hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] transition-all duration-300 ring-2 ${action.ringColor}`}
                 style={{
-                  minHeight: 92,
+                  minHeight: 95,
                   animationDelay: `${idx * 60}ms`,
-                  animation: fadeIn ? 'popInBounce 0.5s ease-out forwards' : 'none'
+                  animation: fadeIn ? 'slideUpFade 0.5s ease-out forwards' : 'none'
                 }}
               >
-                {/* Badge notification */}
-                {action.badge && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-[#ff4757] to-[#ff6348] rounded-full flex items-center justify-center text-white text-[9px] font-bold shadow-lg border-2 border-white animate-bounce-subtle">
-                    {action.badge}
-                  </div>
-                )}
+                {/* Category tag */}
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-full px-2 py-0.5 shadow-sm">
+                  <span className="text-[7px] font-bold text-gray-600 tracking-wider uppercase">{action.category}</span>
+                </div>
                 
-                <div className={`w-11 h-11 rounded-[14px] bg-gradient-to-br ${action.color} border border-white/50 flex items-center justify-center text-white mb-2.5 shadow-md group-hover:scale-110 group-active:scale-95 transition-transform duration-300`}>
+                <div className={`w-11 h-11 rounded-[14px] bg-gradient-to-br ${action.bgColor} flex items-center justify-center text-white mb-2.5 shadow-lg group-hover:scale-110 transition-transform duration-300 mt-2`}>
                   {action.icon}
                 </div>
                 <p className="text-[11px] font-bold text-[#1F1F1F] leading-tight text-center" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
@@ -166,11 +167,11 @@ export default function GuestDashboard_Option3A() {
           </div>
         </div>
 
-        {/* ── MEGA CARD WITH STATUS TIMELINE ──────────────────────────── */}
+        {/* ── EXPANDABLE MEGA CARD ────────────────────────────────────── */}
         <div className="px-4 mb-4">
           <div className="bg-white rounded-[22px] border border-[#c9a96e]/10 shadow-[0_6px_28px_rgba(30,21,16,0.08)] overflow-hidden">
             
-            {/* Orders Section with Timeline */}
+            {/* Orders Section */}
             <div className="p-5 border-b border-[#c9a96e]/8">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#6B6B6B]">Your Orders</p>
@@ -180,9 +181,7 @@ export default function GuestDashboard_Option3A() {
               </div>
 
               {hasActiveOrder ? (
-                <div className="space-y-3">
-                  {/* Timeline will go here when there's an active order */}
-                </div>
+                <div>Order details here</div>
               ) : (
                 <div className="flex items-center gap-3.5 p-4 bg-gradient-to-r from-[#F6EADB] to-[#f0ddc5]/50 rounded-[16px] border border-[#A4005D]/8">
                   <div className="w-11 h-11 flex-shrink-0 rounded-[13px] bg-white border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm">
@@ -196,62 +195,87 @@ export default function GuestDashboard_Option3A() {
                     <p className="text-[15px] font-bold text-[#1F1F1F] leading-tight mb-0.5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                       No active orders
                     </p>
-                    <p className="text-[10px] text-[#6B6B6B] font-light">Ready to serve you anytime</p>
+                    <p className="text-[10px] text-[#6B6B6B] font-light">Start an order anytime</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Explore Section */}
+            {/* Expandable Explore Section */}
             <div className="p-5">
               <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#6B6B6B] mb-3.5">Explore More</p>
               <div className="flex flex-col gap-2">
                 {exploreItems.map((item, idx) => (
-                  <button
-                    key={item.label}
-                    onClick={() => navigate(item.route)}
-                    className="flex items-center gap-3.5 w-full px-3.5 py-3 rounded-[15px] active:bg-[#F6EADB]/50 hover:bg-[#F6EADB]/25 transition-all duration-200 text-left group"
-                  >
-                    <div className="w-10 h-10 flex-shrink-0 rounded-[12px] bg-gradient-to-br from-[#F6EADB] to-[#f0ddc5] border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm group-hover:scale-110 transition-transform duration-300">
-                      {item.icon}
+                  <div key={item.label} className="border border-[#c9a96e]/8 rounded-[16px] overflow-hidden">
+                    <button
+                      onClick={() => setExpandedSection(expandedSection === idx ? null : idx)}
+                      className="flex items-center gap-3.5 w-full px-3.5 py-3 hover:bg-[#F6EADB]/25 transition-all duration-200 text-left group"
+                    >
+                      <div className="w-10 h-10 flex-shrink-0 rounded-[12px] bg-gradient-to-br from-[#F6EADB] to-[#f0ddc5] border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm">
+                        {item.icon}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[15px] font-bold text-[#1F1F1F] leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                          {item.label}
+                        </p>
+                        <p className="text-[9.5px] text-[#6B6B6B] font-light mt-0.5">{item.sub}</p>
+                      </div>
+                      <span className={`text-[#c9a96e] text-[18px] transition-all duration-300 ${expandedSection === idx ? 'rotate-90' : ''}`}>›</span>
+                    </button>
+                    
+                    {/* Expandable Details */}
+                    <div className={`overflow-hidden transition-all duration-300 ${expandedSection === idx ? 'max-h-48' : 'max-h-0'}`}>
+                      <div className="px-4 pb-3 pt-1 bg-[#F6EADB]/20 border-t border-[#c9a96e]/8">
+                        {item.details.map((detail, detailIdx) => (
+                          <div key={detailIdx} className="flex items-center gap-2 py-2 border-b border-[#c9a96e]/5 last:border-0">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#A4005D]" />
+                            <p className="text-[11px] text-[#1F1F1F] font-light">{detail}</p>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => navigate(item.route)}
+                          className="mt-2 w-full py-2 bg-[#A4005D] text-white rounded-[12px] text-[11px] font-semibold tracking-wide active:scale-95 transition-transform"
+                        >
+                          View Full Schedule
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-[15px] font-bold text-[#1F1F1F] leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                        {item.label}
-                      </p>
-                      <p className="text-[9.5px] text-[#6B6B6B] font-light mt-0.5">{item.sub}</p>
-                    </div>
-                    <span className="text-[#c9a96e] text-[18px] opacity-50 group-hover:opacity-80 group-hover:translate-x-1 transition-all duration-200">›</span>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── LIVE NOTIFICATIONS FEED ─────────────────────────────────── */}
+        {/* ── WEATHER & LOCAL EVENTS WIDGET ───────────────────────────── */}
         <div className="px-4 pb-3">
-          <div className="bg-gradient-to-br from-[#A4005D]/8 via-[#c9a96e]/8 to-[#A4005D]/6 rounded-[20px] border border-[#A4005D]/10 p-4 shadow-[0_4px_20px_rgba(164,0,93,0.06)]">
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 flex-shrink-0 rounded-[12px] bg-gradient-to-br from-white/80 to-white/60 border border-[#A4005D]/12 flex items-center justify-center text-[#A4005D] shadow-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-[13px] font-bold text-[#1F1F1F]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                    Live Updates
-                  </p>
-                  <span className="px-2 py-0.5 bg-[#A4005D]/10 border border-[#A4005D]/20 rounded-full text-[8px] font-bold text-[#A4005D] tracking-wider">LIVE</span>
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-[20px] border border-blue-100 p-4 shadow-[0_4px_20px_rgba(59,130,246,0.08)]">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-[12px] bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-white shadow-md">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <circle cx="12" cy="12" r="5" />
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                  </svg>
                 </div>
-                <p className="text-[10.5px] text-[#6B6B6B] font-light leading-relaxed mb-2">
-                  Rooftop lounge now open • Pool heated to 28°C
-                </p>
-                <button className="text-[9px] text-[#A4005D] font-semibold tracking-wide hover:opacity-70 transition-opacity">
-                  View All Notifications →
-                </button>
+                <div>
+                  <p className="text-[15px] font-bold text-gray-800" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Sunny, 28°C</p>
+                  <p className="text-[9px] text-gray-600 font-light">Perfect day to explore</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[11px] font-semibold text-gray-700">Nearby</p>
+                <p className="text-[8px] text-gray-500">Art Festival Today</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-[12px] p-2 text-center border border-blue-100">
+                <p className="text-[9px] text-gray-500 font-medium">Tomorrow</p>
+                <p className="text-[13px] font-bold text-gray-800">26°C</p>
+              </div>
+              <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-[12px] p-2 text-center border border-blue-100">
+                <p className="text-[9px] text-gray-500 font-medium">Saturday</p>
+                <p className="text-[13px] font-bold text-gray-800">24°C</p>
               </div>
             </div>
           </div>
@@ -285,41 +309,20 @@ export default function GuestDashboard_Option3A() {
       </div>
 
       <style jsx>{`
-        @keyframes popInBounce {
-          0% { opacity: 0; transform: scale(0.8); }
-          50% { transform: scale(1.05); }
-          100% { opacity: 1; transform: scale(1); }
+        @keyframes slideUpFade {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes pulse-slow {
+        @keyframes gradient-shift {
           0%, 100% { opacity: 1; }
-          50% { opacity: 0.95; }
+          50% { opacity: 0.85; }
         }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        @keyframes gradient-pulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 0.8; }
         }
-        @keyframes slide-up {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slide-up-delay {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fade-in-delay {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-2px); }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .animate-fade-in { animation: fade-in 0.6s ease-out; }
-        .animate-slide-up { animation: slide-up 0.6s ease-out; }
-        .animate-slide-up-delay { animation: slide-up-delay 0.8s ease-out; }
-        .animate-fade-in-delay { animation: fade-in-delay 1s ease-out; }
-        .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+        .animate-gradient-shift { animation: gradient-shift 4s ease-in-out infinite; }
+        .animate-gradient-pulse { animation: gradient-pulse 6s ease-in-out infinite; }
       `}</style>
 
     </div>
