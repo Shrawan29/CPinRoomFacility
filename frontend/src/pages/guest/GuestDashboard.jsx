@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import hotelbg from "../../assets/hotel-bg.jpg";
 import logo from "../../assets/logo.png";
+
 import { useEffect, useState, useRef } from "react";
+import { getGuestEvents } from "../../services/event.service";
 
 export default function GuestDashboard() {
   const { guest, loading } = useGuestAuth();
@@ -99,57 +101,13 @@ export default function GuestDashboard() {
     { icon: <HouseIcon />, label: "Housekeeping", sub: "Room essentials", route: "/guest/housekeeping", accent: "linear-gradient(90deg,#c9a96e,#d4b464)" },
   ];
 
-  // ── Events — in real app replace with DB fetch ─────────────────────────
-  // Each event has an optional `image` field. If present the slider shows it.
-  // If your events don't have images, the card falls back to emoji + gradient.
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Rooftop Yoga",
-      description: "Start your morning with a rejuvenating yoga session overlooking the city skyline.",
-      time: "7:00", period: "AM", date: "Today",
-      location: "Rooftop Garden",
-      emoji: "🧘",
-      // image: yogaImg, // ← uncomment and import if you have an image
-      color: "#8B4789",
-      gradient: "linear-gradient(135deg,#3d1060,#8B4789)",
-      tag: "Open",
-      tagBg: "rgba(134,239,172,0.2)", tagColor: "#15803d", tagBorder: "rgba(134,239,172,0.4)",
-    },
-    {
-      id: 2,
-      title: "Wine Tasting",
-      description: "Indulge in an exclusive curated selection of fine wines from across the globe.",
-      time: "6:00", period: "PM", date: "Today",
-      location: "Grand Ballroom",
-      emoji: "🍷",
-      gradient: "linear-gradient(135deg,#6a003c,#A4005D)",
-      tag: "4 Spots",
-      tagBg: "rgba(251,191,36,0.18)", tagColor: "#b45309", tagBorder: "rgba(251,191,36,0.35)",
-    },
-    {
-      id: 3,
-      title: "Live Jazz Night",
-      description: "Unwind with soulful live jazz performances in the ambient lounge setting.",
-      time: "8:30", period: "PM", date: "Tomorrow",
-      location: "The Lounge Bar",
-      emoji: "🎷",
-      gradient: "linear-gradient(135deg,#0d3347,#1e6a8a)",
-      tag: "Free",
-      tagBg: "rgba(164,0,93,0.1)", tagColor: "#A4005D", tagBorder: "rgba(164,0,93,0.22)",
-    },
-    {
-      id: 4,
-      title: "Chef's Table",
-      description: "An intimate dining experience with our Executive Chef. 8-course tasting menu.",
-      time: "7:30", period: "PM", date: "Saturday",
-      location: "Private Dining",
-      emoji: "👨‍🍳",
-      gradient: "linear-gradient(135deg,#3d2400,#8a5200)",
-      tag: "Limited",
-      tagBg: "rgba(239,68,68,0.1)", tagColor: "#dc2626", tagBorder: "rgba(239,68,68,0.25)",
-    },
-  ];
+  // ── Events — fetch from backend ─────────────────────────
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  useEffect(() => {
+    getGuestEvents().then((data) => {
+      setUpcomingEvents(data || []);
+    });
+  }, []);
 
   const hasActiveOrder = false;
   const activeOrder = {
