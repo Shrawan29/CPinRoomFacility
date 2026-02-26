@@ -4,14 +4,21 @@ import hotelbg from "../../assets/hotel-bg.jpg";
 import logo from "../../assets/logo.png";
 import { useEffect, useState } from "react";
 
-export default function GuestDashboard_Option3B() {
+export default function GuestDashboard_Option3C() {
   const { guest } = useGuestAuth();
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
-  const [expandedSection, setExpandedSection] = useState(null);
+  const [hoveredAction, setHoveredAction] = useState(null);
+  const [offerIndex, setOfferIndex] = useState(0);
 
-  useEffect(() => { setFadeIn(true); }, []);
+  useEffect(() => { 
+    setFadeIn(true);
+    const offerTimer = setInterval(() => {
+      setOfferIndex(prev => (prev + 1) % 3);
+    }, 4000);
+    return () => clearInterval(offerTimer);
+  }, []);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -64,14 +71,24 @@ export default function GuestDashboard_Option3B() {
   );
 
   const quickActions = [
-    { icon: <FoodIcon />, label: "Food", route: "/guest/menu", category: "Dining", bgColor: "from-[#ff6b6b] to-[#ee5a6f]", ringColor: "ring-[#ff6b6b]/20" },
-    { icon: <HouseIcon />, label: "Service", route: "/guest/housekeeping", category: "Room", bgColor: "from-[#4ecdc4] to-[#44a8a0]", ringColor: "ring-[#4ecdc4]/20" },
-    { icon: <EventsIcon />, label: "Events", route: "/guest/events", category: "Activity", bgColor: "from-[#a29bfe] to-[#6c5ce7]", ringColor: "ring-[#a29bfe]/20" },
-    { icon: <AmenitiesIcon />, label: "Amenities", route: "/guest/hotel-info", category: "Facility", bgColor: "from-[#fdcb6e] to-[#f6b93b]", ringColor: "ring-[#fdcb6e]/20" },
+    { icon: <FoodIcon />, label: "Food", route: "/guest/menu", tooltip: "Order delicious meals", bgGradient: "from-rose-500 to-pink-500" },
+    { icon: <HouseIcon />, label: "Service", route: "/guest/housekeeping", tooltip: "Request housekeeping", bgGradient: "from-teal-500 to-cyan-500" },
+    { icon: <EventsIcon />, label: "Events", route: "/guest/events", tooltip: "Explore activities", bgGradient: "from-purple-500 to-indigo-500" },
+    { icon: <AmenitiesIcon />, label: "Amenities", route: "/guest/hotel-info", tooltip: "Discover facilities", bgGradient: "from-amber-500 to-orange-500" },
+  ];
+
+  const recentOrders = [
+    { name: "Caesar Salad", time: "Yesterday, 7:30 PM" },
+    { name: "Club Sandwich", time: "2 days ago" },
+  ];
+
+  const offers = [
+    { title: "20% Off Spa Services", subtitle: "Book today and relax", color: "from-purple-500 to-pink-500" },
+    { title: "Complimentary Breakfast", subtitle: "Tomorrow 7-10 AM", color: "from-amber-500 to-orange-500" },
+    { title: "Late Checkout Available", subtitle: "Extend your stay stress-free", color: "from-teal-500 to-cyan-500" },
   ];
 
   const hasActiveOrder = false;
-
   const navItems = [
     { key: "home", label: "Home", icon: (a) => <HomeNavIcon active={a} />, route: "/guest/dashboard" },
     { key: "orders", label: "Orders", icon: (a) => <OrdersNavIcon active={a} />, route: "/guest/orders" },
@@ -79,20 +96,8 @@ export default function GuestDashboard_Option3B() {
   ];
 
   const exploreItems = [
-    { 
-      icon: <EventsIcon />, 
-      label: "Hotel Events", 
-      sub: "Today's schedule",
-      route: "/guest/events",
-      details: ["Yoga Class - 7:00 AM", "Wine Tasting - 6:00 PM", "Live Jazz - 8:30 PM"]
-    },
-    { 
-      icon: <AmenitiesIcon />, 
-      label: "Facilities", 
-      sub: "Available now",
-      route: "/guest/hotel-info",
-      details: ["Gym: Open 24/7", "Pool: Heated, 6AM-10PM", "Spa: Book treatments"]
-    },
+    { icon: <EventsIcon />, label: "Hotel Events", sub: "Live music tonight at 8 PM", route: "/guest/events" },
+    { icon: <AmenitiesIcon />, label: "Facilities", sub: "Pool, gym, spa - all open", route: "/guest/hotel-info" },
   ];
 
   return (
@@ -100,66 +105,88 @@ export default function GuestDashboard_Option3B() {
 
       <div className="flex-1 overflow-y-auto" style={{ maxWidth: 430, width: "100%", margin: "0 auto", paddingBottom: 70 }}>
 
-        {/* ── MEDIUM ANIMATED GRADIENT BANNER ─────────────────────────── */}
-        <div className="relative mb-4 overflow-hidden" style={{ height: 150 }}>
+        {/* ── DUAL-LAYER FLOATING BANNER ──────────────────────────────── */}
+        <div className="relative mb-5" style={{ height: 190 }}>
           <img src={hotelbg} alt="Hotel" className="w-full h-full object-cover" />
           
-          {/* Animated multi-layer gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#A4005D]/70 via-purple-600/40 to-black/60 animate-gradient-shift" />
-          <div className="absolute inset-0 bg-gradient-to-tl from-[#c9a96e]/30 via-transparent to-[#A4005D]/20 animate-gradient-pulse" />
+          {/* Layered gradients */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-transparent to-black/75" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#A4005D]/50 via-transparent to-purple-900/40" />
           
+          {/* Floating elements */}
+          <div className="absolute top-4 right-4">
+            <div className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl px-4 py-2.5 shadow-2xl animate-float">
+              <p className="text-white text-[9px] font-semibold tracking-[0.14em] uppercase">Elite Member</p>
+            </div>
+          </div>
+
           {/* Header Content */}
-          <div className="absolute top-5 left-5 right-5 flex items-start justify-between">
+          <div className="absolute top-7 left-5 right-5 flex items-start justify-between">
             <div className="flex-1">
               <p className="text-white/95 text-[10px] font-light tracking-[0.16em] uppercase mb-1">{greeting}</p>
-              <h1 className="text-white text-[29px] font-bold leading-none drop-shadow-2xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              <h1 className="text-white text-[31px] font-bold leading-none drop-shadow-2xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                 {guest?.name || "Valued Guest"}
               </h1>
-              <div className="inline-flex items-center gap-1.5 bg-white/25 backdrop-blur-xl border border-white/40 rounded-full px-3 py-1 mt-2 shadow-lg">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <div className="inline-flex items-center gap-1.5 bg-white/25 backdrop-blur-xl border border-white/40 rounded-full px-3 py-1.5 mt-2.5 shadow-2xl">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-white text-[9px] font-bold tracking-[0.12em]">ROOM {guest?.roomNumber}</span>
               </div>
             </div>
-            <img src={logo} alt="Logo" className="w-11 h-11 object-contain opacity-95 drop-shadow-2xl flex-shrink-0" />
+            <div className="bg-white/15 backdrop-blur-xl rounded-2xl p-2 border border-white/25 shadow-2xl">
+              <img src={logo} alt="Logo" className="w-9 h-9 object-contain opacity-95" />
+            </div>
           </div>
 
-          {/* Bottom Content */}
-          <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
-            <div>
-              <p className="text-white text-[24px] font-bold leading-tight tracking-wide drop-shadow-xl" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                Grand Luxe Hotel
-              </p>
-              <p className="text-white/85 text-[9px] font-light tracking-[0.12em] uppercase mt-1">5-Star Experience</p>
-            </div>
-            <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-3 py-1.5 shadow-lg">
-              <p className="text-white text-[8px] font-semibold tracking-[0.12em] uppercase">Premium</p>
+          {/* Bottom floating card */}
+          <div className="absolute bottom-5 left-5 right-5">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[18px] font-bold text-[#1F1F1F]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                    Grand Luxe Hotel
+                  </p>
+                  <p className="text-[9px] text-[#6B6B6B] font-light tracking-wider uppercase mt-0.5">Where Luxury Meets Comfort</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ── COLOR-CODED 4-COLUMN GRID ───────────────────────────────── */}
+        {/* ── ANIMATED ICON GRID WITH TOOLTIPS ────────────────────────── */}
         <div className="px-4 mb-4">
           <div className="grid grid-cols-4 gap-2.5">
             {quickActions.map((action, idx) => (
               <button
                 key={action.label}
                 onClick={() => navigate(action.route)}
-                className={`relative bg-white rounded-[18px] p-3 flex flex-col items-center justify-center border shadow-[0_3px_16px_rgba(0,0,0,0.06)] active:scale-95 hover:shadow-[0_6px_24px_rgba(0,0,0,0.1)] transition-all duration-300 ring-2 ${action.ringColor}`}
+                onMouseEnter={() => setHoveredAction(idx)}
+                onMouseLeave={() => setHoveredAction(null)}
+                className="relative bg-white rounded-[18px] p-3 flex flex-col items-center justify-center border border-gray-100 shadow-[0_3px_16px_rgba(0,0,0,0.06)] active:scale-95 hover:shadow-[0_6px_28px_rgba(0,0,0,0.12)] transition-all duration-300"
                 style={{
                   minHeight: 95,
                   animationDelay: `${idx * 60}ms`,
-                  animation: fadeIn ? 'slideUpFade 0.5s ease-out forwards' : 'none'
+                  animation: fadeIn ? 'bounceIn 0.6s ease-out forwards' : 'none'
                 }}
               >
-                {/* Category tag */}
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-full px-2 py-0.5 shadow-sm">
-                  <span className="text-[7px] font-bold text-gray-600 tracking-wider uppercase">{action.category}</span>
-                </div>
+                {/* Tooltip */}
+                {hoveredAction === idx && (
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[9px] font-medium whitespace-nowrap shadow-xl z-10 animate-fade-in">
+                    {action.tooltip}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
+                  </div>
+                )}
                 
-                <div className={`w-11 h-11 rounded-[14px] bg-gradient-to-br ${action.bgColor} flex items-center justify-center text-white mb-2.5 shadow-lg group-hover:scale-110 transition-transform duration-300 mt-2`}>
+                <div className={`w-12 h-12 rounded-[15px] bg-gradient-to-br ${action.bgGradient} flex items-center justify-center text-white mb-2.5 shadow-lg transition-all duration-300 ${hoveredAction === idx ? 'scale-125 rotate-6' : 'scale-100'}`}>
                   {action.icon}
                 </div>
-                <p className="text-[11px] font-bold text-[#1F1F1F] leading-tight text-center" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                <p className="text-[11.5px] font-bold text-[#1F1F1F] leading-tight text-center" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
                   {action.label}
                 </p>
               </button>
@@ -167,11 +194,11 @@ export default function GuestDashboard_Option3B() {
           </div>
         </div>
 
-        {/* ── EXPANDABLE MEGA CARD ────────────────────────────────────── */}
+        {/* ── MEGA CARD WITH QUICK REORDER ────────────────────────────── */}
         <div className="px-4 mb-4">
           <div className="bg-white rounded-[22px] border border-[#c9a96e]/10 shadow-[0_6px_28px_rgba(30,21,16,0.08)] overflow-hidden">
             
-            {/* Orders Section */}
+            {/* Orders Section with Reorder */}
             <div className="p-5 border-b border-[#c9a96e]/8">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#6B6B6B]">Your Orders</p>
@@ -181,103 +208,103 @@ export default function GuestDashboard_Option3B() {
               </div>
 
               {hasActiveOrder ? (
-                <div>Order details here</div>
+                <div>Order details</div>
               ) : (
-                <div className="flex items-center gap-3.5 p-4 bg-gradient-to-r from-[#F6EADB] to-[#f0ddc5]/50 rounded-[16px] border border-[#A4005D]/8">
-                  <div className="w-11 h-11 flex-shrink-0 rounded-[13px] bg-white border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5.5 h-5.5">
-                      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-                      <rect x="9" y="3" width="6" height="4" rx="1" />
-                      <path d="M9 12h6" /><path d="M9 16h4" />
-                    </svg>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3.5 p-3.5 bg-gradient-to-r from-[#F6EADB] to-[#f0ddc5]/50 rounded-[16px] border border-[#A4005D]/8">
+                    <div className="w-10 h-10 flex-shrink-0 rounded-[12px] bg-white border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-[14px] font-bold text-[#1F1F1F] leading-tight mb-0.5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                        No active orders
+                      </p>
+                      <p className="text-[9.5px] text-[#6B6B6B] font-light">Order your favorite meals</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-[15px] font-bold text-[#1F1F1F] leading-tight mb-0.5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                      No active orders
-                    </p>
-                    <p className="text-[10px] text-[#6B6B6B] font-light">Start an order anytime</p>
+
+                  {/* Quick Reorder Section */}
+                  <div>
+                    <p className="text-[9px] font-semibold tracking-wider uppercase text-[#6B6B6B] mb-2">Quick Reorder</p>
+                    {recentOrders.map((order, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => navigate("/guest/menu")}
+                        className="w-full flex items-center justify-between p-3 mb-2 last:mb-0 bg-gray-50 hover:bg-gray-100 rounded-[14px] border border-gray-200 transition-all active:scale-98"
+                      >
+                        <div className="text-left">
+                          <p className="text-[12px] font-semibold text-[#1F1F1F]">{order.name}</p>
+                          <p className="text-[8.5px] text-[#6B6B6B] font-light">{order.time}</p>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-[#A4005D] flex items-center justify-center text-white shadow-md">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                            <path d="M12 5v14M5 12h14" />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Expandable Explore Section */}
+            {/* Explore Section */}
             <div className="p-5">
-              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#6B6B6B] mb-3.5">Explore More</p>
-              <div className="flex flex-col gap-2">
-                {exploreItems.map((item, idx) => (
-                  <div key={item.label} className="border border-[#c9a96e]/8 rounded-[16px] overflow-hidden">
-                    <button
-                      onClick={() => setExpandedSection(expandedSection === idx ? null : idx)}
-                      className="flex items-center gap-3.5 w-full px-3.5 py-3 hover:bg-[#F6EADB]/25 transition-all duration-200 text-left group"
-                    >
-                      <div className="w-10 h-10 flex-shrink-0 rounded-[12px] bg-gradient-to-br from-[#F6EADB] to-[#f0ddc5] border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm">
-                        {item.icon}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[15px] font-bold text-[#1F1F1F] leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                          {item.label}
-                        </p>
-                        <p className="text-[9.5px] text-[#6B6B6B] font-light mt-0.5">{item.sub}</p>
-                      </div>
-                      <span className={`text-[#c9a96e] text-[18px] transition-all duration-300 ${expandedSection === idx ? 'rotate-90' : ''}`}>›</span>
-                    </button>
-                    
-                    {/* Expandable Details */}
-                    <div className={`overflow-hidden transition-all duration-300 ${expandedSection === idx ? 'max-h-48' : 'max-h-0'}`}>
-                      <div className="px-4 pb-3 pt-1 bg-[#F6EADB]/20 border-t border-[#c9a96e]/8">
-                        {item.details.map((detail, detailIdx) => (
-                          <div key={detailIdx} className="flex items-center gap-2 py-2 border-b border-[#c9a96e]/5 last:border-0">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#A4005D]" />
-                            <p className="text-[11px] text-[#1F1F1F] font-light">{detail}</p>
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => navigate(item.route)}
-                          className="mt-2 w-full py-2 bg-[#A4005D] text-white rounded-[12px] text-[11px] font-semibold tracking-wide active:scale-95 transition-transform"
-                        >
-                          View Full Schedule
-                        </button>
-                      </div>
+              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#6B6B6B] mb-3.5">Discover</p>
+              <div className="flex flex-col gap-2.5">
+                {exploreItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => navigate(item.route)}
+                    className="flex items-center gap-3.5 w-full px-4 py-3.5 rounded-[16px] bg-gradient-to-r from-[#F6EADB] to-[#f0ddc5]/30 border border-[#A4005D]/8 hover:shadow-md active:scale-98 transition-all duration-200 text-left group"
+                  >
+                    <div className="w-10 h-10 flex-shrink-0 rounded-[13px] bg-white border border-[#A4005D]/10 flex items-center justify-center text-[#A4005D] shadow-sm group-hover:scale-110 transition-transform">
+                      {item.icon}
                     </div>
-                  </div>
+                    <div className="flex-1">
+                      <p className="text-[15px] font-bold text-[#1F1F1F] leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                        {item.label}
+                      </p>
+                      <p className="text-[9.5px] text-[#6B6B6B] font-light mt-0.5">{item.sub}</p>
+                    </div>
+                    <span className="text-[#c9a96e] text-[18px] opacity-50 group-hover:opacity-80 group-hover:translate-x-1 transition-all">›</span>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── WEATHER & LOCAL EVENTS WIDGET ───────────────────────────── */}
+        {/* ── SPECIAL OFFERS CAROUSEL ─────────────────────────────────── */}
         <div className="px-4 pb-3">
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-[20px] border border-blue-100 p-4 shadow-[0_4px_20px_rgba(59,130,246,0.08)]">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-[12px] bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center text-white shadow-md">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                    <circle cx="12" cy="12" r="5" />
-                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                  </svg>
+          <div className="relative overflow-hidden rounded-[20px] shadow-[0_6px_24px_rgba(0,0,0,0.1)]" style={{ height: 110 }}>
+            {offers.map((offer, idx) => (
+              <div
+                key={idx}
+                className={`absolute inset-0 transition-all duration-700 ${idx === offerIndex ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'}`}
+                style={{ background: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
+              >
+                <div className={`w-full h-full bg-gradient-to-br ${offer.color} p-5 flex flex-col justify-between`}>
+                  <div>
+                    <span className="inline-block px-2.5 py-1 bg-white/25 backdrop-blur-sm border border-white/40 rounded-full text-white text-[8px] font-bold tracking-wider uppercase mb-2">
+                      Special Offer
+                    </span>
+                    <p className="text-white text-[19px] font-bold leading-tight drop-shadow-lg" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                      {offer.title}
+                    </p>
+                    <p className="text-white/90 text-[10px] font-light mt-1">{offer.subtitle}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {offers.map((_, dotIdx) => (
+                      <div key={dotIdx} className={`h-1.5 rounded-full transition-all ${dotIdx === offerIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50'}`} />
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[15px] font-bold text-gray-800" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Sunny, 28°C</p>
-                  <p className="text-[9px] text-gray-600 font-light">Perfect day to explore</p>
-                </div>
               </div>
-              <div className="text-right">
-                <p className="text-[11px] font-semibold text-gray-700">Nearby</p>
-                <p className="text-[8px] text-gray-500">Art Festival Today</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-[12px] p-2 text-center border border-blue-100">
-                <p className="text-[9px] text-gray-500 font-medium">Tomorrow</p>
-                <p className="text-[13px] font-bold text-gray-800">26°C</p>
-              </div>
-              <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-[12px] p-2 text-center border border-blue-100">
-                <p className="text-[9px] text-gray-500 font-medium">Saturday</p>
-                <p className="text-[13px] font-bold text-gray-800">24°C</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -309,20 +336,22 @@ export default function GuestDashboard_Option3B() {
       </div>
 
       <style jsx>{`
-        @keyframes slideUpFade {
-          from { opacity: 0; transform: translateY(15px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes bounceIn {
+          0% { opacity: 0; transform: scale(0.3); }
+          50% { transform: scale(1.05); }
+          70% { transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
         }
-        @keyframes gradient-shift {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.85; }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
         }
-        @keyframes gradient-pulse {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 0.8; }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        .animate-gradient-shift { animation: gradient-shift 4s ease-in-out infinite; }
-        .animate-gradient-pulse { animation: gradient-pulse 6s ease-in-out infinite; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-fade-in { animation: fade-in 0.3s ease-out; }
       `}</style>
 
     </div>
