@@ -41,7 +41,7 @@ export default function GuestLogin() {
         setFormData((prev) => ({ ...prev, roomNumber: roomFromUrl }));
         try {
           // Call backend to check room status
-          const res = await api.get(`/room/status/${encodeURIComponent(roomFromUrl)}`);
+          const res = await api.get(`/rooms/status/${encodeURIComponent(roomFromUrl)}`);
           if (!res.data || res.data.status !== "OCCUPIED") {
             window.location.href = `/guest/access-fallback?reason=no-guest-registered`;
           }
