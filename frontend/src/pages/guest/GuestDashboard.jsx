@@ -111,7 +111,7 @@ export default function GuestDashboard() {
   ];
 
   // ── Icons ──────────────────────────────────────────────────────────────
-  const FoodIcon = () => (
+const FoodIcon = () => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
@@ -121,24 +121,19 @@ export default function GuestDashboard() {
     strokeLinejoin="round"
     style={{ width: 28, height: 28 }}
   >
-    {/* Plate base */}
-    <path d="M3 18h18" />
-    <path d="M5 18v1h14v-1" />
+    {/* Bottom tray */}
+    <path d="M3 17h18" />
+    <path d="M5 17l2 2h10l2-2" />
 
     {/* Dome */}
     <path d="M4 14a8 8 0 0 1 16 0" />
 
-    {/* Handle */}
-    <path d="M10.5 6h3" />
-    <path d="M12 6v-2" />
+    {/* Top handle */}
+    <path d="M10.5 5h3" />
+    <path d="M12 5v-2" />
 
-    {/* Highlight curve */}
+    {/* Shine curve */}
     <path d="M7 12a5 5 0 0 1 3-3" />
-
-    {/* Plus circle */}
-    <circle cx="18" cy="8" r="3" />
-    <path d="M18 6.8v2.4" />
-    <path d="M16.8 8h2.4" />
   </svg>
 );
   const HouseIcon = () => (
