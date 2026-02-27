@@ -46,6 +46,29 @@ export default function GuestDashboard() {
     };
   }, [upcomingEvents.length]);
 
+  // Manual navigation handler
+  const navigateEvent = (direction) => {
+    // Pause auto-play when user manually navigates
+    if (autoRef.current) {
+      clearInterval(autoRef.current);
+    }
+
+    if (direction === "next") {
+      setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
+    } else {
+      setCurrentEventIndex((prev) => (prev - 1 + upcomingEvents.length) % upcomingEvents.length);
+    }
+
+    // Restart auto-play after 5 seconds of inactivity
+    const restartTimer = setTimeout(() => {
+      autoRef.current = setInterval(() => {
+        setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
+      }, 4500);
+    }, 5000);
+
+    return () => clearTimeout(restartTimer);
+  };
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
 
@@ -250,7 +273,7 @@ export default function GuestDashboard() {
         .event-card-container {
           position: relative;
           width: 100%;
-          height: 360px;
+          aspect-ratio: 16 / 9;
           perspective: 1000px;
         }
 
@@ -271,6 +294,45 @@ export default function GuestDashboard() {
         .event-card-wrapper.exit {
           animation: fadeSlideOut 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
           z-index: 0;
+        }
+
+        /* Navigation arrows */
+        .event-nav-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.22);
+          border: 1.5px solid rgba(255, 255, 255, 0.32);
+          border-radius: 50%;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #fff;
+          font-size: 20px;
+          z-index: 10;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+        }
+
+        .event-nav-button:hover {
+          background: rgba(255, 255, 255, 0.32);
+          border-color: rgba(255, 255, 255, 0.48);
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .event-nav-button:active {
+          transform: translateY(-50%) scale(0.95);
+        }
+
+        .event-nav-button.prev {
+          left: 12px;
+        }
+
+        .event-nav-button.next {
+          right: 12px;
         }
 
         /* Crisp image base — no blur overlay on image */
@@ -558,7 +620,7 @@ export default function GuestDashboard() {
                 </div>
               ) : (
                 <>
-                  <div style={{ padding: "0 20px" }}>
+                  <div style={{ padding: "0 20px", position: "relative" }}>
                     <div className="event-card-container">
                       {upcomingEvents.map((ev, i) => {
                         const evTime = formatEventTime(ev);
@@ -691,6 +753,28 @@ export default function GuestDashboard() {
                           </div>
                         );
                       })}
+
+                      {/* Navigation Arrows */}
+                      <button
+                        className="event-nav-button prev"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateEvent("prev");
+                        }}
+                        title="Previous event"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        className="event-nav-button next"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateEvent("next");
+                        }}
+                        title="Next event"
+                      >
+                        ›
+                      </button>
                     </div>
                   </div>
 
