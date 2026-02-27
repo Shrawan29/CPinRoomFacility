@@ -119,7 +119,7 @@ const FoodIcon = () => (
     strokeWidth="1.6"
     strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ width: 28, height: 28 }}
+    style={{ width: 30, height: 30 }}
   >
     {/* Bottom tray */}
     <path d="M3 17h18" />
