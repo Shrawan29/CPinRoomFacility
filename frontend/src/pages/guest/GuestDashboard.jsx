@@ -1,3 +1,4 @@
+// Demo edit: This comment was added to test git push after cleanup.
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import hotelbg from "../../assets/hotel-bg.jpg";
