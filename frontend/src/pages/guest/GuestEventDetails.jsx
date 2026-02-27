@@ -23,6 +23,7 @@ const getStatusColor = (status) => {
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
 };
+import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
 export default function GuestEventDetails() {
   const { id } = useParams();
@@ -57,7 +58,8 @@ export default function GuestEventDetails() {
   return (
     <GuestLuxuryTheme>
       <div className="min-h-screen">
-        <GuestHeader />
+        {/* BOTTOM NAV */}
+        <GuestBottomNav activeNav={"events"} setActiveNav={() => {}} />
 
         <div className="px-4 py-4 max-w-xl mx-auto">
         <div className="mb-4">

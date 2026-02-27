@@ -3,6 +3,7 @@ import { getGuestEvents } from "../../services/event.service";
 import GuestHeader from "../../components/guest/GuestHeader";
 import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { Link } from "react-router-dom";
+import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
 export default function GuestEvents() {
   const [events, setEvents] = useState([]);
@@ -48,8 +49,8 @@ export default function GuestEvents() {
   return (
     <GuestLuxuryTheme>
       <div className="min-h-screen">
-        {/* HEADER */}
-        <GuestHeader />
+        {/* BOTTOM NAV */}
+        <GuestBottomNav activeNav={"events"} setActiveNav={() => {}} />
 
         <div className="px-4 py-4 max-w-xl mx-auto">
           {/* PAGE TITLE */}

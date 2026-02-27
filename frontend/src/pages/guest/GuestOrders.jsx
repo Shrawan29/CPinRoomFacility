@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import api from "../../services/api";
 import GuestHeader from "../../components/guest/GuestHeader";
+import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
 export default function GuestOrders() {
   const [orders, setOrders] = useState([]);
@@ -40,8 +41,8 @@ export default function GuestOrders() {
   return (
     <GuestLuxuryTheme>
       <div className="min-h-screen">
-        {/* HEADER */}
-        <GuestHeader />
+        {/* BOTTOM NAV */}
+        <GuestBottomNav activeNav={"orders"} setActiveNav={() => {}} />
 
         <div className="px-4 py-4">
           <h1 className="text-2xl font-bold mb-4" style={{ color: "var(--text)" }}>
