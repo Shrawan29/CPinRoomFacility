@@ -114,13 +114,13 @@ export default function GuestDashboard() {
   // ── Icons ──────────────────────────────────────────────────────────────
 const FoodIcon = () => (
   <svg
-    viewBox="0 0 26 26"
+    viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
     strokeWidth="1.6"
     strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ width: 30, height: 30 }}
+    style={{ width: 32, height: 32 }}  // increased size
   >
     {/* Bottom tray */}
     <path d="M3 17h18" />
@@ -138,13 +138,35 @@ const FoodIcon = () => (
   </svg>
 );
    const HouseIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
-    <path d="M17 3l-10 10" />
-    <path d="M14 6l3 3" />
-    <path d="M4 14c-1 1-1 3 0 4" />
-    <path d="M3 20h8" />
-    <path d="M7 16v4" />
-    <path d="M19 5l-2 2" />
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ width: 32, height: 32 }}  // increased from 28 → 32
+  >
+    {/* Mop Handle */}
+    <path d="M17 3v14" />
+
+    {/* Mop Head Top */}
+    <path d="M15 17h4" />
+
+    {/* Mop Base */}
+    <path d="M14 19h6l-1.5 2h-3z" />
+
+    {/* Bucket Top Rim */}
+    <path d="M4 8c0-1 4-2 8-1" />
+
+    {/* Bucket Body */}
+    <path d="M6 8l-1 6a3 3 0 0 0 3 3h2" />
+
+    {/* Bucket Handle */}
+    <path d="M4 9c0 0 1.5-3 4-3" />
+
+    {/* Water Drop Curve */}
+    <path d="M9 12c1-1 2-1 2 0a1.5 1.5 0 0 1-3 0" />
   </svg>
 );
   const EventsIcon = () => (
