@@ -18,6 +18,8 @@ export default function GuestDashboard() {
   const sliderRef = useRef(null);
   const autoRef = useRef(null);
   const isDragging = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
@@ -38,17 +40,31 @@ export default function GuestDashboard() {
   // Auto-advance slider
   useEffect(() => {
     if (upcomingEvents.length === 0) return;
-    autoRef.current = setInterval(() => {
-      setSliderIndex((prev) => (prev + 1) % upcomingEvents.length);
-    }, 3500);
-    return () => clearInterval(autoRef.current);
+    
+    const startAutoplay = () => {
+      autoRef.current = setInterval(() => {
+        setSliderIndex((prev) => (prev + 1) % upcomingEvents.length);
+      }, 4500); // Slide changes every 4.5 seconds
+    };
+
+    startAutoplay();
+    return () => {
+      if (autoRef.current) clearInterval(autoRef.current);
+    };
   }, [upcomingEvents.length]);
 
+  // Smooth scroll to current slide
   useEffect(() => {
     if (!sliderRef.current || upcomingEvents.length === 0) return;
+    
     const cardWidth = sliderRef.current.offsetWidth * 0.84 + 14;
-    sliderRef.current.scrollTo({ left: sliderIndex * cardWidth, behavior: "smooth" });
-  }, [sliderIndex]);
+    const targetScroll = sliderIndex * cardWidth;
+    
+    sliderRef.current.scrollTo({ 
+      left: targetScroll, 
+      behavior: "smooth" 
+    });
+  }, [sliderIndex, upcomingEvents.length]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -137,12 +153,54 @@ export default function GuestDashboard() {
     { key: "support", label: "Support", icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
   ];
 
+  // Mouse drag handlers for slider
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    startXRef.current = e.pageX - sliderRef.current.offsetLeft;
+    scrollLeftRef.current = sliderRef.current.scrollLeft;
+    
+    // Stop autoplay on drag
+    if (autoRef.current) {
+      clearInterval(autoRef.current);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+    // Resume autoplay
+    resumeAutoplay();
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    // Resume autoplay with slight delay
+    setTimeout(() => resumeAutoplay(), 100);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 1; // scroll-fast
+    sliderRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
+
   const handleSliderScroll = () => {
     if (!sliderRef.current || isDragging.current) return;
-    clearInterval(autoRef.current);
+    
     const cardWidth = sliderRef.current.offsetWidth * 0.84 + 14;
-    const idx = Math.round(sliderRef.current.scrollLeft / cardWidth);
+    const scrollLeft = sliderRef.current.scrollLeft;
+    const idx = Math.round(scrollLeft / cardWidth);
+    
     setSliderIndex(Math.max(0, Math.min(idx, upcomingEvents.length - 1)));
+  };
+
+  const resumeAutoplay = () => {
+    if (upcomingEvents.length === 0) return;
+    autoRef.current = setInterval(() => {
+      setSliderIndex((prev) => (prev + 1) % upcomingEvents.length);
+    }, 4500);
   };
 
   return (
@@ -247,7 +305,7 @@ export default function GuestDashboard() {
         .wave-glow  { animation: waveGlow  4.5s ease-in-out 3.1s infinite, delayFadeIn 0.8s ease 3.0s forwards; }
         .wave-aura  { animation: waveAura  6s ease-in-out 3.1s infinite, delayFadeIn 1s ease 3.0s forwards; }
 
-        /* ─── Event slider ──────────────────────────────── */
+        /* ─── Event slider (JioHotstar style) ──────────────────────────────── */
         .event-slider {
           display: flex;
           gap: 14px;
@@ -256,10 +314,10 @@ export default function GuestDashboard() {
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
           padding: 4px 20px 12px;
-          /* smooth momentum */
           scroll-behavior: smooth;
+          position: relative;
         }
-        .event-slider::-webkit-scrollbar { display:none; }
+        .event-slider::-webkit-scrollbar { display: none; }
 
         .event-slide {
           scroll-snap-align: start;
@@ -268,12 +326,14 @@ export default function GuestDashboard() {
           border-radius: 22px;
           overflow: hidden;
           position: relative;
-          cursor: pointer;
+          cursor: grab;
           transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s ease;
           aspect-ratio: 16 / 9;
           will-change: transform;
+          user-select: none;
         }
-        .event-slide:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 20px 48px rgba(0,0,0,0.28)!important; }
+        .event-slide:active { cursor: grabbing; }
+        .event-slide:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 20px 48px rgba(0,0,0,0.28) !important; }
         .event-slide:last-child { margin-right: 20px; }
 
         /* Crisp image base — no blur overlay on image */
@@ -541,7 +601,7 @@ export default function GuestDashboard() {
             </div>
 
             {/* ══════════════════════════════════════════
-                FIX 2: UPCOMING EVENTS SLIDER — clearer images + details
+                UPCOMING EVENTS SLIDER — JioHotstar style with auto-play
             ══════════════════════════════════════════ */}
             <div style={{ paddingTop: 22 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", marginBottom: 14 }}>
@@ -561,7 +621,15 @@ export default function GuestDashboard() {
                 </div>
               ) : (
                 <>
-                  <div ref={sliderRef} className="event-slider" onScroll={handleSliderScroll}>
+                  <div
+                    ref={sliderRef}
+                    className="event-slider"
+                    onScroll={handleSliderScroll}
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                  >
                     {upcomingEvents.map((ev, i) => {
                       const evTime = formatEventTime(ev);
                       const evDate = formatEventDate(ev);
@@ -620,7 +688,7 @@ export default function GuestDashboard() {
                             {/* ── BOTTOM BLOCK: all details stacked cleanly ── */}
                             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
 
-                               {/* Date + Time — single pill */}
+                              {/* Date + Time — single pill */}
                               {(evDate || evTime) && (
                                 <div style={{
                                   display: "inline-flex", alignItems: "center", gap: 6,
@@ -692,14 +760,23 @@ export default function GuestDashboard() {
                     })}
                   </div>
 
-                  {/* Dot indicators */}
+                  {/* Dot indicators — clickable to jump to slide */}
                   <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4, marginTop: 2 }}>
                     {upcomingEvents.map((_, i) => (
-                      <div key={i} onClick={() => setSliderIndex(i)} style={{
-                        width: i === sliderIndex ? 22 : 6, height: 6, borderRadius: 3,
-                        background: i === sliderIndex ? "#A4005D" : "rgba(164,0,93,0.22)",
-                        transition: "all 0.35s cubic-bezier(0.22,1,0.36,1)", cursor: "pointer",
-                      }} />
+                      <button
+                        key={i}
+                        onClick={() => setSliderIndex(i)}
+                        style={{
+                          width: i === sliderIndex ? 22 : 6,
+                          height: 6,
+                          borderRadius: 3,
+                          background: i === sliderIndex ? "#A4005D" : "rgba(164,0,93,0.22)",
+                          transition: "all 0.35s cubic-bezier(0.22,1,0.36,1)",
+                          cursor: "pointer",
+                          border: "none",
+                          padding: 0,
+                        }}
+                      />
                     ))}
                   </div>
                 </>
