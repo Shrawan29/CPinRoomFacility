@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import GuestLuxuryTheme from "../../components/guest/GuestLuxuryTheme";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import { getGuestMenu, placeOrder } from "../../services/guest.service";
-import GuestHeader from "../../components/guest/GuestHeader"; // ✅ same header as dashboard
+import { useNavigate } from "react-router-dom";
 
 export default function MenuBrowse() {
-    const { token } = useGuestAuth();
+    const { token, guest } = useGuestAuth();
+    const navigate = useNavigate();
 
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ export default function MenuBrowse() {
     const [submitting, setSubmitting] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("ALL");
-    const [showCart, setShowCart] = useState(false); // ✅ bottom cart toggle
+    const [showCart, setShowCart] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
 
     useEffect(() => {
@@ -94,172 +94,400 @@ export default function MenuBrowse() {
     };
 
     return (
-        <GuestLuxuryTheme>
-            {/* ✅ SAME HEADER AS DASHBOARD */}
-            <GuestHeader />
+        <>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
 
-            <div
-                className="min-h-screen p-6 pb-28"
-                style={{ color: "var(--text)" }}
-            >
+                @keyframes fadeUp {
+                    from { opacity:0; transform:translateY(12px); }
+                    to   { opacity:1; transform:translateY(0); }
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(100%); opacity: 0; }
+                    to   { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to   { opacity: 1; }
+                }
+
+                .card-hover { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+                .card-hover:hover { transform:translateY(-3px); box-shadow:0 12px 28px rgba(164,0,93,0.14)!important; }
+            `}</style>
+
+            <div style={{
+                position: "fixed", inset: 0,
+                display: "flex", flexDirection: "column",
+                background: "#EFE1CF",
+            }}>
                 {/* SUCCESS MESSAGE */}
                 {successMessage && (
-                    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg font-semibold">
+                    <div style={{
+                        position: "fixed", top: 20, left: "50%", transform: "translateX(-50%)",
+                        zIndex: 50, background: "#10b981", color: "#fff",
+                        padding: "12px 20px", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+                        fontWeight: 600, fontSize: 14, animation: "fadeIn 0.3s ease",
+                    }}>
                         {successMessage}
                     </div>
                 )}
-                {/* CATEGORIES */}
-                <div className="sticky top-16 z-10 mb-6 flex gap-3 flex-wrap">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className="px-5 py-2 rounded-full text-sm font-semibold"
-                            style={{
-                                backgroundColor:
-                                    selectedCategory === cat
-                                        ? "var(--brand)"
-                                        : "var(--bg-secondary)",
-                                color:
-                                    selectedCategory === cat ? "#fff" : "var(--text-primary)",
-                            }}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+
+                {/* HEADER */}
+                <div style={{
+                    background: "#fff", borderBottom: "1px solid rgba(164,0,93,0.1)",
+                    padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between",
+                    maxWidth: 430, width: "100%", margin: "0 auto",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                }}>
+                    <button onClick={() => navigate("/guest/dashboard")} style={{
+                        background: "none", border: "none", cursor: "pointer",
+                        fontSize: 20, color: "#A4005D",
+                    }}>
+                        ←
+                    </button>
+                    <h1 style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 22, fontWeight: 600, color: "#1F1F1F",
+                        margin: 0, flex: 1, textAlign: "center",
+                    }}>
+                        Order Food
+                    </h1>
+                    <div style={{ width: 24 }} />
                 </div>
 
-                {/* MENU */}
-                {loading ? (
-                    <p className="text-center py-20">Loading menu...</p>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredItems.map((item) => (
-                            <div
-                                key={item._id}
-                                className="bg-white rounded-2xl shadow-lg p-5"
-                            >
-                                <h3 className="font-semibold">{item.name}</h3>
-                                <p className="text-sm mb-3" style={{ color: "var(--text-muted)" }}>
-                                    {item.description}
-                                </p>
+                {/* CONTENT */}
+                <div style={{
+                    flex: 1, overflowY: "auto", overflowX: "hidden",
+                    maxWidth: 430, width: "100%", margin: "0 auto",
+                    paddingBottom: 80,
+                }}>
+                    <div style={{ padding: "16px 20px" }}>
+                        {/* CATEGORIES */}
+                        <div style={{
+                            display: "flex", gap: 8, overflowX: "auto", marginBottom: 20,
+                            scrollBehavior: "smooth", paddingBottom: 8,
+                        }}>
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    style={{
+                                        padding: "8px 16px", borderRadius: 20, border: "none",
+                                        fontSize: 13, fontWeight: 600, cursor: "pointer",
+                                        background: selectedCategory === cat ? "#A4005D" : "rgba(164,0,93,0.08)",
+                                        color: selectedCategory === cat ? "#fff" : "#6B6B6B",
+                                        transition: "all 0.2s ease", flexShrink: 0,
+                                    }}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
 
-                                <div className="flex justify-between items-center">
-                                    <span
-                                        className="text-xl font-bold"
-                                        style={{ color: "var(--brand)" }}
-                                    >
-                                        ₹{item.price}
-                                    </span>
-
-                                    <button
-                                        onClick={() => addToCart(item)}
-                                        className="px-4 py-2 rounded-lg text-white font-semibold"
-                                        style={{ backgroundColor: "var(--brand)" }}
-                                    >
-                                        Add +
-                                    </button>
-                                </div>
+                        {/* MENU ITEMS */}
+                        {loading ? (
+                            <div style={{ textAlign: "center", padding: "40px 20px", color: "#6B6B6B" }}>
+                                Loading menu...
                             </div>
-                        ))}
+                        ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                                {filteredItems.map((item, i) => (
+                                    <div
+                                        key={item._id}
+                                        className="card-hover"
+                                        style={{
+                                            background: "#fff", borderRadius: 18, padding: 16,
+                                            border: "1px solid rgba(164,0,93,0.07)",
+                                            boxShadow: "0 2px 14px rgba(164,0,93,0.06)",
+                                            animation: `fadeUp 0.5s ease ${i * 50}ms both`,
+                                        }}
+                                    >
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{
+                                                    fontFamily: "'Cormorant Garamond', serif",
+                                                    fontSize: 16, fontWeight: 600, color: "#1F1F1F",
+                                                    margin: "0 0 6px 0",
+                                                }}>
+                                                    {item.name}
+                                                </p>
+                                                <p style={{
+                                                    fontSize: 12, color: "#6B6B6B", fontWeight: 300,
+                                                    margin: 0, lineHeight: 1.4,
+                                                }}>
+                                                    {item.description}
+                                                </p>
+                                                <p style={{
+                                                    fontSize: 14, fontWeight: 700, color: "#A4005D",
+                                                    margin: "8px 0 0 0",
+                                                }}>
+                                                    ₹{item.price}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => addToCart(item)}
+                                                style={{
+                                                    background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                                                    color: "#fff", border: "none", borderRadius: 10,
+                                                    padding: "8px 14px", fontSize: 13, fontWeight: 600,
+                                                    cursor: "pointer", whiteSpace: "nowrap",
+                                                    transition: "transform 0.2s ease",
+                                                }}
+                                                onMouseDown={(e) => e.target.style.transform = "scale(0.95)"}
+                                                onMouseUp={(e) => e.target.style.transform = "scale(1)"}
+                                            >
+                                                Add +
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* FIXED BOTTOM CART BAR */}
+                {cartItemCount > 0 && (
+                    <div style={{
+                        position: "fixed", bottom: 0, left: 0, right: 0,
+                        padding: "12px 20px", background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                        boxShadow: "0 -2px 20px rgba(164,0,93,0.2)",
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        maxWidth: 430, margin: "0 auto", left: "50%", transform: "translateX(-50%)",
+                    }}>
+                        <span style={{
+                            color: "#fff", fontWeight: 600, fontSize: 14,
+                        }}>
+                            {cartItemCount} items · ₹{cartTotal}
+                        </span>
+                        <button
+                            onClick={() => setShowCart(true)}
+                            style={{
+                                background: "rgba(255,255,255,0.25)", color: "#fff", border: "none",
+                                padding: "8px 16px", borderRadius: 8, fontWeight: 700, fontSize: 13,
+                                cursor: "pointer", transition: "background 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => e.target.style.background = "rgba(255,255,255,0.35)"}
+                            onMouseLeave={(e) => e.target.style.background = "rgba(255,255,255,0.25)"}
+                        >
+                            View Cart ↑
+                        </button>
                     </div>
                 )}
-            </div>
 
-            {/* 🧾 FIXED BOTTOM CART BAR */}
-            <div
-                className="fixed bottom-0 left-0 right-0 p-4 shadow-xl flex justify-between items-center z-40"
-                style={{ backgroundColor: "var(--brand)" }}
-            >
-                <span className="text-white font-semibold">
-                    {cartItemCount} items · ₹{cartTotal}
-                </span>
+                {/* CART SLIDE-UP */}
+                {showCart && (
+                    <>
+                        <div style={{
+                            position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 50,
+                            animation: "fadeIn 0.3s ease",
+                        }} onClick={() => setShowCart(false)} />
+                        <div style={{
+                            position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 430,
+                            background: "#fff", borderRadius: "24px 24px 0 0",
+                            padding: "20px", maxHeight: "80vh", overflowY: "auto", zIndex: 51,
+                            animation: "slideUp 0.3s ease",
+                            margin: "0 auto", left: "50%", transform: "translateX(-50%)",
+                        }}>
+                            <div style={{
+                                display: "flex", justifyContent: "space-between", alignItems: "center",
+                                marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid rgba(164,0,93,0.1)",
+                            }}>
+                                <h2 style={{
+                                    fontFamily: "'Cormorant Garamond', serif",
+                                    fontSize: 18, fontWeight: 700, color: "#1F1F1F", margin: 0,
+                                }}>
+                                    Your Cart
+                                </h2>
+                                <button onClick={() => setShowCart(false)} style={{
+                                    background: "none", border: "none", fontSize: 20, cursor: "pointer",
+                                    color: "#6B6B6B",
+                                }}>
+                                    ✕
+                                </button>
+                            </div>
 
-                <button
-                    onClick={() => setShowCart(true)}
-                    className="text-white font-bold"
-                >
-                    View Cart ↑
-                </button>
-            </div>
-            {/* 🧾 CART SLIDE-UP */}
-            {showCart && (
-                <div className="fixed inset-0 bg-black/40 z-50">
-                    <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto">
-                        <div className="flex justify-between mb-4">
-                            <h2 className="text-lg font-bold">Your Cart</h2>
-                            <button onClick={() => setShowCart(false)}>✕</button>
-                        </div>
+                            {/* Cart Items */}
+                            <div style={{ marginBottom: 20 }}>
+                                {cart.map((item) => (
+                                    <div key={item._id} style={{
+                                        padding: "12px 0", borderBottom: "1px solid rgba(164,0,93,0.08)",
+                                    }}>
+                                        <div style={{
+                                            display: "flex", justifyContent: "space-between", alignItems: "center",
+                                            marginBottom: 8,
+                                        }}>
+                                            <p style={{
+                                                fontWeight: 600, color: "#1F1F1F", fontSize: 14, margin: 0,
+                                            }}>
+                                                {item.name}
+                                            </p>
+                                            <p style={{
+                                                color: "#A4005D", fontWeight: 700, fontSize: 14, margin: 0,
+                                            }}>
+                                                ₹{(item.price * item.quantity).toFixed(2)}
+                                            </p>
+                                        </div>
+                                        <div style={{
+                                            display: "flex", alignItems: "center", gap: 10,
+                                        }}>
+                                            <button
+                                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                                style={{
+                                                    background: "rgba(164,0,93,0.1)", border: "none",
+                                                    width: 28, height: 28, borderRadius: 6, fontSize: 16,
+                                                    cursor: "pointer", color: "#A4005D", fontWeight: 700,
+                                                }}
+                                            >
+                                                −
+                                            </button>
+                                            <span style={{
+                                                fontSize: 14, fontWeight: 600, color: "#1F1F1F",
+                                                minWidth: 20, textAlign: "center",
+                                            }}>
+                                                {item.quantity}
+                                            </span>
+                                            <button
+                                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                                style={{
+                                                    background: "rgba(164,0,93,0.1)", border: "none",
+                                                    width: 28, height: 28, borderRadius: 6, fontSize: 16,
+                                                    cursor: "pointer", color: "#A4005D", fontWeight: 700,
+                                                }}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
 
-                        {cart.map((item) => (
-                            <div key={item._id} className="mb-4">
-                                <p className="font-semibold">{item.name}</p>
-                                <div className="flex gap-3 mt-1">
-                                    <button onClick={() => updateQuantity(item._id, item.quantity - 1)}>−</button>
-                                    <span>{item.quantity}</span>
-                                    <button onClick={() => updateQuantity(item._id, item.quantity + 1)}>+</button>
+                            {/* Total */}
+                            <div style={{
+                                padding: "12px 0", marginBottom: 16, borderTop: "2px solid rgba(164,0,93,0.2)",
+                                paddingTop: 12,
+                            }}>
+                                <div style={{
+                                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                                }}>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1F1F1F" }}>
+                                        Total
+                                    </span>
+                                    <span style={{
+                                        fontSize: 18, fontWeight: 700, color: "#A4005D",
+                                    }}>
+                                        ₹{cartTotal.toFixed(2)}
+                                    </span>
                                 </div>
                             </div>
-                        ))}
 
-                        <button
-                            onClick={handlePlaceOrder}
-                            disabled={submitting}
-                            className="w-full py-3 mt-4 rounded-lg text-white font-bold"
-                            style={{ backgroundColor: "var(--brand-soft)" }}
-                        >
-                            {submitting ? "Placing Order..." : `Place Order · ₹${cartTotal}`}
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* CONFIRMATION MODAL */}
-            {showConfirmation && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-                        <h2 className="text-xl font-bold mb-4">Confirm Order</h2>
-                        
-                        <div className="mb-4 bg-gray-50 p-4 rounded-lg max-h-48 overflow-y-auto">
-                            {cart.map((item) => (
-                                <div key={item._id} className="flex justify-between mb-2 text-sm">
-                                    <span>{item.name} × {item.quantity}</span>
-                                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                                </div>
-                            ))}
-                            <div className="border-t mt-3 pt-3 flex justify-between font-bold">
-                                <span>Total</span>
-                                <span>₹{cartTotal.toFixed(2)}</span>
-                            </div>
-                        </div>
-
-                        <div className="mb-4 p-3 bg-red-50 rounded-lg border border-red-200">
-                            <p className="text-xs text-red-700 font-semibold">⚠️ Once ordered, it cannot be cancelled</p>
-                        </div>
-
-                        <div className="flex gap-3">
                             <button
-                                onClick={() => setShowConfirmation(false)}
-                                className="flex-1 py-2 rounded-lg border-2 font-semibold"
+                                onClick={handlePlaceOrder}
+                                disabled={submitting}
                                 style={{
-                                    borderColor: "var(--text-muted)",
-                                    color: "var(--text-primary)",
+                                    width: "100%", padding: "14px", borderRadius: 14,
+                                    background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                                    color: "#fff", border: "none", fontWeight: 700, fontSize: 15,
+                                    cursor: submitting ? "not-allowed" : "pointer",
+                                    opacity: submitting ? 0.65 : 1,
+                                    transition: "opacity 0.2s ease",
                                 }}
                             >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmPlaceOrder}
-                                disabled={submitting}
-                                className="flex-1 py-2 rounded-lg text-white font-semibold"
-                                style={{ backgroundColor: "var(--brand)" }}
-                            >
-                                {submitting ? "Processing..." : "Confirm Order"}
+                                {submitting ? "Placing Order..." : `Place Order · ₹${cartTotal}`}
                             </button>
                         </div>
-                    </div>
-                </div>
-            )}
-        </GuestLuxuryTheme>
+                    </>
+                )}
+
+                {/* CONFIRMATION MODAL */}
+                {showConfirmation && (
+                    <>
+                        <div style={{
+                            position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 50,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            animation: "fadeIn 0.3s ease",
+                        }} />
+                        <div style={{
+                            position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                            background: "#fff", borderRadius: 20, padding: "24px",
+                            maxWidth: 380, width: "90%", zIndex: 51, boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+                        }}>
+                            <h2 style={{
+                                fontFamily: "'Cormorant Garamond', serif",
+                                fontSize: 18, fontWeight: 700, color: "#1F1F1F", marginBottom: 16, margin: "0 0 16px 0",
+                            }}>
+                                Confirm Order
+                            </h2>
+
+                            {/* Order Summary */}
+                            <div style={{
+                                background: "#F6EADB", padding: 14, borderRadius: 12,
+                                marginBottom: 16, maxHeight: 200, overflowY: "auto",
+                            }}>
+                                {cart.map((item) => (
+                                    <div key={item._id} style={{
+                                        display: "flex", justifyContent: "space-between",
+                                        marginBottom: 8, fontSize: 13, color: "#1F1F1F",
+                                    }}>
+                                        <span>{item.name} × {item.quantity}</span>
+                                        <span style={{ fontWeight: 600 }}>₹{(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                ))}
+                                <div style={{
+                                    borderTop: "1px solid rgba(164,0,93,0.2)", paddingTop: 8, marginTop: 8,
+                                    display: "flex", justifyContent: "space-between", fontWeight: 700,
+                                    color: "#A4005D",
+                                }}>
+                                    <span>Total</span>
+                                    <span>₹{cartTotal.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            {/* Warning */}
+                            <div style={{
+                                background: "rgba(164,0,93,0.1)", border: "1px solid rgba(164,0,93,0.2)",
+                                borderRadius: 10, padding: 12, marginBottom: 16,
+                            }}>
+                                <p style={{
+                                    fontSize: 11, color: "#A4005D", fontWeight: 600, margin: 0,
+                                }}>
+                                    ⚠️ Once ordered, it cannot be cancelled
+                                </p>
+                            </div>
+
+                            {/* Buttons */}
+                            <div style={{ display: "flex", gap: 12 }}>
+                                <button
+                                    onClick={() => setShowConfirmation(false)}
+                                    style={{
+                                        flex: 1, padding: "12px", borderRadius: 12,
+                                        background: "transparent", border: "2px solid #A4005D",
+                                        color: "#A4005D", fontWeight: 700, fontSize: 14,
+                                        cursor: "pointer", transition: "all 0.2s ease",
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.background = "rgba(164,0,93,0.05)"}
+                                    onMouseLeave={(e) => e.target.style.background = "transparent"}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmPlaceOrder}
+                                    disabled={submitting}
+                                    style={{
+                                        flex: 1, padding: "12px", borderRadius: 12,
+                                        background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                                        color: "#fff", fontWeight: 700, fontSize: 14,
+                                        border: "none", cursor: submitting ? "not-allowed" : "pointer",
+                                        opacity: submitting ? 0.65 : 1,
+                                    }}
+                                >
+                                    {submitting ? "Processing..." : "Confirm Order"}
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+        </>
     );
 }
