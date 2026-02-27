@@ -50,7 +50,7 @@ export default function GuestEvents() {
     <GuestLuxuryTheme>
       <div className="min-h-screen">
         {/* BOTTOM NAV */}
-        <GuestBottomNav activeNav={"events"} setActiveNav={() => {}} />
+        <GuestBottomNav activeNav={"home"} setActiveNav={() => {}} />
 
         <div className="px-4 py-4 max-w-xl mx-auto">
           {/* PAGE TITLE */}

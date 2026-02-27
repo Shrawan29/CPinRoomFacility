@@ -142,31 +142,31 @@ const FoodIcon = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.6"
+    strokeWidth="1.8"
     strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ width: 32, height: 32 }}  // increased from 28 → 32
+    style={{ width: 32, height: 32 }}
   >
     {/* Mop Handle */}
-    <path d="M17 3v14" />
+    <path d="M17 3v12" />
 
-    {/* Mop Head Top */}
-    <path d="M15 17h4" />
+    {/* Mop Connector */}
+    <path d="M15 15h4" />
 
     {/* Mop Base */}
-    <path d="M14 19h6l-1.5 2h-3z" />
+    <path d="M14 17h6l-1 3h-4z" />
 
-    {/* Bucket Top Rim */}
-    <path d="M4 8c0-1 4-2 8-1" />
+    {/* Bucket Rim */}
+    <ellipse cx="8" cy="8" rx="3.5" ry="1.5" />
 
     {/* Bucket Body */}
-    <path d="M6 8l-1 6a3 3 0 0 0 3 3h2" />
+    <path d="M4.5 8l1 6a3 3 0 0 0 3 2h1a3 3 0 0 0 3-2l1-6" />
 
     {/* Bucket Handle */}
-    <path d="M4 9c0 0 1.5-3 4-3" />
+    <path d="M4.5 9c0-2 2-3.5 3.5-3.5" />
 
-    {/* Water Drop Curve */}
-    <path d="M9 12c1-1 2-1 2 0a1.5 1.5 0 0 1-3 0" />
+    {/* Water Drop */}
+    <path d="M8 11c1-1 2 0 2 1a2 2 0 0 1-4 0c0-1 1-1.5 2-1z" />
   </svg>
 );
   const EventsIcon = () => (
@@ -883,7 +883,7 @@ const FoodIcon = () => (
         </div>
 
         {/* BOTTOM NAV */}
-        <GuestBottomNav activeNav={activeNav} setActiveNav={setActiveNav} />
+        <GuestBottomNav activeNav={"home"} setActiveNav={() => {}} />
       </div>
     </>
   );
