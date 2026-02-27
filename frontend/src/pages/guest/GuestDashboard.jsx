@@ -136,13 +136,16 @@ const FoodIcon = () => (
     <path d="M7 12a5 5 0 0 1 3-3" />
   </svg>
 );
-  const HouseIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
-      <path d="M6 3l12 12" /><path d="M10 7l-2 2" /><path d="M14 11l-2 2" />
-      <path d="M4 20h7" /><path d="M4 20c1.2-3.4 3.6-5.8 7-7" />
-      <path d="M11 13c1.2 0 2.7 1.1 3.6 2.1" />
-    </svg>
-  );
+   const HouseIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
+    <path d="M17 3l-10 10" />
+    <path d="M14 6l3 3" />
+    <path d="M4 14c-1 1-1 3 0 4" />
+    <path d="M3 20h8" />
+    <path d="M7 16v4" />
+    <path d="M19 5l-2 2" />
+  </svg>
+);
   const EventsIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 26, height: 26 }}>
       <path d="M8 3v3" /><path d="M16 3v3" /><path d="M4 7h16" />
