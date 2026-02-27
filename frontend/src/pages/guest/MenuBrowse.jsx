@@ -158,32 +158,6 @@ export default function MenuBrowse() {
           50%      { transform:translate(12px,-10px) scale(1.08); }
         }
 
-        /* Wave animations */
-        @keyframes waveDraw {
-          0%   { stroke-dashoffset: 1400; opacity: 0; }
-          5%   { opacity: 1; }
-          100% { stroke-dashoffset: 0; opacity: 1; }
-        }
-        @keyframes waveGlow {
-          0%,100% { opacity: 0.4; }
-          50%      { opacity: 0.85; }
-        }
-        @keyframes waveRace {
-          0%   { stroke-dashoffset: 700; }
-          100% { stroke-dashoffset: -700; }
-        }
-        @keyframes delayFadeIn {
-          0%   { opacity: 0; }
-          100% { opacity: 1; }
-        }
-
-        .wave-base {
-          stroke-dasharray: 1400;
-          stroke-dashoffset: 1400;
-          animation: waveDraw 2.6s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
-        }
-        .wave-glow  { animation: waveGlow 4.5s ease-in-out 2.9s infinite, delayFadeIn 0.8s ease 2.9s forwards; opacity:0; }
-        .wave-race  { stroke-dasharray: 130 1270; stroke-dashoffset: 700; animation: waveRace 3.2s linear 3.0s infinite, delayFadeIn 0.6s ease 2.9s forwards; opacity:0; }
 
         .card-item {
           background: #fff;
@@ -246,135 +220,71 @@ export default function MenuBrowse() {
           </div>
         )}
 
-        {/* ══════════════════════════════════════════
-            HERO HEADER (matches dashboard aesthetic)
-        ══════════════════════════════════════════ */}
+        {/* ── SIMPLE HEADER ── */}
         <div style={{
-          position: "relative", overflow: "hidden", flexShrink: 0,
-          animation: "heroFade 0.65s cubic-bezier(0.22,1,0.36,1) both",
+          flexShrink: 0,
+          background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(164,0,93,0.1)",
+          boxShadow: "0 2px 12px rgba(30,21,16,0.06)",
+          maxWidth: 430, width: "100%", margin: "0 auto",
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}>
-          {/* Gradient bg — matches dashboard hero tone */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(160deg, #1a0010 0%, #6b0038 50%, #1a0010 100%)",
-          }} />
-          {/* Decorative blob */}
-          <div style={{
-            position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(164,0,93,0.28), transparent 65%)",
-            animation: "blob1 7s ease-in-out infinite", pointerEvents: "none",
-          }} />
-
-          {/* Header content */}
-          <div style={{
-            position: "relative", zIndex: 2,
-            padding: "44px 20px 60px",
-            maxWidth: 430, width: "100%", margin: "0 auto",
+            display: "flex", alignItems: "center",
+            padding: "12px 16px", gap: 12,
           }}>
-            {/* Back + Title row */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <button
-                onClick={() => navigate("/guest/dashboard")}
-                style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: "rgba(255,255,255,0.12)", backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", color: "#fff", fontSize: 16, flexShrink: 0,
-                }}
-              >
-                ←
-              </button>
-              <div>
-                <p style={{
-                  fontSize: 9, color: "rgba(255,255,255,0.7)",
-                  fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase",
-                  margin: "0 0 2px 0",
-                }}>In-Room Dining</p>
-                <h1 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: 30, fontWeight: 300, fontStyle: "italic",
-                  color: "#fff", margin: 0, lineHeight: 1,
-                  textShadow: "0 2px 16px rgba(0,0,0,0.5)",
-                }}>
-                  Order Food
-                </h1>
-              </div>
+            <button
+              onClick={() => navigate("/guest/dashboard")}
+              style={{
+                width: 36, height: 36, borderRadius: "50%",
+                background: "rgba(164,0,93,0.07)",
+                border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#A4005D", fontSize: 18, flexShrink: 0,
+              }}
+            >
+              ←
+            </button>
+
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <p style={{
+                fontSize: 9, color: "#6B6B6B",
+                fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
+                margin: "0 0 1px 0",
+              }}>In-Room Dining</p>
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 22, fontWeight: 600, fontStyle: "italic",
+                color: "#1F1F1F", margin: 0, lineHeight: 1,
+              }}>
+                Order Food
+              </h1>
             </div>
 
-            {/* Room badge */}
-            {guest?.roomNumber && (
+            {/* Room badge placeholder — keeps layout balanced */}
+            {guest?.roomNumber ? (
               <div style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                border: "1px solid rgba(255,255,255,0.22)",
-                background: "rgba(255,255,255,0.11)", backdropFilter: "blur(10px)",
-                borderRadius: 20, padding: "4px 12px",
+                display: "flex", alignItems: "center", gap: 5,
+                background: "rgba(164,0,93,0.07)", borderRadius: 20,
+                padding: "5px 10px", flexShrink: 0,
               }}>
                 <span style={{
-                  width: 6, height: 6, borderRadius: "50%",
+                  width: 5, height: 5, borderRadius: "50%",
                   background: "#86efac", flexShrink: 0,
                   animation: "pulseDot 2.2s ease-in-out infinite",
                 }} />
                 <span style={{
-                  fontSize: 9, fontWeight: 700, color: "#fff",
-                  letterSpacing: "0.14em", textTransform: "uppercase",
+                  fontSize: 9, fontWeight: 700, color: "#A4005D",
+                  letterSpacing: "0.12em", textTransform: "uppercase",
                 }}>
-                  ROOM {guest.roomNumber}
+                  {guest.roomNumber}
                 </span>
               </div>
+            ) : (
+              <div style={{ width: 36 }} />
             )}
           </div>
-
-          {/* Wave — cream fill, identical to dashboard */}
-          <div style={{ position: "absolute", bottom: -1, left: 0, right: 0, zIndex: 3, lineHeight: 0 }}>
-            <svg viewBox="0 0 430 80" fill="none" preserveAspectRatio="none"
-              style={{ width: "100%", height: 80, display: "block" }}>
-              <path
-                d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44 L430 80 L0 80 Z"
-                fill="#EFE1CF"
-              />
-              <path
-                className="wave-base"
-                d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
-                fill="none" stroke="url(#mGrad1)" strokeWidth="2.2" strokeLinecap="round"
-              />
-              <path
-                className="wave-glow"
-                d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
-                fill="none" stroke="url(#mGrad2)" strokeWidth="7" strokeLinecap="round"
-              />
-              <path
-                className="wave-race"
-                d="M0 28 C50 70, 110 76, 175 50 C225 28, 280 10, 340 42 C375 62, 408 62, 430 44"
-                fill="none" stroke="url(#mGrad3)" strokeWidth="4" strokeLinecap="round"
-              />
-              <defs>
-                <linearGradient id="mGrad1" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="transparent" />
-                  <stop offset="12%" stopColor="#A4005D" stopOpacity="0.65" />
-                  <stop offset="50%" stopColor="#D44F93" />
-                  <stop offset="88%" stopColor="#A4005D" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="transparent" />
-                </linearGradient>
-                <linearGradient id="mGrad2" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="transparent" />
-                  <stop offset="20%" stopColor="#A4005D" stopOpacity="0.2" />
-                  <stop offset="50%" stopColor="#D44F93" stopOpacity="0.3" />
-                  <stop offset="80%" stopColor="#A4005D" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="transparent" />
-                </linearGradient>
-                <linearGradient id="mGrad3" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="transparent" />
-                  <stop offset="38%" stopColor="#C44A87" stopOpacity="0.7" />
-                  <stop offset="52%" stopColor="#ffffff" stopOpacity="1" />
-                  <stop offset="66%" stopColor="#C44A87" stopOpacity="0.55" />
-                  <stop offset="100%" stopColor="transparent" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
         </div>
-        {/* end hero */}
 
         {/* ══════════════════════════════════════════
             CREAM BODY
