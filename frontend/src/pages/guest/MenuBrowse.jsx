@@ -126,8 +126,8 @@ export default function MenuBrowse() {
           to   { opacity:1; transform:translateY(0); }
         }
         @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0; }
-          to   { transform: translateY(0); opacity: 1; }
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
         }
         @keyframes fadeIn {
           from { opacity: 0; }
@@ -137,10 +137,15 @@ export default function MenuBrowse() {
           0%,100% { box-shadow:0 0 0 0 rgba(164,0,93,0.5); }
           50%      { box-shadow:0 0 0 5px rgba(164,0,93,0); }
         }
-        @keyframes popIn {
+        @keyframes scaleIn {
           0%   { transform: scale(0.85); opacity: 0; }
           60%  { transform: scale(1.06); }
           100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes popIn {
+          0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.88); }
+          60%  { transform: translate(-50%, -50%) scale(1.03); }
+          100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
         @keyframes cartBounce {
           0%,100% { transform: translateY(0); }
@@ -329,17 +334,21 @@ export default function MenuBrowse() {
           </div>
 
           {/* CATEGORIES */}
-          <div style={{ padding: "14px 20px 0" }}>
+          <div style={{ paddingTop: 14 }}>
             <p style={{
               fontSize: 10, fontWeight: 700, letterSpacing: "0.18em",
               textTransform: "uppercase", color: "#6B6B6B", marginBottom: 10,
+              paddingLeft: 20,
             }}>
               Categories
             </p>
             <div
               ref={categoryScrollRef}
               className="cat-scroll"
-              style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}
+              style={{
+                display: "flex", gap: 8, overflowX: "auto",
+                padding: "4px 20px 10px",
+              }}
             >
               {categories.map((cat) => {
                 const isActive = selectedCategory === cat;
@@ -516,7 +525,7 @@ export default function MenuBrowse() {
                                   cursor: "pointer", letterSpacing: "0.04em",
                                   boxShadow: "0 3px 10px rgba(164,0,93,0.25)",
                                   transition: "transform 0.15s, box-shadow 0.15s",
-                                  animation: "popIn 0.3s ease",
+                                  animation: "scaleIn 0.3s ease",
                                 }}
                                 onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.94)"; e.currentTarget.style.boxShadow = "0 1px 4px rgba(164,0,93,0.15)"; }}
                                 onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 3px 10px rgba(164,0,93,0.25)"; }}
@@ -528,7 +537,7 @@ export default function MenuBrowse() {
                                 display: "flex", alignItems: "center", gap: 8,
                                 background: "rgba(164,0,93,0.07)", borderRadius: 12,
                                 padding: "4px 6px", border: "1px solid rgba(164,0,93,0.14)",
-                                animation: "popIn 0.25s ease",
+                                animation: "scaleIn 0.25s ease",
                               }}>
                                 <button
                                   className="qty-btn"
@@ -643,14 +652,14 @@ export default function MenuBrowse() {
             <div
               className="cart-sheet"
               style={{
-                position: "fixed", bottom: 0, left: "50%",
-                transform: "translateX(-50%)",
-                width: "100%", maxWidth: 430,
+                position: "fixed", bottom: 0, left: 0, right: 0,
+                maxWidth: 430,
+                margin: "0 auto",
                 background: "#EFE1CF",
                 borderRadius: "24px 24px 0 0",
                 maxHeight: "80vh", overflowY: "auto",
                 zIndex: 101,
-                animation: "slideUp 0.35s cubic-bezier(0.22,1,0.36,1)",
+                animation: "slideUp 0.38s cubic-bezier(0.22,1,0.36,1) both",
                 paddingBottom: "env(safe-area-inset-bottom, 0px)",
               }}
             >
@@ -791,11 +800,10 @@ export default function MenuBrowse() {
             }} />
             <div style={{
               position: "fixed", top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
               background: "#EFE1CF", borderRadius: 24, padding: "24px",
               maxWidth: 380, width: "90%", zIndex: 111,
               boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
-              animation: "popIn 0.35s cubic-bezier(0.22,1,0.36,1)",
+              animation: "popIn 0.38s cubic-bezier(0.22,1,0.36,1) both",
             }}>
               {/* Icon */}
               <div style={{
