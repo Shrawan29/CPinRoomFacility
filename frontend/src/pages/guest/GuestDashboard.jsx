@@ -46,27 +46,44 @@ export default function GuestDashboard() {
     };
   }, [upcomingEvents.length]);
 
-  // Manual navigation handler
-  const navigateEvent = (direction) => {
-    // Pause auto-play when user manually navigates
-    if (autoRef.current) {
-      clearInterval(autoRef.current);
-    }
+  // Touch swipe handling for manual event navigation
+  const touchStartRef = useRef(0);
+  const touchEndRef = useRef(0);
 
-    if (direction === "next") {
+  const handleTouchStart = (e) => {
+    touchStartRef.current = e.changedTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    touchEndRef.current = e.changedTouches[0].clientX;
+    handleSwipe();
+  };
+
+  const handleSwipe = () => {
+    const distance = touchStartRef.current - touchEndRef.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      // Swiped left - go to next event
+      if (autoRef.current) clearInterval(autoRef.current);
       setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
-    } else {
+      restartAutoplay();
+    } else if (isRightSwipe) {
+      // Swiped right - go to previous event
+      if (autoRef.current) clearInterval(autoRef.current);
       setCurrentEventIndex((prev) => (prev - 1 + upcomingEvents.length) % upcomingEvents.length);
+      restartAutoplay();
     }
+  };
 
-    // Restart auto-play after 5 seconds of inactivity
-    const restartTimer = setTimeout(() => {
+  const restartAutoplay = () => {
+    const timer = setTimeout(() => {
       autoRef.current = setInterval(() => {
         setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
       }, 4500);
     }, 5000);
-
-    return () => clearTimeout(restartTimer);
+    return () => clearTimeout(timer);
   };
 
   const hour = new Date().getHours();
@@ -296,45 +313,6 @@ export default function GuestDashboard() {
           z-index: 0;
         }
 
-        /* Navigation arrows */
-        .event-nav-button {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          background: rgba(255, 255, 255, 0.22);
-          border: 1.5px solid rgba(255, 255, 255, 0.32);
-          border-radius: 50%;
-          width: 44px;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          color: #fff;
-          font-size: 20px;
-          z-index: 10;
-          transition: all 0.3s ease;
-          backdrop-filter: blur(10px);
-        }
-
-        .event-nav-button:hover {
-          background: rgba(255, 255, 255, 0.32);
-          border-color: rgba(255, 255, 255, 0.48);
-          transform: translateY(-50%) scale(1.1);
-        }
-
-        .event-nav-button:active {
-          transform: translateY(-50%) scale(0.95);
-        }
-
-        .event-nav-button.prev {
-          left: 12px;
-        }
-
-        .event-nav-button.next {
-          right: 12px;
-        }
-
         /* Crisp image base — no blur overlay on image */
         .event-img {
           position: absolute; inset: 0;
@@ -560,7 +538,7 @@ export default function GuestDashboard() {
           <div style={{ background: "#EFE1CF" }}>
 
             {/* QUICK ACTIONS */}
-            <div style={{ padding: "20px 20px 0" }}>
+            <div style={{ padding: "16px 20px 0" }}>
               <p style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: "0.18em",
                 textTransform: "uppercase", color: "#6B6B6B", marginBottom: 14,
@@ -602,7 +580,7 @@ export default function GuestDashboard() {
             {/* ══════════════════════════════════════════
                 UPCOMING EVENTS SECTION — Single card with auto-transition
             ══════════════════════════════════════════ */}
-            <div style={{ paddingTop: 22 }}>
+            <div style={{ paddingTop: 16 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", marginBottom: 14 }}>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B6B6B", margin: 0 }}>
                   Upcoming Events
@@ -621,7 +599,11 @@ export default function GuestDashboard() {
               ) : (
                 <>
                   <div style={{ padding: "0 20px", position: "relative" }}>
-                    <div className="event-card-container">
+                    <div
+                      className="event-card-container"
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
+                    >
                       {upcomingEvents.map((ev, i) => {
                         const evTime = formatEventTime(ev);
                         const evDate = formatEventDate(ev);
@@ -753,33 +735,11 @@ export default function GuestDashboard() {
                           </div>
                         );
                       })}
-
-                      {/* Navigation Arrows */}
-                      <button
-                        className="event-nav-button prev"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigateEvent("prev");
-                        }}
-                        title="Previous event"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        className="event-nav-button next"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigateEvent("next");
-                        }}
-                        title="Next event"
-                      >
-                        ›
-                      </button>
                     </div>
                   </div>
 
                   {/* Dot indicators — clickable to jump to event */}
-                  <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4, marginTop: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4, marginTop: 12 }}>
                     {upcomingEvents.map((_, i) => (
                       <button
                         key={i}
@@ -884,15 +844,15 @@ export default function GuestDashboard() {
           maxWidth: 430, width: "100%", margin: "0 auto",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around", padding: "10px 8px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around", padding: "6px 8px" }}>
             {navItems.map((item) => {
               const isActive = activeNav === item.key;
               return (
                 <button key={item.key} onClick={() => { setActiveNav(item.key); navigate(item.route); }} className="nav-btn"
-                  style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "8px 28px", borderRadius: 14, background: isActive ? "rgba(164,0,93,0.07)" : "transparent", border: "none", cursor: "pointer" }}
+                  style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 24px", borderRadius: 14, background: isActive ? "rgba(164,0,93,0.07)" : "transparent", border: "none", cursor: "pointer" }}
                 >
                   <span style={{ color: isActive ? "#A4005D" : "#6B6B6B", transition: "color 0.2s ease" }}>{item.icon(isActive)}</span>
-                  <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isActive ? "#A4005D" : "#6B6B6B", transition: "color 0.2s ease" }}>{item.label}</span>
+                  <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isActive ? "#A4005D" : "#6B6B6B", transition: "color 0.2s ease" }}>{item.label}</span>
                   {isActive && <div style={{ position: "absolute", bottom: -1, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: "#A4005D" }} />}
                 </button>
               );
