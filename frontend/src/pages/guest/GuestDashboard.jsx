@@ -113,7 +113,7 @@ export default function GuestDashboard() {
   // ── Icons ──────────────────────────────────────────────────────────────
 const FoodIcon = () => (
   <svg
-    viewBox="0 0 24 24"
+    viewBox="0 0 26 26"
     fill="none"
     stroke="currentColor"
     strokeWidth="1.6"
