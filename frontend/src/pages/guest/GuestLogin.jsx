@@ -192,7 +192,7 @@ export default function GuestLogin() {
           }} />
 
           {/* Hero Content */}
-          <div style={{ position: "relative", zIndex: 2, padding: "50px 20px 80px" }}>
+          <div style={{ position: "relative", zIndex: 2, padding: "30px 20px 50px" }}>
             {/* Logo Section */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <div style={{
@@ -266,8 +266,8 @@ export default function GuestLogin() {
         </div>
 
         {/* Login Form Content */}
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", maxWidth: 430, width: "100%", margin: "0 auto" }}>
-          <div style={{ background: "#EFE1CF", padding: "20px 20px 40px" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", maxWidth: 430, width: "100%", margin: "0 auto" }}>
+          <div style={{ background: "#EFE1CF", padding: "0 20px", width: "100%" }}>
             {/* Form Card */}
             <div style={{
               background: "#fff", borderRadius: 20, padding: "20px 16px",
@@ -445,7 +445,7 @@ export default function GuestLogin() {
 
             {/* Footer */}
             <p style={{
-              marginTop: 16, fontSize: 12, color: "#6B6B6B", textAlign: "center",
+              marginTop: 12, fontSize: 11, color: "#6B6B6B", textAlign: "center",
             }}>
               Need help? Contact the front desk 📞
             </p>
