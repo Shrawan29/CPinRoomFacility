@@ -36,7 +36,7 @@ export default function GuestDashboard() {
   // Auto-advance event card every 4.5 seconds
   useEffect(() => {
     if (upcomingEvents.length === 0) return;
-    
+
     autoRef.current = setInterval(() => {
       setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
     }, 4500); // Auto-transition every 4.5 seconds
@@ -112,9 +112,19 @@ export default function GuestDashboard() {
 
   // ── Icons ──────────────────────────────────────────────────────────────
   const FoodIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
-      <path d="M6 18h12" /><path d="M7 18v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1" />
-      <path d="M8 12h8" /><path d="M5 12a7 7 0 0 1 14 0" /><path d="M12 9v-1" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: 28, height: 28 }}
+    >
+      {/* Replace below paths with your actual shape paths */}
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 12h8" />
+      <path d="M12 8v8" />
     </svg>
   );
   const HouseIcon = () => (
@@ -157,7 +167,7 @@ export default function GuestDashboard() {
   );
 
   const quickActions = [
-    { icon: <FoodIcon />,  label: "Food Order",   sub: "In-room dining",  route: "/guest/menu",         accent: "linear-gradient(90deg,#A4005D,#C44A87)" },
+    { icon: <FoodIcon />, label: "Food Order", sub: "In-room dining", route: "/guest/menu", accent: "linear-gradient(90deg,#A4005D,#C44A87)" },
     { icon: <HouseIcon />, label: "Housekeeping", sub: "Room essentials", route: "/guest/housekeeping", accent: "linear-gradient(90deg,#c9a96e,#d4b464)" },
   ];
 
@@ -168,8 +178,8 @@ export default function GuestDashboard() {
   };
 
   const navItems = [
-    { key: "home",    label: "Home",    icon: (a) => <HomeNavIcon active={a} />,    route: "/guest/dashboard" },
-    { key: "orders",  label: "Orders",  icon: (a) => <OrdersNavIcon active={a} />,  route: "/guest/orders" },
+    { key: "home", label: "Home", icon: (a) => <HomeNavIcon active={a} />, route: "/guest/dashboard" },
+    { key: "orders", label: "Orders", icon: (a) => <OrdersNavIcon active={a} />, route: "/guest/orders" },
     { key: "support", label: "Support", icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
   ];
 
@@ -504,26 +514,26 @@ export default function GuestDashboard() {
 
                 <defs>
                   <linearGradient id="wGrad1" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%"   stopColor="transparent" />
-                    <stop offset="12%"  stopColor="#A4005D" stopOpacity="0.65" />
-                    <stop offset="42%"  stopColor="#D44F93" />
-                    <stop offset="72%"  stopColor="#A4005D" stopOpacity="0.75" />
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="12%" stopColor="#A4005D" stopOpacity="0.65" />
+                    <stop offset="42%" stopColor="#D44F93" />
+                    <stop offset="72%" stopColor="#A4005D" stopOpacity="0.75" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
 
                   <linearGradient id="wGrad2" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%"   stopColor="transparent" />
-                    <stop offset="18%"  stopColor="#A4005D" stopOpacity="0.22" />
-                    <stop offset="50%"  stopColor="#D44F93" stopOpacity="0.32" />
-                    <stop offset="82%"  stopColor="#A4005D" stopOpacity="0.18" />
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="18%" stopColor="#A4005D" stopOpacity="0.22" />
+                    <stop offset="50%" stopColor="#D44F93" stopOpacity="0.32" />
+                    <stop offset="82%" stopColor="#A4005D" stopOpacity="0.18" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
 
                   <linearGradient id="wGrad3" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%"   stopColor="transparent" />
-                    <stop offset="38%"  stopColor="#C44A87" stopOpacity="0.7" />
-                    <stop offset="52%"  stopColor="#ffffff" stopOpacity="1" />
-                    <stop offset="66%"  stopColor="#C44A87" stopOpacity="0.55" />
+                    <stop offset="0%" stopColor="transparent" />
+                    <stop offset="38%" stopColor="#C44A87" stopOpacity="0.7" />
+                    <stop offset="52%" stopColor="#ffffff" stopOpacity="1" />
+                    <stop offset="66%" stopColor="#C44A87" stopOpacity="0.55" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
                 </defs>
@@ -814,8 +824,8 @@ export default function GuestDashboard() {
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B6B6B", marginBottom: 12 }}>Explore</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { icon: <EventsIcon />,    label: "All Events", route: "/guest/events" },
-                  { icon: <AmenitiesIcon />, label: "Amenities",  route: "/guest/hotel-info" },
+                  { icon: <EventsIcon />, label: "All Events", route: "/guest/events" },
+                  { icon: <AmenitiesIcon />, label: "Amenities", route: "/guest/hotel-info" },
                 ].map((item, i) => (
                   <button key={item.label} onClick={() => navigate(item.route)} className="row-hover"
                     style={{
