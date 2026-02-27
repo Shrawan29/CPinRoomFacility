@@ -14,12 +14,8 @@ export default function GuestDashboard() {
   const [cardsVisible, setCardsVisible] = useState(false);
   const [exploreVisible, setExploreVisible] = useState(false);
 
-  const [sliderIndex, setSliderIndex] = useState(0);
-  const sliderRef = useRef(null);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const autoRef = useRef(null);
-  const isDragging = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
@@ -37,34 +33,18 @@ export default function GuestDashboard() {
     getGuestEvents().then((data) => setUpcomingEvents(data || []));
   }, []);
 
-  // Auto-advance slider
+  // Auto-advance event card every 4.5 seconds
   useEffect(() => {
     if (upcomingEvents.length === 0) return;
     
-    const startAutoplay = () => {
-      autoRef.current = setInterval(() => {
-        setSliderIndex((prev) => (prev + 1) % upcomingEvents.length);
-      }, 4500); // Slide changes every 4.5 seconds
-    };
+    autoRef.current = setInterval(() => {
+      setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
+    }, 4500); // Auto-transition every 4.5 seconds
 
-    startAutoplay();
     return () => {
       if (autoRef.current) clearInterval(autoRef.current);
     };
   }, [upcomingEvents.length]);
-
-  // Smooth scroll to current slide
-  useEffect(() => {
-    if (!sliderRef.current || upcomingEvents.length === 0) return;
-    
-    const cardWidth = sliderRef.current.offsetWidth * 0.84 + 14;
-    const targetScroll = sliderIndex * cardWidth;
-    
-    sliderRef.current.scrollTo({ 
-      left: targetScroll, 
-      behavior: "smooth" 
-    });
-  }, [sliderIndex, upcomingEvents.length]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -153,55 +133,7 @@ export default function GuestDashboard() {
     { key: "support", label: "Support", icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
   ];
 
-  // Mouse drag handlers for slider
-  const handleMouseDown = (e) => {
-    isDragging.current = true;
-    startXRef.current = e.pageX - sliderRef.current.offsetLeft;
-    scrollLeftRef.current = sliderRef.current.scrollLeft;
-    
-    // Stop autoplay on drag
-    if (autoRef.current) {
-      clearInterval(autoRef.current);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    isDragging.current = false;
-    // Resume autoplay
-    resumeAutoplay();
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
-    // Resume autoplay with slight delay
-    setTimeout(() => resumeAutoplay(), 100);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging.current) return;
-    e.preventDefault();
-    
-    const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startXRef.current) * 1; // scroll-fast
-    sliderRef.current.scrollLeft = scrollLeftRef.current - walk;
-  };
-
-  const handleSliderScroll = () => {
-    if (!sliderRef.current || isDragging.current) return;
-    
-    const cardWidth = sliderRef.current.offsetWidth * 0.84 + 14;
-    const scrollLeft = sliderRef.current.scrollLeft;
-    const idx = Math.round(scrollLeft / cardWidth);
-    
-    setSliderIndex(Math.max(0, Math.min(idx, upcomingEvents.length - 1)));
-  };
-
-  const resumeAutoplay = () => {
-    if (upcomingEvents.length === 0) return;
-    autoRef.current = setInterval(() => {
-      setSliderIndex((prev) => (prev + 1) % upcomingEvents.length);
-    }, 4500);
-  };
+  // No longer needed for single card view
 
   return (
     <>
@@ -305,36 +237,41 @@ export default function GuestDashboard() {
         .wave-glow  { animation: waveGlow  4.5s ease-in-out 3.1s infinite, delayFadeIn 0.8s ease 3.0s forwards; }
         .wave-aura  { animation: waveAura  6s ease-in-out 3.1s infinite, delayFadeIn 1s ease 3.0s forwards; }
 
-        /* ─── Event slider (JioHotstar style) ──────────────────────────────── */
-        .event-slider {
-          display: flex;
-          gap: 14px;
-          overflow-x: scroll;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          padding: 4px 20px 12px;
-          scroll-behavior: smooth;
-          position: relative;
+        /* ─── Event card transition (single card auto-flip) ──────────────────────────────── */
+        @keyframes fadeSlideOut {
+          0% { opacity: 1; transform: translateX(0); }
+          100% { opacity: 0; transform: translateX(-20px); }
         }
-        .event-slider::-webkit-scrollbar { display: none; }
+        @keyframes fadeSlideIn {
+          0% { opacity: 0; transform: translateX(20px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
 
-        .event-slide {
-          scroll-snap-align: start;
-          flex-shrink: 0;
-          width: 84%;
+        .event-card-container {
+          position: relative;
+          width: 100%;
+          height: 360px;
+          perspective: 1000px;
+        }
+
+        .event-card-wrapper {
+          position: absolute;
+          width: 100%;
+          height: 100%;
           border-radius: 22px;
           overflow: hidden;
-          position: relative;
-          cursor: grab;
-          transition: transform 0.28s cubic-bezier(0.22,1,0.36,1), box-shadow 0.28s ease;
-          aspect-ratio: 16 / 9;
-          will-change: transform;
-          user-select: none;
+          will-change: opacity, transform;
         }
-        .event-slide:active { cursor: grabbing; }
-        .event-slide:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 20px 48px rgba(0,0,0,0.28) !important; }
-        .event-slide:last-child { margin-right: 20px; }
+
+        .event-card-wrapper.active {
+          animation: fadeSlideIn 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+          z-index: 1;
+        }
+
+        .event-card-wrapper.exit {
+          animation: fadeSlideOut 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+          z-index: 0;
+        }
 
         /* Crisp image base — no blur overlay on image */
         .event-img {
@@ -601,7 +538,7 @@ export default function GuestDashboard() {
             </div>
 
             {/* ══════════════════════════════════════════
-                UPCOMING EVENTS SLIDER — JioHotstar style with auto-play
+                UPCOMING EVENTS SECTION — Single card with auto-transition
             ══════════════════════════════════════════ */}
             <div style={{ paddingTop: 22 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", marginBottom: 14 }}>
@@ -621,156 +558,153 @@ export default function GuestDashboard() {
                 </div>
               ) : (
                 <>
-                  <div
-                    ref={sliderRef}
-                    className="event-slider"
-                    onScroll={handleSliderScroll}
-                    onMouseDown={handleMouseDown}
-                    onMouseLeave={handleMouseLeave}
-                    onMouseUp={handleMouseUp}
-                    onMouseMove={handleMouseMove}
-                  >
-                    {upcomingEvents.map((ev, i) => {
-                      const evTime = formatEventTime(ev);
-                      const evDate = formatEventDate(ev);
-                      const bg = ev.gradient || eventGradients[i % eventGradients.length];
-                      return (
-                        <div
-                          key={ev.id || ev._id || i}
-                          className="event-slide"
-                          onClick={() => navigate("/guest/events")}
-                          style={{
-                            background: bg,
-                            boxShadow: "0 10px 40px rgba(0,0,0,0.26)",
-                            animation: exploreVisible ? `cardIn 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 80}ms both` : "none",
-                          }}
-                        >
-                          {/* Clear event image (no blur) */}
-                          {ev.image && (
-                            <>
-                              <img className="event-img" src={ev.image} alt={ev.title || ev.name} />
-                              {/* Strong directional scrim for readability */}
-                              <div className="event-scrim" />
-                            </>
-                          )}
+                  <div style={{ padding: "0 20px" }}>
+                    <div className="event-card-container">
+                      {upcomingEvents.map((ev, i) => {
+                        const evTime = formatEventTime(ev);
+                        const evDate = formatEventDate(ev);
+                        const bg = ev.gradient || eventGradients[i % eventGradients.length];
+                        const isActive = i === currentEventIndex;
+                        const wasActive = i === (currentEventIndex - 1 + upcomingEvents.length) % upcomingEvents.length;
 
-                          {/* No-image: subtle noise/pattern overlay for depth */}
-                          {!ev.image && (
-                            <div style={{
-                              position: "absolute", inset: 0, zIndex: 1,
-                              background: "radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.12) 0%, transparent 60%)",
-                            }} />
-                          )}
-
-                          {/* Card content */}
-                          <div style={{
-                            position: "relative", zIndex: 2,
-                            padding: "14px 16px 16px",
-                            height: "100%", display: "flex", flexDirection: "column",
-                            justifyContent: "flex-end",
-                          }}>
-
-                            {/* ── TOP: tag chip (absolute top-left) ── */}
-                            {ev.tag && (
-                              <div style={{
-                                position: "absolute", top: 14, left: 16,
-                                fontSize: 8, fontWeight: 700, letterSpacing: "0.14em",
-                                textTransform: "uppercase", padding: "4px 10px", borderRadius: 8,
-                                background: "rgba(255,255,255,0.15)",
-                                color: "rgba(255,255,255,0.9)",
-                                border: "1px solid rgba(255,255,255,0.25)",
-                                backdropFilter: "blur(8px)",
-                              }}>
-                                {ev.tag}
-                              </div>
+                        return (
+                          <div
+                            key={ev.id || ev._id || i}
+                            className={`event-card-wrapper ${isActive ? "active" : wasActive ? "exit" : ""}`}
+                            onClick={() => navigate("/guest/events")}
+                            style={{
+                              background: bg,
+                              boxShadow: "0 10px 40px rgba(0,0,0,0.26)",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {/* Clear event image (no blur) */}
+                            {ev.image && (
+                              <>
+                                <img className="event-img" src={ev.image} alt={ev.title || ev.name} />
+                                {/* Strong directional scrim for readability */}
+                                <div className="event-scrim" />
+                              </>
                             )}
 
-                            {/* ── BOTTOM BLOCK: all details stacked cleanly ── */}
-                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            {/* No-image: subtle noise/pattern overlay for depth */}
+                            {!ev.image && (
+                              <div style={{
+                                position: "absolute", inset: 0, zIndex: 1,
+                                background: "radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.12) 0%, transparent 60%)",
+                              }} />
+                            )}
 
-                              {/* Date + Time — single pill */}
-                              {(evDate || evTime) && (
+                            {/* Card content */}
+                            <div style={{
+                              position: "relative", zIndex: 2,
+                              padding: "14px 16px 16px",
+                              height: "100%", display: "flex", flexDirection: "column",
+                              justifyContent: "flex-end",
+                            }}>
+
+                              {/* ── TOP: tag chip (absolute top-left) ── */}
+                              {ev.tag && (
                                 <div style={{
-                                  display: "inline-flex", alignItems: "center", gap: 6,
-                                  background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
-                                  border: "1px solid rgba(249,168,212,0.25)",
-                                  borderRadius: 6, padding: "4px 10px", alignSelf: "flex-start",
+                                  position: "absolute", top: 14, left: 16,
+                                  fontSize: 8, fontWeight: 700, letterSpacing: "0.14em",
+                                  textTransform: "uppercase", padding: "4px 10px", borderRadius: 8,
+                                  background: "rgba(255,255,255,0.15)",
+                                  color: "rgba(255,255,255,0.9)",
+                                  border: "1px solid rgba(255,255,255,0.25)",
+                                  backdropFilter: "blur(8px)",
                                 }}>
-                                  {evDate && (
-                                    <span style={{
-                                      fontSize: 9, fontWeight: 700, color: "#F9A8D4",
-                                      letterSpacing: "0.16em", textTransform: "uppercase",
-                                    }}>
-                                      {evDate}
-                                    </span>
-                                  )}
-                                  {evDate && evTime && (
-                                    <span style={{ fontSize: 8, color: "rgba(249,168,212,0.4)", fontWeight: 300 }}>·</span>
-                                  )}
-                                  {evTime && (
-                                    <span style={{
-                                      fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.8)",
-                                      letterSpacing: "0.06em",
-                                    }}>
-                                      {evTime}
-                                    </span>
-                                  )}
+                                  {ev.tag}
                                 </div>
                               )}
 
-                              {/* Title */}
-                              <p style={{
-                                fontFamily: "'Cormorant Garamond', serif",
-                                fontSize: 22, fontWeight: 700, color: "#fff",
-                                lineHeight: 1.1, margin: 0,
-                                textShadow: "0 2px 14px rgba(0,0,0,0.6)",
-                              }}>
-                                {ev.title || ev.name}
-                              </p>
+                              {/* ── BOTTOM BLOCK: all details stacked cleanly ── */}
+                              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
 
-                              {/* Description — single line only in 16:9 */}
-                              {ev.description && (
+                                {/* Date + Time — single pill */}
+                                {(evDate || evTime) && (
+                                  <div style={{
+                                    display: "inline-flex", alignItems: "center", gap: 6,
+                                    background: "rgba(0,0,0,0.35)", backdropFilter: "blur(8px)",
+                                    border: "1px solid rgba(249,168,212,0.25)",
+                                    borderRadius: 6, padding: "4px 10px", alignSelf: "flex-start",
+                                  }}>
+                                    {evDate && (
+                                      <span style={{
+                                        fontSize: 9, fontWeight: 700, color: "#F9A8D4",
+                                        letterSpacing: "0.16em", textTransform: "uppercase",
+                                      }}>
+                                        {evDate}
+                                      </span>
+                                    )}
+                                    {evDate && evTime && (
+                                      <span style={{ fontSize: 8, color: "rgba(249,168,212,0.4)", fontWeight: 300 }}>·</span>
+                                    )}
+                                    {evTime && (
+                                      <span style={{
+                                        fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.8)",
+                                        letterSpacing: "0.06em",
+                                      }}>
+                                        {evTime}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Title */}
                                 <p style={{
-                                  fontSize: 11.5, color: "rgba(255,255,255,0.72)",
-                                  fontWeight: 400, lineHeight: 1.4, margin: 0,
-                                  display: "-webkit-box", WebkitLineClamp: 1,
-                                  WebkitBoxOrient: "vertical", overflow: "hidden",
-                                  textShadow: "0 1px 4px rgba(0,0,0,0.4)",
+                                  fontFamily: "'Cormorant Garamond', serif",
+                                  fontSize: 22, fontWeight: 700, color: "#fff",
+                                  lineHeight: 1.1, margin: 0,
+                                  textShadow: "0 2px 14px rgba(0,0,0,0.6)",
                                 }}>
-                                  {ev.description}
+                                  {ev.title || ev.name}
                                 </p>
-                              )}
 
-                              {/* Location row */}
-                              {(ev.location || ev.venue) && (
-                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                  <svg viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 11, height: 11, flexShrink: 0 }}>
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                    <circle cx="12" cy="10" r="3" />
-                                  </svg>
-                                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>
-                                    {ev.location || ev.venue}
-                                  </span>
-                                </div>
-                              )}
+                                {/* Description — single line only in 16:9 */}
+                                {ev.description && (
+                                  <p style={{
+                                    fontSize: 11.5, color: "rgba(255,255,255,0.72)",
+                                    fontWeight: 400, lineHeight: 1.4, margin: 0,
+                                    display: "-webkit-box", WebkitLineClamp: 1,
+                                    WebkitBoxOrient: "vertical", overflow: "hidden",
+                                    textShadow: "0 1px 4px rgba(0,0,0,0.4)",
+                                  }}>
+                                    {ev.description}
+                                  </p>
+                                )}
+
+                                {/* Location row */}
+                                {(ev.location || ev.venue) && (
+                                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 11, height: 11, flexShrink: 0 }}>
+                                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                      <circle cx="12" cy="10" r="3" />
+                                    </svg>
+                                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 400 }}>
+                                      {ev.location || ev.venue}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  {/* Dot indicators — clickable to jump to slide */}
-                  <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4, marginTop: 2 }}>
+                  {/* Dot indicators — clickable to jump to event */}
+                  <div style={{ display: "flex", justifyContent: "center", gap: 6, paddingBottom: 4, marginTop: 16 }}>
                     {upcomingEvents.map((_, i) => (
                       <button
                         key={i}
-                        onClick={() => setSliderIndex(i)}
+                        onClick={() => setCurrentEventIndex(i)}
                         style={{
-                          width: i === sliderIndex ? 22 : 6,
+                          width: i === currentEventIndex ? 22 : 6,
                           height: 6,
                           borderRadius: 3,
-                          background: i === sliderIndex ? "#A4005D" : "rgba(164,0,93,0.22)",
+                          background: i === currentEventIndex ? "#A4005D" : "rgba(164,0,93,0.22)",
                           transition: "all 0.35s cubic-bezier(0.22,1,0.36,1)",
                           cursor: "pointer",
                           border: "none",
