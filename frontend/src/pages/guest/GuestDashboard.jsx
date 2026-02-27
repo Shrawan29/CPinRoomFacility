@@ -112,21 +112,35 @@ export default function GuestDashboard() {
 
   // ── Icons ──────────────────────────────────────────────────────────────
   const FoodIcon = () => (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ width: 28, height: 28 }}
-    >
-      {/* Replace below paths with your actual shape paths */}
-      <circle cx="12" cy="12" r="9" />
-      <path d="M8 12h8" />
-      <path d="M12 8v8" />
-    </svg>
-  );
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ width: 28, height: 28 }}
+  >
+    {/* Plate base */}
+    <path d="M3 18h18" />
+    <path d="M5 18v1h14v-1" />
+
+    {/* Dome */}
+    <path d="M4 14a8 8 0 0 1 16 0" />
+
+    {/* Handle */}
+    <path d="M10.5 6h3" />
+    <path d="M12 6v-2" />
+
+    {/* Highlight curve */}
+    <path d="M7 12a5 5 0 0 1 3-3" />
+
+    {/* Plus circle */}
+    <circle cx="18" cy="8" r="3" />
+    <path d="M18 6.8v2.4" />
+    <path d="M16.8 8h2.4" />
+  </svg>
+);
   const HouseIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
       <path d="M6 3l12 12" /><path d="M10 7l-2 2" /><path d="M14 11l-2 2" />
