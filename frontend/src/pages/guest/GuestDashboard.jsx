@@ -1,4 +1,3 @@
-// Demo edit: This comment was added to test git push after cleanup.
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import hotelbg from "../../assets/hotel-bg.jpg";
@@ -6,7 +5,6 @@ import logo from "../../assets/logo.png";
 
 import { useEffect, useState, useRef } from "react";
 import { getGuestEvents } from "../../services/event.service";
-import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
 export default function GuestDashboard() {
   const { guest, loading } = useGuestAuth();
@@ -38,7 +36,7 @@ export default function GuestDashboard() {
   // Auto-advance event card every 4.5 seconds
   useEffect(() => {
     if (upcomingEvents.length === 0) return;
-
+    
     autoRef.current = setInterval(() => {
       setCurrentEventIndex((prev) => (prev + 1) % upcomingEvents.length);
     }, 4500); // Auto-transition every 4.5 seconds
@@ -113,63 +111,19 @@ export default function GuestDashboard() {
   ];
 
   // ── Icons ──────────────────────────────────────────────────────────────
-const FoodIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ width: 32, height: 32 }}  // increased size
-  >
-    {/* Bottom tray */}
-    <path d="M3 17h18" />
-    <path d="M5 17l2 2h10l2-2" />
-
-    {/* Dome */}
-    <path d="M4 14a8 8 0 0 1 16 0" />
-
-    {/* Top handle */}
-    <path d="M10.5 5h3" />
-    <path d="M12 5v-2" />
-
-    {/* Shine curve */}
-    <path d="M7 12a5 5 0 0 1 3-3" />
-  </svg>
-);
-   const HouseIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ width: 32, height: 32 }}
-  >
-    {/* Mop Handle */}
-    <path d="M17 3v12" />
-
-    {/* Mop Connector */}
-    <path d="M15 15h4" />
-
-    {/* Mop Base */}
-    <path d="M14 17h6l-1 3h-4z" />
-
-    {/* Bucket Rim */}
-    <ellipse cx="8" cy="8" rx="3.5" ry="1.5" />
-
-    {/* Bucket Body */}
-    <path d="M4.5 8l1 6a3 3 0 0 0 3 2h1a3 3 0 0 0 3-2l1-6" />
-
-    {/* Bucket Handle */}
-    <path d="M4.5 9c0-2 2-3.5 3.5-3.5" />
-
-    {/* Water Drop */}
-    <path d="M8 11c1-1 2 0 2 1a2 2 0 0 1-4 0c0-1 1-1.5 2-1z" />
-  </svg>
-);
+  const FoodIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
+      <path d="M6 18h12" /><path d="M7 18v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1" />
+      <path d="M8 12h8" /><path d="M5 12a7 7 0 0 1 14 0" /><path d="M12 9v-1" />
+    </svg>
+  );
+  const HouseIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 28, height: 28 }}>
+      <path d="M6 3l12 12" /><path d="M10 7l-2 2" /><path d="M14 11l-2 2" />
+      <path d="M4 20h7" /><path d="M4 20c1.2-3.4 3.6-5.8 7-7" />
+      <path d="M11 13c1.2 0 2.7 1.1 3.6 2.1" />
+    </svg>
+  );
   const EventsIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 26, height: 26 }}>
       <path d="M8 3v3" /><path d="M16 3v3" /><path d="M4 7h16" />
@@ -203,7 +157,7 @@ const FoodIcon = () => (
   );
 
   const quickActions = [
-    { icon: <FoodIcon />, label: "Food Order", sub: "In-room dining", route: "/guest/menu", accent: "linear-gradient(90deg,#A4005D,#C44A87)" },
+    { icon: <FoodIcon />,  label: "Food Order",   sub: "In-room dining",  route: "/guest/menu",         accent: "linear-gradient(90deg,#A4005D,#C44A87)" },
     { icon: <HouseIcon />, label: "Housekeeping", sub: "Room essentials", route: "/guest/housekeeping", accent: "linear-gradient(90deg,#c9a96e,#d4b464)" },
   ];
 
@@ -214,8 +168,8 @@ const FoodIcon = () => (
   };
 
   const navItems = [
-    { key: "home", label: "Home", icon: (a) => <HomeNavIcon active={a} />, route: "/guest/dashboard" },
-    { key: "orders", label: "Orders", icon: (a) => <OrdersNavIcon active={a} />, route: "/guest/orders" },
+    { key: "home",    label: "Home",    icon: (a) => <HomeNavIcon active={a} />,    route: "/guest/dashboard" },
+    { key: "orders",  label: "Orders",  icon: (a) => <OrdersNavIcon active={a} />,  route: "/guest/orders" },
     { key: "support", label: "Support", icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
   ];
 
@@ -391,6 +345,7 @@ const FoodIcon = () => (
         <div style={{
           flex: 1, overflowY: "auto", overflowX: "hidden",
           maxWidth: 430, width: "100%", margin: "0 auto",
+          paddingBottom: "80px",
         }}>
 
           {/* ══════════════════════════════════════════
@@ -550,26 +505,26 @@ const FoodIcon = () => (
 
                 <defs>
                   <linearGradient id="wGrad1" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="transparent" />
-                    <stop offset="12%" stopColor="#A4005D" stopOpacity="0.65" />
-                    <stop offset="42%" stopColor="#D44F93" />
-                    <stop offset="72%" stopColor="#A4005D" stopOpacity="0.75" />
+                    <stop offset="0%"   stopColor="transparent" />
+                    <stop offset="12%"  stopColor="#A4005D" stopOpacity="0.65" />
+                    <stop offset="42%"  stopColor="#D44F93" />
+                    <stop offset="72%"  stopColor="#A4005D" stopOpacity="0.75" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
 
                   <linearGradient id="wGrad2" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="transparent" />
-                    <stop offset="18%" stopColor="#A4005D" stopOpacity="0.22" />
-                    <stop offset="50%" stopColor="#D44F93" stopOpacity="0.32" />
-                    <stop offset="82%" stopColor="#A4005D" stopOpacity="0.18" />
+                    <stop offset="0%"   stopColor="transparent" />
+                    <stop offset="18%"  stopColor="#A4005D" stopOpacity="0.22" />
+                    <stop offset="50%"  stopColor="#D44F93" stopOpacity="0.32" />
+                    <stop offset="82%"  stopColor="#A4005D" stopOpacity="0.18" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
 
                   <linearGradient id="wGrad3" x1="0" y1="0" x2="430" y2="0" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="transparent" />
-                    <stop offset="38%" stopColor="#C44A87" stopOpacity="0.7" />
-                    <stop offset="52%" stopColor="#ffffff" stopOpacity="1" />
-                    <stop offset="66%" stopColor="#C44A87" stopOpacity="0.55" />
+                    <stop offset="0%"   stopColor="transparent" />
+                    <stop offset="38%"  stopColor="#C44A87" stopOpacity="0.7" />
+                    <stop offset="52%"  stopColor="#ffffff" stopOpacity="1" />
+                    <stop offset="66%"  stopColor="#C44A87" stopOpacity="0.55" />
                     <stop offset="100%" stopColor="transparent" />
                   </linearGradient>
                 </defs>
@@ -860,8 +815,8 @@ const FoodIcon = () => (
               <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B6B6B", marginBottom: 12 }}>Explore</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
-                  { icon: <EventsIcon />, label: "All Events", route: "/guest/events" },
-                  { icon: <AmenitiesIcon />, label: "Amenities", route: "/guest/hotel-info" },
+                  { icon: <EventsIcon />,    label: "All Events", route: "/guest/events" },
+                  { icon: <AmenitiesIcon />, label: "Amenities",  route: "/guest/hotel-info" },
                 ].map((item, i) => (
                   <button key={item.label} onClick={() => navigate(item.route)} className="row-hover"
                     style={{
@@ -884,7 +839,27 @@ const FoodIcon = () => (
         </div>
 
         {/* BOTTOM NAV */}
-        <GuestBottomNav activeNav={"home"} setActiveNav={() => {}} />
+        <div style={{
+          flexShrink: 0, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)",
+          borderTop: "1px solid rgba(164,0,93,0.1)", boxShadow: "0 -2px 20px rgba(30,21,16,0.07)",
+          maxWidth: 430, width: "100%", margin: "0 auto",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around", padding: "6px 8px" }}>
+            {navItems.map((item) => {
+              const isActive = activeNav === item.key;
+              return (
+                <button key={item.key} onClick={() => { setActiveNav(item.key); navigate(item.route); }} className="nav-btn"
+                  style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "6px 24px", borderRadius: 14, background: isActive ? "rgba(164,0,93,0.07)" : "transparent", border: "none", cursor: "pointer" }}
+                >
+                  <span style={{ color: isActive ? "#A4005D" : "#6B6B6B", transition: "color 0.2s ease" }}>{item.icon(isActive)}</span>
+                  <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: isActive ? "#A4005D" : "#6B6B6B", transition: "color 0.2s ease" }}>{item.label}</span>
+                  {isActive && <div style={{ position: "absolute", bottom: -1, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: "50%", background: "#A4005D" }} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </>
   );
