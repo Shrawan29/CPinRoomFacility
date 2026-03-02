@@ -130,6 +130,8 @@ const getOpenAIClient = () => {
 
   const defaultHeaders = {
     ...(openRouterReferer ? { "HTTP-Referer": openRouterReferer } : {}),
+    // OpenRouter documents X-OpenRouter-Title. Keep X-Title as a fallback.
+    ...(openRouterAppName ? { "X-OpenRouter-Title": openRouterAppName } : {}),
     ...(openRouterAppName ? { "X-Title": openRouterAppName } : {}),
   };
 
@@ -138,6 +140,76 @@ const getOpenAIClient = () => {
     ...(baseURL ? { baseURL } : {}),
     ...(Object.keys(defaultHeaders).length > 0 ? { defaultHeaders } : {}),
   });
+};
+
+const isOpenRouterNoEndpointsDataPolicyError = (error) => {
+  const status = error?.status || error?.response?.status;
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    status === 404 &&
+    (message.includes("no endpoints found") || message.includes("data policy"))
+  );
+};
+
+const inferNeedsMenu = (text) => {
+  const t = String(text || "").toLowerCase();
+  return (
+    t.includes("menu") ||
+    t.includes("food") ||
+    t.includes("eat") ||
+    t.includes("dish") ||
+    t.includes("breakfast") ||
+    t.includes("lunch") ||
+    t.includes("dinner") ||
+    t.includes("veg") ||
+    t.includes("vegetarian") ||
+    t.includes("price") ||
+    t.includes("beverage") ||
+    t.includes("drink")
+  );
+};
+
+const inferNeedsEvents = (text) => {
+  const t = String(text || "").toLowerCase();
+  return (
+    t.includes("event") ||
+    t.includes("events") ||
+    t.includes("activity") ||
+    t.includes("activities") ||
+    t.includes("what's on") ||
+    t.includes("whats on") ||
+    t.includes("today") ||
+    t.includes("tomorrow") ||
+    t.includes("week")
+  );
+};
+
+const buildRestrictedContext = async (userMessage) => {
+  const wantsMenu = inferNeedsMenu(userMessage);
+  const wantsEvents = inferNeedsEvents(userMessage);
+
+  const shouldFetchMenu = wantsMenu || !wantsEvents;
+  const shouldFetchEvents = wantsEvents || !wantsMenu;
+
+  const isBroadMenuRequest = /\b(menu|food|dishes|items)\b/i.test(String(userMessage || ""));
+
+  const [menu, events] = await Promise.all([
+    shouldFetchMenu
+      ? searchMenu({
+          query: isBroadMenuRequest ? "" : userMessage,
+          availableOnly: true,
+          limit: isBroadMenuRequest ? 12 : 8,
+        })
+      : Promise.resolve({ count: 0, items: [] }),
+    shouldFetchEvents
+      ? searchEvents({
+          query: userMessage,
+          limit: 6,
+        })
+      : Promise.resolve({ count: 0, events: [] }),
+  ]);
+
+  return { menu, events };
 };
 
 export const guestChat = async (req, res) => {
@@ -234,13 +306,46 @@ export const guestChat = async (req, res) => {
     while (round < MAX_TOOL_CALL_ROUNDS) {
       round += 1;
 
-      const completion = await client.chat.completions.create({
-        model,
-        messages,
-        tools,
-        tool_choice: "auto",
-        temperature: 0.2,
-      });
+      let completion;
+      try {
+        completion = await client.chat.completions.create({
+          model,
+          messages,
+          tools,
+          tool_choice: "auto",
+          temperature: 0.2,
+        });
+      } catch (error) {
+        // Some OpenRouter endpoints (commonly :free routes) reject tool-calling and respond with:
+        // "404 error no endpoints found matching your data policy".
+        // Fallback: do server-side restricted retrieval (events/menu only) and retry WITHOUT tools.
+        if (isOpenRouterNoEndpointsDataPolicyError(error)) {
+          const context = await buildRestrictedContext(userMessage);
+          const fallbackMessages = [
+            system,
+            {
+              role: "system",
+              content:
+                "The following JSON is the ONLY database information you may use. " +
+                "If it doesn't contain the answer, say you don't know and offer to help with menu or events.\n\n" +
+                JSON.stringify(context),
+            },
+            ...history,
+            { role: "user", content: userMessage },
+          ];
+
+          const fallbackCompletion = await client.chat.completions.create({
+            model,
+            messages: fallbackMessages,
+            temperature: 0.2,
+          });
+
+          const fallbackMsg = fallbackCompletion.choices?.[0]?.message;
+          return res.json({ reply: fallbackMsg?.content || "" });
+        }
+
+        throw error;
+      }
 
       const msg = completion.choices?.[0]?.message;
       if (!msg) {
