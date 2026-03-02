@@ -151,6 +151,33 @@ const isOpenRouterNoEndpointsDataPolicyError = (error) => {
   );
 };
 
+const parseBoolEnv = (value) => {
+  const v = String(value ?? "").trim().toLowerCase();
+  if (!v) return null;
+  if (["1", "true", "yes", "y", "on"].includes(v)) return true;
+  if (["0", "false", "no", "n", "off"].includes(v)) return false;
+  return null;
+};
+
+const getOpenRouterProviderPrefs = () => {
+  const baseUrlLower = toTrimmedString(process.env.OPENAI_BASE_URL).toLowerCase();
+  if (!baseUrlLower.includes("openrouter.ai")) return null;
+
+  const dataCollection = toTrimmedString(process.env.OPENROUTER_DATA_COLLECTION);
+  const zdr = parseBoolEnv(process.env.OPENROUTER_ZDR);
+  const requireParameters = parseBoolEnv(process.env.OPENROUTER_REQUIRE_PARAMETERS);
+  const allowFallbacks = parseBoolEnv(process.env.OPENROUTER_ALLOW_FALLBACKS);
+
+  const provider = {
+    ...(dataCollection ? { data_collection: dataCollection } : {}),
+    ...(typeof zdr === "boolean" ? { zdr } : {}),
+    ...(typeof requireParameters === "boolean" ? { require_parameters: requireParameters } : {}),
+    ...(typeof allowFallbacks === "boolean" ? { allow_fallbacks: allowFallbacks } : {}),
+  };
+
+  return Object.keys(provider).length > 0 ? provider : null;
+};
+
 const inferNeedsMenu = (text) => {
   const t = String(text || "").toLowerCase();
   return (
@@ -308,12 +335,14 @@ export const guestChat = async (req, res) => {
 
       let completion;
       try {
+        const provider = getOpenRouterProviderPrefs();
         completion = await client.chat.completions.create({
           model,
           messages,
           tools,
           tool_choice: "auto",
           temperature: 0.2,
+          ...(provider ? { provider } : {}),
         });
       } catch (error) {
         // Some OpenRouter endpoints (commonly :free routes) reject tool-calling and respond with:
@@ -334,10 +363,13 @@ export const guestChat = async (req, res) => {
             { role: "user", content: userMessage },
           ];
 
+          const provider = getOpenRouterProviderPrefs();
+
           const fallbackCompletion = await client.chat.completions.create({
             model,
             messages: fallbackMessages,
             temperature: 0.2,
+            ...(provider ? { provider } : {}),
           });
 
           const fallbackMsg = fallbackCompletion.choices?.[0]?.message;
@@ -395,7 +427,9 @@ export const guestChat = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: error?.message || "Chat failed",
+      message:
+        error?.message ||
+        "Chat failed. If using OpenRouter and you see 'no endpoints found matching your data policy', check https://openrouter.ai/settings/privacy for account-wide ZDR/data-collection filtering.",
     });
   }
 };
