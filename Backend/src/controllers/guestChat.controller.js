@@ -151,6 +151,39 @@ const isOpenRouterNoEndpointsDataPolicyError = (error) => {
   );
 };
 
+const isRateLimitError = (error) => {
+  const status = error?.status || error?.response?.status;
+  const message = String(error?.message || "").toLowerCase();
+  return status === 429 || message.includes("rate limit") || message.includes("too many requests");
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const createChatCompletionWithRetry = async (client, params) => {
+  const maxAttempts = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await client.chat.completions.create(params);
+    } catch (error) {
+      lastError = error;
+
+      if (!isRateLimitError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+
+      // Exponential backoff with small jitter
+      const baseDelayMs = 600;
+      const jitterMs = Math.floor(Math.random() * 250);
+      const delayMs = baseDelayMs * Math.pow(2, attempt - 1) + jitterMs;
+      await sleep(delayMs);
+    }
+  }
+
+  throw lastError;
+};
+
 const parseBoolEnv = (value) => {
   const v = String(value ?? "").trim().toLowerCase();
   if (!v) return null;
@@ -336,7 +369,7 @@ export const guestChat = async (req, res) => {
       let completion;
       try {
         const provider = getOpenRouterProviderPrefs();
-        completion = await client.chat.completions.create({
+        completion = await createChatCompletionWithRetry(client, {
           model,
           messages,
           tools,
@@ -365,7 +398,7 @@ export const guestChat = async (req, res) => {
 
           const provider = getOpenRouterProviderPrefs();
 
-          const fallbackCompletion = await client.chat.completions.create({
+          const fallbackCompletion = await createChatCompletionWithRetry(client, {
             model,
             messages: fallbackMessages,
             temperature: 0.2,
@@ -426,6 +459,14 @@ export const guestChat = async (req, res) => {
       message: "Chat timed out while calling tools. Please try again.",
     });
   } catch (error) {
+    const status = error?.status || error?.response?.status;
+    if (status === 429 || isRateLimitError(error)) {
+      return res.status(429).json({
+        message:
+          "Chat is rate-limited by the AI provider right now. Please wait a moment and try again (or switch to a non-free model on OpenRouter).",
+      });
+    }
+
     return res.status(500).json({
       message:
         error?.message ||
