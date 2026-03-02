@@ -214,7 +214,7 @@ export default function GuestLogin() {
                   textShadow: "0 1px 10px rgba(0,0,0,0.9)",
                   margin: 0, padding: 0,
                 }}>
-                  Welcome
+                  Hospitality is Love in Action !
                 </p>
                 <h1 style={{
                   fontFamily: "'Cormorant Garamond', serif",

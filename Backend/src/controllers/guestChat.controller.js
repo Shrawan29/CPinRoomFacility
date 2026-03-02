@@ -184,6 +184,125 @@ const createChatCompletionWithRetry = async (client, params) => {
   throw lastError;
 };
 
+const createResponseWithRetry = async (client, params) => {
+  const maxAttempts = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await client.responses.create(params);
+    } catch (error) {
+      lastError = error;
+
+      if (!isRateLimitError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+
+      // Exponential backoff with small jitter
+      const baseDelayMs = 600;
+      const jitterMs = Math.floor(Math.random() * 250);
+      const delayMs = baseDelayMs * Math.pow(2, attempt - 1) + jitterMs;
+      await sleep(delayMs);
+    }
+  }
+
+  throw lastError;
+};
+
+const shouldUseResponsesApi = ({ baseUrlLower, model }) => {
+  // OpenRouter is OpenAI-chat-compatible but does not universally support /responses.
+  if (baseUrlLower.includes("openrouter.ai")) return false;
+
+  const forced = parseBoolEnv(process.env.OPENAI_USE_RESPONSES_API);
+  if (forced === true) return true;
+  if (forced === false) return false;
+
+  const m = toTrimmedString(model).toLowerCase();
+  // o-series models commonly require the Responses API.
+  return m.startsWith("o") || m.includes("/o");
+};
+
+const toResponsesTools = (chatTools) => {
+  if (!Array.isArray(chatTools)) return [];
+
+  return chatTools
+    .filter((t) => t?.type === "function" && t?.function?.name)
+    .map((t) => ({
+      type: "function",
+      name: t.function.name,
+      description: t.function.description,
+      parameters: t.function.parameters || null,
+      strict: true,
+    }));
+};
+
+const runResponsesToolLoop = async ({
+  client,
+  model,
+  input,
+  tools,
+  temperature,
+  maxRounds,
+}) => {
+  let response = await createResponseWithRetry(client, {
+    model,
+    input,
+    tools,
+    tool_choice: "auto",
+    temperature,
+  });
+
+  let round = 0;
+  while (round < maxRounds) {
+    round += 1;
+
+    const functionCalls = Array.isArray(response?.output)
+      ? response.output.filter((item) => item?.type === "function_call")
+      : [];
+
+    if (functionCalls.length === 0) {
+      return response?.output_text || "";
+    }
+
+    const toolOutputs = [];
+    for (const call of functionCalls) {
+      const toolName = call?.name;
+      let args = {};
+      try {
+        args = call?.arguments ? JSON.parse(call.arguments) : {};
+      } catch {
+        args = {};
+      }
+
+      let result;
+      if (toolName === "search_menu") {
+        result = await searchMenu(args);
+      } else if (toolName === "search_events") {
+        result = await searchEvents(args);
+      } else {
+        result = { error: "Tool not allowed" };
+      }
+
+      toolOutputs.push({
+        type: "function_call_output",
+        call_id: call.call_id,
+        output: JSON.stringify(result),
+      });
+    }
+
+    response = await createResponseWithRetry(client, {
+      model,
+      tools,
+      tool_choice: "auto",
+      temperature,
+      previous_response_id: response.id,
+      input: toolOutputs,
+    });
+  }
+
+  return null;
+};
+
 const parseBoolEnv = (value) => {
   const v = String(value ?? "").trim().toLowerCase();
   if (!v) return null;
@@ -358,6 +477,29 @@ export const guestChat = async (req, res) => {
         },
       },
     ];
+
+    // If the selected model/provider expects the Responses API (common for o-series), use it.
+    if (shouldUseResponsesApi({ baseUrlLower, model })) {
+      const responsesTools = toResponsesTools(tools);
+      const input = [system, ...history, { role: "user", content: userMessage }];
+
+      const reply = await runResponsesToolLoop({
+        client,
+        model,
+        input,
+        tools: responsesTools,
+        temperature: 0.2,
+        maxRounds: MAX_TOOL_CALL_ROUNDS,
+      });
+
+      if (typeof reply === "string") {
+        return res.json({ reply });
+      }
+
+      return res.status(504).json({
+        message: "Chat timed out while calling tools. Please try again.",
+      });
+    }
 
     const messages = [system, ...history, { role: "user", content: userMessage }];
 
