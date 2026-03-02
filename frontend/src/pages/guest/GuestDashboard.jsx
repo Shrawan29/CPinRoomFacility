@@ -148,16 +148,17 @@ export default function GuestDashboard() {
 
         .ac-card {
           position:relative; overflow:hidden;
-          background:linear-gradient(145deg,rgba(255,252,248,0.94),rgba(252,244,232,0.90));
-          border:1px solid rgba(255,255,255,0.76);
+          background:linear-gradient(145deg,rgba(255,252,248,0.55),rgba(252,244,232,0.45));
+          border:1px solid rgba(255,255,255,0.62);
           border-radius:20px; padding:16px 14px 14px;
           display:flex; flex-direction:column; align-items:flex-start;
           cursor:pointer; text-align:left;
-          box-shadow:0 4px 18px rgba(100,60,20,.10),0 1px 3px rgba(100,60,20,.06),inset 0 1px 0 rgba(255,255,255,.85);
-          backdrop-filter:blur(10px);
+          box-shadow:0 4px 18px rgba(100,60,20,.10),0 1px 3px rgba(100,60,20,.06),inset 0 1px 0 rgba(255,255,255,.70);
+          backdrop-filter:blur(24px) saturate(1.6);
+          -webkit-backdrop-filter:blur(24px) saturate(1.6);
           transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;
         }
-        .ac-card:hover { transform:translateY(-3px); box-shadow:0 10px 32px rgba(100,60,20,.15),inset 0 1px 0 rgba(255,255,255,.85); }
+        .ac-card:hover { transform:translateY(-3px); box-shadow:0 10px 32px rgba(100,60,20,.15),inset 0 1px 0 rgba(255,255,255,.70); }
         .ac-card:active { transform:scale(.96); }
         .ac-shimmer { position:absolute;inset:0;background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.55) 50%,transparent 64%);transform:translateX(-130%);pointer-events:none;border-radius:inherit; }
         .ac-card:hover .ac-shimmer { animation:shimmer .55s ease forwards; }
@@ -202,14 +203,11 @@ export default function GuestDashboard() {
             <div style={{ position:"absolute", top:-50, right:-50, width:180, height:180, borderRadius:"50%", background:"radial-gradient(circle,rgba(164,0,93,0.22),transparent 65%)", animation:"blob1 7s ease-in-out infinite", pointerEvents:"none" }} />
             <div style={{ position:"absolute", bottom:20, left:-40, width:150, height:150, borderRadius:"50%", background:"radial-gradient(circle,rgba(196,74,135,0.15),transparent 65%)", animation:"blob2 9s ease-in-out infinite", pointerEvents:"none" }} />
 
-            <div style={{ position:"relative", zIndex:2, padding:"32px 20px 52px" }}>
+            <div style={{ position:"relative", zIndex:2, padding:"40px 20px 56px" }}>
               <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:8 }}>
                 <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-                    <span style={{ fontSize:11 }}>{hour < 12 ? "☀️" : hour < 17 ? "🌤️" : "🌙"}</span>
-                    <p style={{ fontSize:9, color:"rgba(255,255,255,.82)", fontWeight:500, letterSpacing:".24em", textTransform:"uppercase", textShadow:"0 1px 10px rgba(0,0,0,.9)", margin:0, lineHeight:1 }}>{greeting}</p>
-                  </div>
-                  <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:34, fontWeight:300, fontStyle:"italic", color:"#fff", lineHeight:1, margin:0, textShadow:"0 2px 20px rgba(0,0,0,.5)", letterSpacing:"-.01em" }}>
+                  <p style={{ fontSize:9, color:"rgba(255,255,255,.82)", fontWeight:500, letterSpacing:".24em", textTransform:"uppercase", textShadow:"0 1px 10px rgba(0,0,0,.9)", margin:0, lineHeight:1 }}>{greeting}</p>
+                  <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:40, fontWeight:300, fontStyle:"italic", color:"#fff", lineHeight:1, margin:0, textShadow:"0 2px 20px rgba(0,0,0,.5)", letterSpacing:"-.01em" }}>
                     {guest?.name || "Valued Guest"}
                   </h1>
                 </div>
@@ -325,7 +323,7 @@ export default function GuestDashboard() {
                   {/* Event card fills all available vertical space */}
                   <div
                     style={{
-                      flex:1, position:"relative", borderRadius:18, overflow:"hidden", minHeight:0,
+                      flex:1, position:"relative", borderRadius:18, overflow:"hidden", minHeight:0, maxHeight:"42vh",
                       boxShadow:"0 12px 40px rgba(26,20,16,.16)", cursor:"pointer",
                     }}
                     onTouchStart={handleTouchStart}
