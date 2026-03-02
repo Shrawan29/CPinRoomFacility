@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useGuestAuth } from "../context/GuestAuthContext";
+import GuestChatWidget from "./guest/GuestChatWidget";
 
 export default function GuestProtectedRoute({ children }) {
   const { token, loading } = useGuestAuth();
@@ -47,6 +48,7 @@ export default function GuestProtectedRoute({ children }) {
       }}
     >
       {children}
+      <GuestChatWidget />
     </div>
   );
 }

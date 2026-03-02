@@ -51,15 +51,24 @@ dataSyncService.initialize();
 const app = express();
 
 /* =========================================================
-   CORS (RAILWAY + VERCEL SAFE)
+   CORS (DEPLOYMENT SAFE)
+   - Allows localhost in dev
+   - Allows Vercel (.vercel.app) and Render (.onrender.com)
+   - Allows explicit FRONTEND_URL (recommended for prod)
    ========================================================= */
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
 
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (frontendUrl && origin === frontendUrl) {
+      return callback(null, true);
+    }
+
     if (
       origin.startsWith("http://localhost") ||
-      origin.endsWith(".vercel.app")
+      origin.endsWith(".vercel.app") ||
+      origin.endsWith(".onrender.com")
     ) {
       return callback(null, true);
     }
