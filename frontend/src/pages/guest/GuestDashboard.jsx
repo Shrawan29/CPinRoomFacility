@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
+import GuestBottomNav from "../../components/guest/GuestBottomNav";
 import hotelbg from "../../assets/hotel-bg.jpg";
 import logo from "../../assets/logo.png";
 
@@ -21,51 +22,12 @@ const HouseIcon = () => (
   </svg>
 );
 
-const EventsNavIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
-    <path d="M8 3v3" /><path d="M16 3v3" /><path d="M4 7h16" />
-    <path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
-    <path d="M8 11h4" />
-  </svg>
-);
 
-const OrdersNavIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
-    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-    <rect x="9" y="3" width="6" height="4" rx="1" /><path d="M9 12h6" /><path d="M9 16h4" />
-  </svg>
-);
-
-const SupportNavIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
-    <circle cx="12" cy="12" r="10" />
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-    <circle cx="12" cy="17" r=".5" fill="currentColor" />
-  </svg>
-);
-
-const HotelNavIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
-    <path d="M3 21h18" />
-    <path d="M6 21V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14" />
-    <path d="M10 7h4" />
-    <path d="M10 11h4" />
-    <path d="M10 15h4" />
-  </svg>
-);
-
-const HomeNavIcon = ({ active }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
-    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z" />
-    <path d="M9 21V12h6v9" />
-  </svg>
-);
 
 export default function GuestDashboard() {
   const { guest, loading } = useGuestAuth();
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
-  const [activeNav, setActiveNav] = useState("home");
   const [cardsVisible, setCardsVisible] = useState(false);
 
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
@@ -152,18 +114,6 @@ export default function GuestDashboard() {
     { icon: <FoodIcon />,  label: "Food Order",   sub: "In-room dining",  route: "/guest/menu",         accent: "linear-gradient(135deg,#A4005D,#C44A87)" },
     { icon: <HouseIcon />, label: "Housekeeping", sub: "Room essentials", route: "/guest/housekeeping", accent: "linear-gradient(135deg,#c9a96e,#b8883a)" },
   ];
-
-  const navItemsLeft = [
-    { key: "home",  label: "Home",      icon: (a) => <HomeNavIcon active={a} />,  route: "/guest/dashboard" },
-    { key: "hotel", label: "Hotel Info", icon: (a) => <HotelNavIcon active={a} />, route: "/guest/hotel-info" },
-  ];
-
-  const navItemsRight = [
-    { key: "orders", label: "Orders", icon: (a) => <OrdersNavIcon active={a} />, route: "/guest/orders" },
-    { key: "events", label: "Events", icon: (a) => <EventsNavIcon active={a} />, route: "/guest/events" },
-  ];
-
-  const isAiActive = activeNav === "ai";
 
   return (
     <>
@@ -279,8 +229,7 @@ export default function GuestDashboard() {
         .card-hover:active { transform: scale(0.97); }
         .row-hover  { transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .row-hover:active  { transform: scale(0.98); }
-        .nav-btn { transition: background 0.2s ease, transform 0.15s ease; }
-        .nav-btn:active { transform:scale(0.93); }
+
       `}</style>
 
       {/* ── ROOT: identical to original ── */}
@@ -672,115 +621,7 @@ export default function GuestDashboard() {
         </div>
         {/* end scrollable */}
 
-        {/* ══ BOTTOM NAV — same structure as original ══ */}
-        <div style={{
-          flexShrink: 0,
-          background: "rgba(242,232,220,0.97)", backdropFilter: "blur(24px)",
-          borderTop: "1px solid rgba(164,0,93,0.1)",
-          boxShadow: "0 -4px 24px rgba(26,20,16,0.08)",
-          maxWidth: 430, width: "100%", margin: "0 auto",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        }}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-around", padding: "7px 8px 5px" }}>
-            {navItemsLeft.map((item) => {
-              const isActive = activeNav === item.key;
-              return (
-                <button key={item.key} onClick={() => { setActiveNav(item.key); navigate(item.route); }} className="nav-btn"
-                  style={{
-                    position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    padding: "6px 18px", borderRadius: 14,
-                    background: isActive ? "rgba(164,0,93,0.08)" : "transparent",
-                    border: "none", cursor: "pointer",
-                  }}
-                >
-                  <span style={{ color: isActive ? "#A4005D" : "#8a7a70", transition: "color 0.2s ease" }}>
-                    {item.icon(isActive)}
-                  </span>
-                  <span style={{
-                    fontSize: 7, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
-                    color: isActive ? "#A4005D" : "#8a7a70", transition: "color 0.2s ease",
-                  }}>{item.label}</span>
-                  {isActive && (
-                    <div style={{
-                      position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)",
-                      width: 18, height: 2, borderRadius: 1, background: "#A4005D",
-                    }} />
-                  )}
-                </button>
-              );
-            })}
-
-            {/* Center AI Chat */}
-            <button
-              key="ai"
-              onClick={() => { setActiveNav("ai"); navigate("/guest/support"); }}
-              className="nav-btn"
-              style={{
-                position: "relative",
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                padding: 0,
-                transform: "translateY(-10px)",
-              }}
-            >
-              <div style={{
-                width: 56,
-                height: 56,
-                borderRadius: "50%",
-                background: "#A4005D",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 10px 30px rgba(26,20,16,0.22)",
-                border: isAiActive ? "2px solid rgba(255,255,255,0.9)" : "2px solid rgba(255,255,255,0.65)",
-              }}>
-                <span style={{ color: "#fff" }}>
-                  <SupportNavIcon active={true} />
-                </span>
-              </div>
-              <div style={{
-                marginTop: 6,
-                fontSize: 7,
-                fontWeight: 800,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: isAiActive ? "#A4005D" : "#8a7a70",
-                textAlign: "center",
-              }}>
-                AI Chat
-              </div>
-            </button>
-
-            {navItemsRight.map((item) => {
-              const isActive = activeNav === item.key;
-              return (
-                <button key={item.key} onClick={() => { setActiveNav(item.key); navigate(item.route); }} className="nav-btn"
-                  style={{
-                    position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    padding: "6px 18px", borderRadius: 14,
-                    background: isActive ? "rgba(164,0,93,0.08)" : "transparent",
-                    border: "none", cursor: "pointer",
-                  }}
-                >
-                  <span style={{ color: isActive ? "#A4005D" : "#8a7a70", transition: "color 0.2s ease" }}>
-                    {item.icon(isActive)}
-                  </span>
-                  <span style={{
-                    fontSize: 7, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase",
-                    color: isActive ? "#A4005D" : "#8a7a70", transition: "color 0.2s ease",
-                  }}>{item.label}</span>
-                  {isActive && (
-                    <div style={{
-                      position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)",
-                      width: 18, height: 2, borderRadius: 1, background: "#A4005D",
-                    }} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <GuestBottomNav />
 
       </div>
     </>
