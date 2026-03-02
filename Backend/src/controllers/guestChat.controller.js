@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 
 import Event from "../models/Event.js";
+import HotelInfo from "../models/HotelInfo.js";
 import MenuItem from "../models/MenuItem.js";
 
 const MAX_MESSAGE_CHARS = 2000;
@@ -118,6 +119,89 @@ const searchEvents = async (args) => {
       status: e.status,
     })),
   };
+};
+
+const searchHotelInfo = async (args) => {
+  const query = toTrimmedString(args?.query);
+  const section = toTrimmedString(args?.section).toLowerCase();
+  const limit = clampInt(args?.limit, 1, MAX_TOOL_LIMIT, 10);
+
+  const info = await HotelInfo.findOne().lean();
+  if (!info) {
+    return { found: false, message: "Hotel info not configured" };
+  }
+
+  const regex = buildRegex(query);
+  const matches = (value) => {
+    if (!regex) return true;
+    return regex.test(String(value || ""));
+  };
+
+  const basicInfo = {
+    name: toTrimmedString(info?.basicInfo?.name),
+    description: toTrimmedString(info?.basicInfo?.description),
+    address: toTrimmedString(info?.basicInfo?.address),
+    contactPhone: toTrimmedString(info?.basicInfo?.contactPhone),
+    contactEmail: toTrimmedString(info?.basicInfo?.contactEmail),
+  };
+
+  let amenities = Array.isArray(info?.amenities) ? info.amenities : [];
+  amenities = amenities
+    .filter((a) => a && a.available !== false)
+    .filter((a) => matches(a.name))
+    .slice(0, limit)
+    .map((a) => ({ name: toTrimmedString(a.name), available: a.available !== false }));
+
+  let services = Array.isArray(info?.services) ? info.services : [];
+  services = services
+    .filter((s) => s && s.available !== false)
+    .filter((s) => matches(s.name) || matches(s.description))
+    .slice(0, limit)
+    .map((s) => ({
+      name: toTrimmedString(s.name),
+      description: toTrimmedString(s.description),
+      available: s.available !== false,
+    }));
+
+  let policies = Array.isArray(info?.policies) ? info.policies : [];
+  policies = policies
+    .map((p) => toTrimmedString(p))
+    .filter(Boolean)
+    .filter((p) => matches(p))
+    .slice(0, limit);
+
+  const emergency = {
+    frontDeskNumber: toTrimmedString(info?.emergency?.frontDeskNumber),
+    ambulanceNumber: toTrimmedString(info?.emergency?.ambulanceNumber),
+    fireSafetyInfo: toTrimmedString(info?.emergency?.fireSafetyInfo),
+  };
+
+  const payload = {
+    found: true,
+    basicInfo,
+    amenities,
+    services,
+    policies,
+    emergency,
+  };
+
+  if (section === "basic" || section === "basicinfo") {
+    return { found: true, basicInfo };
+  }
+  if (section === "amenities" || section === "amenity") {
+    return { found: true, count: amenities.length, amenities };
+  }
+  if (section === "services" || section === "service") {
+    return { found: true, count: services.length, services };
+  }
+  if (section === "policies" || section === "policy") {
+    return { found: true, count: policies.length, policies };
+  }
+  if (section === "emergency") {
+    return { found: true, emergency };
+  }
+
+  return payload;
 };
 
 const getOpenAIClient = () => {
@@ -277,6 +361,8 @@ const runResponsesToolLoop = async ({
       let result;
       if (toolName === "search_menu") {
         result = await searchMenu(args);
+      } else if (toolName === "search_hotel_info") {
+        result = await searchHotelInfo(args);
       } else if (toolName === "search_events") {
         result = await searchEvents(args);
       } else {
@@ -363,16 +449,44 @@ const inferNeedsEvents = (text) => {
   );
 };
 
+const inferNeedsHotelInfo = (text) => {
+  const t = String(text || "").toLowerCase();
+  return (
+    t.includes("amenit") ||
+    t.includes("hotel info") ||
+    t.includes("hotel") ||
+    t.includes("policy") ||
+    t.includes("policies") ||
+    t.includes("wifi") ||
+    t.includes("internet") ||
+    t.includes("check out") ||
+    t.includes("checkout") ||
+    t.includes("late checkout") ||
+    t.includes("emergency") ||
+    t.includes("front desk") ||
+    t.includes("contact") ||
+    t.includes("phone") ||
+    t.includes("address") ||
+    t.includes("pool") ||
+    t.includes("gym") ||
+    t.includes("spa") ||
+    t.includes("laundry") ||
+    t.includes("parking")
+  );
+};
+
 const buildRestrictedContext = async (userMessage) => {
   const wantsMenu = inferNeedsMenu(userMessage);
   const wantsEvents = inferNeedsEvents(userMessage);
+  const wantsHotelInfo = inferNeedsHotelInfo(userMessage);
 
-  const shouldFetchMenu = wantsMenu || !wantsEvents;
-  const shouldFetchEvents = wantsEvents || !wantsMenu;
+  const shouldFetchMenu = wantsMenu || (!wantsEvents && !wantsHotelInfo);
+  const shouldFetchEvents = wantsEvents || (!wantsMenu && !wantsHotelInfo);
+  const shouldFetchHotelInfo = wantsHotelInfo || (!wantsMenu && !wantsEvents);
 
   const isBroadMenuRequest = /\b(menu|food|dishes|items)\b/i.test(String(userMessage || ""));
 
-  const [menu, events] = await Promise.all([
+  const [menu, events, hotelInfo] = await Promise.all([
     shouldFetchMenu
       ? searchMenu({
           query: isBroadMenuRequest ? "" : userMessage,
@@ -386,9 +500,15 @@ const buildRestrictedContext = async (userMessage) => {
           limit: 6,
         })
       : Promise.resolve({ count: 0, events: [] }),
+    shouldFetchHotelInfo
+      ? searchHotelInfo({
+          query: userMessage,
+          limit: 12,
+        })
+      : Promise.resolve({ found: false }),
   ]);
 
-  return { menu, events };
+  return { menu, events, hotelInfo };
 };
 
 export const guestChat = async (req, res) => {
@@ -427,9 +547,9 @@ export const guestChat = async (req, res) => {
     const system = {
       role: "system",
       content:
-        "You are a hotel guest assistant. You ONLY have access to two data sources: (1) hotel EVENTS, (2) the FOOD MENU. " +
+        "You are a hotel guest assistant. You ONLY have access to three data sources: (1) hotel EVENTS, (2) the FOOD MENU, (3) HOTEL INFO (amenities/services/policies/contact/emergency). " +
         "Do not answer questions about anything else (orders, billing, rooms, staff, housekeeping, admin, guest accounts, etc). " +
-        "When you need factual info, call the provided tools. If the user asks for something outside events/menu, refuse briefly and redirect to events/menu.",
+        "When you need factual info, call the provided tools. If the user asks for something outside events/menu/hotel info, refuse briefly and redirect.",
     };
 
     const tools = [
@@ -449,6 +569,26 @@ export const guestChat = async (req, res) => {
               availableOnly: { type: "boolean", description: "Only available items (default true)" },
               maxPrice: { type: "number", description: "Maximum price" },
               limit: { type: "integer", description: "Max results (1-20)" },
+            },
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "search_hotel_info",
+          description:
+            "Search hotel info (amenities/services/policies/contact/emergency). Returns matching items or a compact summary.",
+          parameters: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              query: { type: "string", description: "Text to search (optional)" },
+              section: {
+                type: "string",
+                description: "Optional section: basicInfo, amenities, services, policies, emergency",
+              },
+              limit: { type: "integer", description: "Max results per section (1-20)" },
             },
           },
         },
@@ -531,7 +671,7 @@ export const guestChat = async (req, res) => {
               role: "system",
               content:
                 "The following JSON is the ONLY database information you may use. " +
-                "If it doesn't contain the answer, say you don't know and offer to help with menu or events.\n\n" +
+                "If it doesn't contain the answer, say you don't know and offer to help with menu, events, or hotel info.\n\n" +
                 JSON.stringify(context),
             },
             ...history,
@@ -583,6 +723,8 @@ export const guestChat = async (req, res) => {
         let result;
         if (toolName === "search_menu") {
           result = await searchMenu(args);
+        } else if (toolName === "search_hotel_info") {
+          result = await searchHotelInfo(args);
         } else if (toolName === "search_events") {
           result = await searchEvents(args);
         } else {

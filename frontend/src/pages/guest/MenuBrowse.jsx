@@ -112,6 +112,17 @@ export default function MenuBrowse() {
       ),
     },
     {
+      key: "hotel", label: "Hotel Info", route: "/guest/hotel-info",
+      icon: (active) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
+          <path d="M3 21h18" />
+          <path d="M6 21V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14" />
+          <path d="M10 7h4" />
+          <path d="M10 11h4" /><path d="M10 15h4" />
+        </svg>
+      ),
+    },
+    {
       key: "orders", label: "Orders", route: "/guest/orders",
       icon: (active) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
@@ -618,7 +629,7 @@ export default function MenuBrowse() {
                   style={{
                     position: "relative",
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-                    padding: "6px 24px", borderRadius: 14,
+                    padding: "6px 18px", borderRadius: 14,
                     background: isActive ? "rgba(164,0,93,0.07)" : "transparent",
                     border: "none", cursor: "pointer",
                   }}

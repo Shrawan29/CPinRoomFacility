@@ -120,6 +120,17 @@ export default function GuestHousekeeping() {
       ),
     },
     {
+      key: "hotel", label: "Hotel Info", route: "/guest/hotel-info",
+      icon: (active) => (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
+          <path d="M3 21h18" />
+          <path d="M6 21V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14" />
+          <path d="M10 7h4" />
+          <path d="M10 11h4" /><path d="M10 15h4" />
+        </svg>
+      ),
+    },
+    {
       key: "orders", label: "Orders", route: "/guest/orders",
       icon: (active) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
@@ -263,7 +274,7 @@ export default function GuestHousekeeping() {
                 fontSize: 9, color: "#6B6B6B", fontWeight: 700,
                 letterSpacing: "0.18em", textTransform: "uppercase",
                 margin: "0 0 1px 0",
-              }}>Room Service</p>
+              }}>Centre Point Nagpur</p>
               <h1 style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: 22, fontWeight: 600, fontStyle: "italic",

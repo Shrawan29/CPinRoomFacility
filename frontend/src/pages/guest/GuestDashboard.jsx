@@ -134,6 +134,15 @@ export default function GuestDashboard() {
       <circle cx="12" cy="17" r=".5" fill="currentColor" />
     </svg>
   );
+  const HotelNavIcon = ({ active }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
+      <path d="M3 21h18" />
+      <path d="M6 21V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14" />
+      <path d="M10 7h4" />
+      <path d="M10 11h4" />
+      <path d="M10 15h4" />
+    </svg>
+  );
   const HomeNavIcon = ({ active }) => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z" />
@@ -154,6 +163,7 @@ export default function GuestDashboard() {
 
   const navItems = [
     { key: "home",    label: "Home",   icon: (a) => <HomeNavIcon active={a} />,    route: "/guest/dashboard" },
+    { key: "hotel",   label: "Hotel Info", icon: (a) => <HotelNavIcon active={a} />,   route: "/guest/hotel-info" },
     { key: "orders",  label: "Orders", icon: (a) => <OrdersNavIcon active={a} />,  route: "/guest/orders" },
     { key: "support", label: "Chat",   icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
   ];
@@ -748,7 +758,6 @@ export default function GuestDashboard() {
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
                   { icon: <EventsIcon />,    label: "All Events", sub: "Experiences & activities", route: "/guest/events",     delay: 400 },
-                  { icon: <AmenitiesIcon />, label: "Amenities",  sub: "Facilities & services",   route: "/guest/hotel-info",  delay: 480 },
                 ].map((item, i) => (
                   <button key={item.label} onClick={() => navigate(item.route)} className="row-hover"
                     style={{
@@ -808,7 +817,7 @@ export default function GuestDashboard() {
                 <button key={item.key} onClick={() => { setActiveNav(item.key); navigate(item.route); }} className="nav-btn"
                   style={{
                     position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    padding: "6px 24px", borderRadius: 14,
+                    padding: "6px 18px", borderRadius: 14,
                     background: isActive ? "rgba(164,0,93,0.08)" : "transparent",
                     border: "none", cursor: "pointer",
                   }}
