@@ -18,6 +18,7 @@ export default function MenuBrowse() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [orderNotes, setOrderNotes] = useState("");
   const categoryScrollRef = useRef(null);
 
   useEffect(() => {
@@ -81,11 +82,12 @@ export default function MenuBrowse() {
       await placeOrder({
         items: cart.map((item) => ({
           menuItemId: item._id,
-          quantity: item.quantity,
-          price: item.price,
+          qty: item.quantity,
         })),
+        notes: String(orderNotes || "").trim(),
       });
       setCart([]);
+      setOrderNotes("");
       setShowConfirmation(false);
       setSuccessMessage("Order placed successfully");
       setTimeout(() => setSuccessMessage(""), 3500);
@@ -751,6 +753,40 @@ export default function MenuBrowse() {
                   }}>₹{cartTotal.toFixed(2)}</span>
                 </div>
 
+                <div style={{ marginBottom: 14 }}>
+                  <label
+                    htmlFor="order-notes"
+                    style={{
+                      display: "block",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "#6B6B6B",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Special Request (optional)
+                  </label>
+                  <textarea
+                    id="order-notes"
+                    value={orderNotes}
+                    onChange={(e) => setOrderNotes(e.target.value)}
+                    rows={2}
+                    maxLength={250}
+                    placeholder="E.g. no onions, extra spicy, allergies…"
+                    style={{
+                      width: "100%",
+                      borderRadius: 14,
+                      border: "1px solid rgba(164,0,93,0.14)",
+                      padding: "10px 12px",
+                      fontSize: 13,
+                      outline: "none",
+                      background: "rgba(255,255,255,0.95)",
+                    }}
+                  />
+                </div>
+
                 <button
                   onClick={handlePlaceOrder}
                   disabled={submitting}
@@ -836,6 +872,30 @@ export default function MenuBrowse() {
                   }}>₹{cartTotal.toFixed(2)}</span>
                 </div>
               </div>
+
+              {String(orderNotes || "").trim() && (
+                <div style={{
+                  background: "#fff",
+                  padding: "10px 14px",
+                  borderRadius: 16,
+                  marginBottom: 12,
+                  border: "1px solid rgba(164,0,93,0.08)",
+                }}>
+                  <div style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "#6B6B6B",
+                    marginBottom: 6,
+                  }}>
+                    Special Request
+                  </div>
+                  <div style={{ fontSize: 12, color: "#1F1F1F", whiteSpace: "pre-wrap" }}>
+                    {String(orderNotes).trim()}
+                  </div>
+                </div>
+              )}
 
               <div style={{
                 background: "rgba(164,0,93,0.07)", border: "1px solid rgba(164,0,93,0.14)",
