@@ -130,7 +130,7 @@ export default function GuestHousekeeping() {
       ),
     },
     {
-      key: "support", label: "Support", route: "/guest/support",
+      key: "support", label: "Chat", route: "/guest/support",
       icon: (active) => (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.2" : "1.8"} strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
           <circle cx="12" cy="12" r="10" />

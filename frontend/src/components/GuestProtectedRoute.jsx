@@ -1,9 +1,10 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useGuestAuth } from "../context/GuestAuthContext";
 import GuestChatWidget from "./guest/GuestChatWidget";
 
 export default function GuestProtectedRoute({ children }) {
   const { token, loading } = useGuestAuth();
+  const location = useLocation();
 
   // Loading screen
   if (loading) {
@@ -48,7 +49,9 @@ export default function GuestProtectedRoute({ children }) {
       }}
     >
       {children}
-      <GuestChatWidget />
+      {!String(location?.pathname || "").startsWith("/guest/support") && (
+        <GuestChatWidget />
+      )}
     </div>
   );
 }

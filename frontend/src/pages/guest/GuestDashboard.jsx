@@ -170,7 +170,7 @@ export default function GuestDashboard() {
   const navItems = [
     { key: "home",    label: "Home",    icon: (a) => <HomeNavIcon active={a} />,    route: "/guest/dashboard" },
     { key: "orders",  label: "Orders",  icon: (a) => <OrdersNavIcon active={a} />,  route: "/guest/orders" },
-    { key: "support", label: "Support", icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
+    { key: "support", label: "Chat", icon: (a) => <SupportNavIcon active={a} />, route: "/guest/support" },
   ];
 
   // No longer needed for single card view

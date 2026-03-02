@@ -27,7 +27,7 @@ const SupportNavIcon = ({ active }) => (
 const navItems = [
   { key: "home", label: "Home", route: "/guest/dashboard", icon: HomeNavIcon },
   { key: "orders", label: "Orders", route: "/guest/orders", icon: OrdersNavIcon },
-  { key: "support", label: "Support", route: "/guest/support", icon: SupportNavIcon },
+  { key: "support", label: "Chat", route: "/guest/support", icon: SupportNavIcon },
 ];
 
 export default function GuestBottomNav({ activeNav, setActiveNav }) {

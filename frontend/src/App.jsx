@@ -32,6 +32,7 @@ import GuestEvent from "./pages/guest/GuestEvent";
 import GuestEventDetails from "./pages/guest/GuestEventDetails";
 import GuestHotelInfo from "./pages/guest/GuestHotelInfo";
 import GuestHousekeeping from "./pages/guest/GuestHousekeeping";
+import GuestSupport from "./pages/guest/GuestSupport";
 
 // Housekeeping admin
 import HousekeepingDashboard from "./pages/admin/housekeeping/HousekeepingDashboard";
@@ -216,6 +217,15 @@ function App() {
         element={
           <GuestProtectedRoute>
             <GuestHousekeeping />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/support"
+        element={
+          <GuestProtectedRoute>
+            <GuestSupport />
           </GuestProtectedRoute>
         }
       />
