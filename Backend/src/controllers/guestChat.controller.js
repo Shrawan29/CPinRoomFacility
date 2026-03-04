@@ -176,6 +176,43 @@ const searchHotelInfo = async (args) => {
     fireSafetyInfo: toTrimmedString(info?.emergency?.fireSafetyInfo),
   };
 
+  const guestDisplay = extractGuestDisplayForChat(info?.guestDisplay);
+  const guestDisplayMatches = (() => {
+    if (!guestDisplay) return null;
+    const out = {};
+
+    for (const [key, val] of Object.entries(guestDisplay)) {
+      if (!val || typeof val !== "object") continue;
+
+      if (key === "contactCard" && Array.isArray(val.items)) {
+        const items = val.items
+          .filter((d) => matches(d?.label))
+          .slice(0, limit);
+        if (items.length > 0) out[key] = { items };
+        continue;
+      }
+
+      if (Array.isArray(val.items)) {
+        const items = val.items
+          .filter((i) => matches(i?.name) || matches(i?.desc) || matches(i?.hours) || matches(i?.tag))
+          .slice(0, limit);
+        if (items.length > 0) out[key] = { ...(val.headline ? { headline: val.headline } : {}), items };
+        continue;
+      }
+
+      if (Array.isArray(val.details)) {
+        const details = val.details
+          .filter((d) => matches(d?.label) || matches(d?.value))
+          .slice(0, limit);
+        if (details.length > 0) out[key] = { ...(val.headline ? { headline: val.headline } : {}), details };
+        continue;
+      }
+
+    }
+
+    return Object.keys(out).length > 0 ? out : null;
+  })();
+
   const payload = {
     found: true,
     basicInfo,
@@ -183,6 +220,7 @@ const searchHotelInfo = async (args) => {
     services,
     policies,
     emergency,
+    ...(guestDisplay ? { guestDisplay } : {}),
   };
 
   if (section === "basic" || section === "basicinfo") {
@@ -201,8 +239,99 @@ const searchHotelInfo = async (args) => {
     return { found: true, emergency };
   }
 
+  if (section === "guestdisplay" || section === "guest_display" || section === "guest") {
+    return guestDisplayMatches
+      ? { found: true, guestDisplay: guestDisplayMatches }
+      : { found: true, guestDisplay: null, message: "No guestDisplay matches" };
+  }
+
   return payload;
 };
+
+function extractGuestDisplayForChat(guestDisplay) {
+  if (!guestDisplay || typeof guestDisplay !== "object") return null;
+
+  const pickString = (v) => {
+    const s = toTrimmedString(v);
+    return s ? s : null;
+  };
+
+  const sanitizeItems = (items) => {
+    if (!Array.isArray(items)) return null;
+    const out = items
+      .slice(0, 40)
+      .map((i) => ({
+        name: toTrimmedString(i?.name),
+        desc: toTrimmedString(i?.desc || i?.description),
+        hours: toTrimmedString(i?.hours),
+        tag: toTrimmedString(i?.tag),
+      }))
+      .filter((i) => i.name || i.desc || i.hours || i.tag);
+    return out.length > 0 ? out : null;
+  };
+
+  const sanitizeDetails = (details) => {
+    if (!Array.isArray(details)) return null;
+    const out = details
+      .slice(0, 40)
+      .map((d) => ({
+        label: toTrimmedString(d?.label),
+        value: toTrimmedString(d?.value),
+      }))
+      .filter((d) => d.label || d.value);
+    return out.length > 0 ? out : null;
+  };
+
+  const sanitizeContactCard = (contactCard) => {
+    const items = contactCard?.items;
+    if (!Array.isArray(items)) return null;
+    const out = items
+      .slice(0, 20)
+      .map((c) => ({ label: toTrimmedString(c?.label) }))
+      .filter((c) => c.label);
+    return out.length > 0 ? { items: out } : null;
+  };
+
+  const allowedKeys = new Set([
+    "dining",
+    "wellness",
+    "business",
+    "facilities",
+    "wifi",
+    "emergency",
+    "checkout",
+    "contactCard",
+  ]);
+
+  const result = {};
+  for (const [key, val] of Object.entries(guestDisplay)) {
+    if (!allowedKeys.has(key)) continue;
+
+    if (key === "contactCard") {
+      const cc = sanitizeContactCard(val);
+      if (cc) result[key] = cc;
+      continue;
+    }
+
+    if (!val || typeof val !== "object") continue;
+
+    const entry = {};
+    const headline = pickString(val?.headline);
+    const sub = pickString(val?.sub);
+    if (headline) entry.headline = headline;
+    if (sub) entry.sub = sub;
+
+    const items = sanitizeItems(val?.items);
+    if (items) entry.items = items;
+
+    const details = sanitizeDetails(val?.details);
+    if (details) entry.details = details;
+
+    if (Object.keys(entry).length > 0) result[key] = entry;
+  }
+
+  return Object.keys(result).length > 0 ? result : null;
+}
 
 const getOpenAIClient = () => {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -520,12 +649,15 @@ const buildHotelInfoContext = async () => {
     fireSafetyInfo: toTrimmedString(info?.emergency?.fireSafetyInfo),
   };
 
+  const guestDisplay = extractGuestDisplayForChat(info?.guestDisplay);
+
   return {
     basicInfo,
     amenities,
     services,
     policies,
     emergency,
+    ...(guestDisplay ? { guestDisplay } : {}),
   };
 };
 
@@ -587,6 +719,50 @@ const formatHotelInfoContextForPrompt = (ctx) => {
     if (frontDesk) lines.push(`- Front Desk: ${frontDesk}`);
     if (ambulance) lines.push(`- Ambulance: ${ambulance}`);
     if (fire) lines.push(`- Fire Safety: ${fire}`);
+  }
+
+  const guestDisplay = ctx?.guestDisplay && typeof ctx.guestDisplay === "object" ? ctx.guestDisplay : null;
+  if (guestDisplay) {
+    lines.push("\nGuest Display (guest-facing hotel info cards):");
+    for (const [key, val] of Object.entries(guestDisplay)) {
+      if (!val || typeof val !== "object") continue;
+      lines.push(`\n[${key}]`);
+
+      const headline = toTrimmedString(val?.headline);
+      const sub = toTrimmedString(val?.sub);
+      if (headline) lines.push(`- Headline: ${headline}`);
+      if (sub) lines.push(`- Sub: ${sub}`);
+
+      if (Array.isArray(val?.items) && val.items.length > 0) {
+        lines.push("- Items:");
+        for (const it of val.items.slice(0, 25)) {
+          const n = toTrimmedString(it?.name);
+          const d = toTrimmedString(it?.desc);
+          const h = toTrimmedString(it?.hours);
+          const t = toTrimmedString(it?.tag);
+          const parts = [n, d].filter(Boolean).join(" — ");
+          const meta = [h ? `hours: ${h}` : "", t ? `tag: ${t}` : ""].filter(Boolean).join(", ");
+          if (parts || meta) lines.push(`  - ${parts}${meta ? ` (${meta})` : ""}`);
+        }
+      }
+
+      if (Array.isArray(val?.details) && val.details.length > 0) {
+        lines.push("- Details:");
+        for (const d of val.details.slice(0, 25)) {
+          const label = toTrimmedString(d?.label);
+          const value = toTrimmedString(d?.value);
+          if (label || value) lines.push(`  - ${label ? `${label}: ` : ""}${value}`);
+        }
+      }
+
+      if (key === "contactCard" && Array.isArray(val?.items) && val.items.length > 0) {
+        lines.push("- Contact:");
+        for (const c of val.items.slice(0, 15)) {
+          const label = toTrimmedString(c?.label);
+          if (label) lines.push(`  - ${label}`);
+        }
+      }
+    }
   }
 
   return lines.join("\n");
@@ -750,7 +926,8 @@ export const guestChat = async (req, res) => {
               query: { type: "string", description: "Text to search (optional)" },
               section: {
                 type: "string",
-                description: "Optional section: basicInfo, amenities, services, policies, emergency",
+                description:
+                  "Optional section: basicInfo, amenities, services, policies, emergency, guestDisplay",
               },
               limit: { type: "integer", description: "Max results per section (1-20)" },
             },

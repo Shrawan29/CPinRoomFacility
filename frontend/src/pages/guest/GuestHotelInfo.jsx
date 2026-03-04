@@ -76,13 +76,12 @@ export default function GuestHotelInfo() {
 
   const basicName = toTrimmed(hotelInfo?.basicInfo?.name) || "Hotel";
   const guestDisplay = hotelInfo?.guestDisplay && typeof hotelInfo.guestDisplay === "object" ? hotelInfo.guestDisplay : null;
-  const guestDisplayData = (guestDisplay && typeof guestDisplay?.data === "object") ? guestDisplay.data : guestDisplay;
   const amenities = Array.isArray(hotelInfo?.amenities) ? hotelInfo.amenities : [];
   const services = Array.isArray(hotelInfo?.services) ? hotelInfo.services : [];
   const policies = Array.isArray(hotelInfo?.policies) ? hotelInfo.policies : [];
 
   const contacts = (() => {
-    const fromGuestDisplay = guestDisplayData?.contactCard?.items;
+    const fromGuestDisplay = guestDisplay?.contactCard?.items;
     if (Array.isArray(fromGuestDisplay) && fromGuestDisplay.length > 0) {
       return fromGuestDisplay
         .map((c) => ({ icon: String(c?.icon || "").trim(), label: toTrimmed(c?.label) }))
@@ -217,7 +216,7 @@ export default function GuestHotelInfo() {
     },
   };
 
-  const active = (guestDisplayData && guestDisplayData[activeCategory]) ? guestDisplayData[activeCategory] : derivedData[activeCategory];
+  const active = (guestDisplay && guestDisplay[activeCategory]) ? guestDisplay[activeCategory] : derivedData[activeCategory];
 
   return (
     <>
