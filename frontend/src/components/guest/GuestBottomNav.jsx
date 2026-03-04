@@ -7,7 +7,6 @@ const HomeIcon = ({ active }) => (
     <path d="M9 21V12h6v9" />
   </svg>
 );
-
 const OrdersIcon = ({ active }) => (
   <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor"
     strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 21, height: 21 }}>
@@ -16,7 +15,6 @@ const OrdersIcon = ({ active }) => (
     <path d="M9 12h6" /><path d="M9 16h4" />
   </svg>
 );
-
 const EventsIcon = ({ active }) => (
   <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor"
     strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 21, height: 21 }}>
@@ -25,7 +23,6 @@ const EventsIcon = ({ active }) => (
     <path d="M8 11h4" />
   </svg>
 );
-
 const HotelIcon = ({ active }) => (
   <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor"
     strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 21, height: 21 }}>
@@ -34,13 +31,12 @@ const HotelIcon = ({ active }) => (
     <path d="M10 7h4" /><path d="M10 11h4" /><path d="M10 15h4" />
   </svg>
 );
-
 const AiIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8"
+  <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="1.8"
     strokeLinecap="round" strokeLinejoin="round" style={{ width: 21, height: 21 }}>
     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-    <circle cx="9.5" cy="11.5" r="0.65" fill="white" stroke="none" />
-    <circle cx="14.5" cy="11.5" r="0.65" fill="white" stroke="none" />
+    <circle cx="9.5" cy="11.5" r="0.65" fill="rgba(255,255,255,0.95)" stroke="none" />
+    <circle cx="14.5" cy="11.5" r="0.65" fill="rgba(255,255,255,0.95)" stroke="none" />
   </svg>
 );
 
@@ -73,47 +69,114 @@ export default function GuestBottomNav() {
     else if (pathname.startsWith("/guest/orders")) activeKey = "orders";
     else                                            activeKey = "home";
   }
-
   const isAiActive = activeKey === "ai";
+
+  /* ── Shared glass style (same as quick-action cards) ── */
+  const GLASS_BG     = "rgba(244,235,222,0.82)";
+  const GLASS_BLUR   = "blur(28px) saturate(1.8)";
+  const GLASS_BORDER = "1px solid rgba(255,255,255,0.62)";
+  const GLASS_SHADOW =
+    "0 8px 32px rgba(26,20,16,0.13)," +
+    "0 2px 8px rgba(26,20,16,0.07)," +
+    "inset 0 1px 0 rgba(255,255,255,0.72)";
+
+  const Tab = ({ item, delay }) => {
+    const on = activeKey === item.key;
+    return (
+      <button
+        onClick={() => navigate(item.route)}
+        className="gbn-tab"
+        style={{
+          animationDelay: `${delay}s`,
+          flex: 1, height: "100%",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          gap: 4, padding: 0,
+          background: "transparent", border: "none",
+          cursor: "pointer", position: "relative",
+          WebkitTapHighlightColor: "transparent",
+          transition: "transform 0.14s ease",
+        }}
+        onPointerDown={e  => e.currentTarget.style.transform = "scale(0.86)"}
+        onPointerUp={e    => e.currentTarget.style.transform = "scale(1)"}
+        onPointerLeave={e => e.currentTarget.style.transform = "scale(1)"}
+      >
+        <span style={{
+          display: "flex",
+          color: on ? "#A4005D" : "#b5a898",
+          transition: "color 0.22s, transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+          transform: on ? "translateY(-1px) scale(1.1)" : "scale(1)",
+        }}>
+          <item.Icon active={on} />
+        </span>
+        <span style={{
+          fontSize: 9.5, lineHeight: 1,
+          fontWeight: on ? 600 : 400,
+          color: on ? "#A4005D" : "#b5a898",
+          fontFamily: "'DM Sans', system-ui, sans-serif",
+          letterSpacing: "0.01em",
+          transition: "color 0.22s",
+        }}>{item.label}</span>
+        {/* Active pill underline */}
+        <div style={{
+          position: "absolute", bottom: 6,
+          width: on ? 20 : 0, height: 2.5,
+          borderRadius: 2,
+          background: "linear-gradient(90deg,#C44A87,#A4005D)",
+          transition: "width 0.32s cubic-bezier(0.22,1,0.36,1)",
+        }} />
+      </button>
+    );
+  };
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        @keyframes navUp {
-          from { opacity:0; transform:translateY(80px); }
+        @keyframes gbnUp {
+          from { opacity:0; transform:translateY(60px); }
           to   { opacity:1; transform:translateY(0); }
         }
-        @keyframes tabFade {
-          from { opacity:0; transform:translateY(6px); }
+        @keyframes gbnTab {
+          from { opacity:0; transform:translateY(8px); }
           to   { opacity:1; transform:translateY(0); }
         }
-        @keyframes orbDrop {
-          0%   { opacity:0; transform:scale(0.5) translateY(10px); }
-          65%  { transform:scale(1.07) translateY(-2px); }
+        @keyframes gbnOrb {
+          0%   { opacity:0; transform:scale(0.4) translateY(14px); }
+          62%  { transform:scale(1.06) translateY(-2px); }
           100% { opacity:1; transform:scale(1) translateY(0); }
         }
-        @keyframes ripple {
-          0%   { transform:scale(1);   opacity:0.55; }
-          100% { transform:scale(2.0); opacity:0;    }
+        /* Smooth ripple — scale up, fade out */
+        @keyframes rippleOut {
+          0%   { transform:scale(1);    opacity:0.5; }
+          100% { transform:scale(2.1);  opacity:0;   }
         }
-        @keyframes orbPulse {
-          0%,100% { box-shadow:0 4px 16px rgba(164,0,93,0.42),0 2px 6px rgba(0,0,0,0.16); }
-          50%     { box-shadow:0 6px 26px rgba(164,0,93,0.65),0 2px 6px rgba(0,0,0,0.16); }
+        /* Orb glow breathe */
+        @keyframes orbBreathe {
+          0%,100% { box-shadow: 0 0 0 0 rgba(164,0,93,0.0),  0 4px 18px rgba(164,0,93,0.40), 0 2px 6px rgba(0,0,0,0.18); }
+          50%     { box-shadow: 0 0 0 6px rgba(164,0,93,0.08), 0 6px 26px rgba(164,0,93,0.62), 0 2px 6px rgba(0,0,0,0.18); }
         }
 
-        .gbn-root  { animation: navUp  0.44s cubic-bezier(0.22,1,0.36,1) both; }
-        .gbn-tab   { animation: tabFade 0.32s ease both; }
-        .gbn-tab:active { transform: scale(0.84) !important; transition: transform 0.1s !important; }
-        .gbn-orb   { animation: orbDrop 0.48s cubic-bezier(0.22,1,0.36,1) 0.1s both; }
-        .gbn-orb:active .orb-core { transform: scale(0.87); }
-        .orb-core  { animation: orbPulse 2.8s ease-in-out 1s infinite; transition: transform 0.18s ease; }
-        .ripple-a  { animation: ripple 2.6s ease-out 1.1s infinite; }
-        .ripple-b  { animation: ripple 2.6s ease-out 2.4s infinite; }
+        .gbn-root { animation: gbnUp  0.44s cubic-bezier(0.22,1,0.36,1) both; }
+        .gbn-tab  { animation: gbnTab 0.34s ease both; }
+
+        .gbn-orb-btn { animation: gbnOrb 0.50s cubic-bezier(0.22,1,0.36,1) 0.1s both; }
+        .gbn-orb-btn:active .orb-core { transform: scale(0.88) !important; }
+
+        .orb-core {
+          animation: orbBreathe 2.8s ease-in-out 1s infinite;
+          transition: transform 0.18s cubic-bezier(0.22,1,0.36,1) !important;
+        }
+        .rpl { animation: rippleOut 2.8s ease-out infinite; }
+        .rpl2 { animation-delay: 1.4s; }
       `}</style>
 
-      {/* Outer shell — floats above page with side padding, like sketch */}
+      {/*
+        ── OUTER SHELL ──
+        No horizontal padding here — keep full width so left:50% is truly centered.
+        The pill gets horizontal margin via its own style.
+      */}
       <div className="gbn-root" style={{
         flexShrink: 0,
         position: "relative",
@@ -121,207 +184,127 @@ export default function GuestBottomNav() {
         width: "100%",
         maxWidth: 430,
         margin: "0 auto",
-        padding: "0 12px calc(env(safe-area-inset-bottom, 0px) + 10px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}>
 
-        {/*
-          The pill-shaped bar.
-          The notch is created by a circular div positioned at the top-center
-          that matches the page background, punching a smooth arc into the bar.
-          The orb then floats right in that notch.
-        */}
+        {/* ── Pill bar — 12px margin each side ── */}
         <div style={{
-          position: "relative",
+          margin: "0 12px",
           height: 64,
           borderRadius: 32,
-          background: "rgba(244,235,222,0.96)",
-          backdropFilter: "blur(28px) saturate(1.8)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.8)",
-          border: "1px solid rgba(255,255,255,0.60)",
-          boxShadow:
-            "0 8px 32px rgba(26,20,16,0.14)," +
-            "0 2px 8px rgba(26,20,16,0.08)," +
-            "inset 0 1px 0 rgba(255,255,255,0.70)",
+          background: GLASS_BG,
+          backdropFilter: GLASS_BLUR,
+          WebkitBackdropFilter: GLASS_BLUR,
+          border: GLASS_BORDER,
+          boxShadow: GLASS_SHADOW,
+          position: "relative",
           overflow: "visible",
         }}>
 
-          {/* ── Notch punch-out: matches body/page background exactly ── */}
+          {/* ── Notch punch-out: circular div matching page bg color ── */}
           <div style={{
             position: "absolute",
-            top: -18,
+            top: -20,
             left: "50%",
             transform: "translateX(-50%)",
-            width: 72,
-            height: 52,
-            /* This gradient background fades from the page bg to transparent
-               so it works even if the page bg is a gradient/image */
-            background: "radial-gradient(ellipse at 50% 0%, #eddfc5 62%, transparent 100%)",
-            borderRadius: "0 0 50% 50%",
+            width: 68,
+            height: 48,
+            background: "#eddfc5",
+            borderRadius: "0 0 34px 34px",
             zIndex: 0,
             pointerEvents: "none",
           }} />
 
-          {/* ── Nav items row ── */}
+          {/* ── White gloss strip at top of pill (matches quick-action card inset) ── */}
           <div style={{
-            position: "relative",
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            height: "100%",
-            padding: "0 4px",
-          }}>
-            {/* Left tabs */}
-            {[navItems[0], navItems[1]].map((item, i) => {
-              const on = activeKey === item.key;
-              return (
-                <button key={item.key} className="gbn-tab"
-                  onClick={() => navigate(item.route)}
-                  style={{
-                    flex: 1, display: "flex", flexDirection: "column",
-                    alignItems: "center", justifyContent: "center",
-                    gap: 4, height: "100%",
-                    background: "transparent", border: "none", cursor: "pointer",
-                    padding: 0, WebkitTapHighlightColor: "transparent",
-                    animationDelay: `${0.08 + i * 0.05}s`,
-                    transition: "transform 0.14s ease",
-                  }}>
-                  <span style={{
-                    display: "flex",
-                    color: on ? "#A4005D" : "#b8a898",
-                    transition: "color 0.22s, transform 0.22s cubic-bezier(0.22,1,0.36,1)",
-                    transform: on ? "translateY(-1px) scale(1.12)" : "scale(1)",
-                  }}>
-                    <item.Icon active={on} />
-                  </span>
-                  <span style={{
-                    fontSize: 9.5, lineHeight: 1,
-                    fontWeight: on ? 600 : 400,
-                    color: on ? "#A4005D" : "#b8a898",
-                    fontFamily: "'DM Sans', system-ui, sans-serif",
-                    letterSpacing: "0.01em",
-                    transition: "color 0.22s",
-                  }}>{item.label}</span>
-                  {/* Active underline dot */}
-                  <div style={{
-                    position: "absolute",
-                    bottom: 6,
-                    width: on ? 18 : 0,
-                    height: 2,
-                    borderRadius: 2,
-                    background: "#A4005D",
-                    transition: "width 0.3s cubic-bezier(0.22,1,0.36,1)",
-                  }} />
-                </button>
-              );
-            })}
+            position: "absolute",
+            top: 0, left: 12, right: 12, height: 1,
+            background: "rgba(255,255,255,0.72)",
+            borderRadius: "32px 32px 0 0",
+            pointerEvents: "none",
+            zIndex: 3,
+          }} />
 
-            {/* Center gap — the orb lives here, label at bottom */}
+          {/* ── Nav row ── */}
+          <div style={{
+            position: "relative", zIndex: 2,
+            display: "flex", alignItems: "center",
+            height: "100%", padding: "0 6px",
+          }}>
+            <Tab item={navItems[0]} delay={0.10} />
+            <Tab item={navItems[1]} delay={0.15} />
+
+            {/* Center gap — orb floats above, only label shows here */}
             <div style={{
-              flex: 1, display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "flex-end",
-              paddingBottom: 7, pointerEvents: "none",
+              flex: 1, height: "100%",
+              display: "flex", alignItems: "flex-end",
+              justifyContent: "center", paddingBottom: 7,
+              pointerEvents: "none",
             }}>
               <span style={{
                 fontSize: 9.5, lineHeight: 1,
                 fontWeight: isAiActive ? 600 : 400,
-                color: isAiActive ? "#A4005D" : "#b8a898",
+                color: isAiActive ? "#A4005D" : "#b5a898",
                 fontFamily: "'DM Sans', system-ui, sans-serif",
                 transition: "color 0.22s",
               }}>AI Chat</span>
             </div>
 
-            {/* Right tabs */}
-            {[navItems[2], navItems[3]].map((item, i) => {
-              const on = activeKey === item.key;
-              return (
-                <button key={item.key} className="gbn-tab"
-                  onClick={() => navigate(item.route)}
-                  style={{
-                    flex: 1, display: "flex", flexDirection: "column",
-                    alignItems: "center", justifyContent: "center",
-                    gap: 4, height: "100%",
-                    background: "transparent", border: "none", cursor: "pointer",
-                    padding: 0, WebkitTapHighlightColor: "transparent",
-                    animationDelay: `${0.18 + i * 0.05}s`,
-                    transition: "transform 0.14s ease",
-                  }}>
-                  <span style={{
-                    display: "flex",
-                    color: on ? "#A4005D" : "#b8a898",
-                    transition: "color 0.22s, transform 0.22s cubic-bezier(0.22,1,0.36,1)",
-                    transform: on ? "translateY(-1px) scale(1.12)" : "scale(1)",
-                  }}>
-                    <item.Icon active={on} />
-                  </span>
-                  <span style={{
-                    fontSize: 9.5, lineHeight: 1,
-                    fontWeight: on ? 600 : 400,
-                    color: on ? "#A4005D" : "#b8a898",
-                    fontFamily: "'DM Sans', system-ui, sans-serif",
-                    letterSpacing: "0.01em",
-                    transition: "color 0.22s",
-                  }}>{item.label}</span>
-                  {/* Active underline dot */}
-                  <div style={{
-                    position: "absolute",
-                    bottom: 6,
-                    width: on ? 18 : 0,
-                    height: 2,
-                    borderRadius: 2,
-                    background: "#A4005D",
-                    transition: "width 0.3s cubic-bezier(0.22,1,0.36,1)",
-                  }} />
-                </button>
-              );
-            })}
+            <Tab item={navItems[2]} delay={0.20} />
+            <Tab item={navItems[3]} delay={0.25} />
           </div>
         </div>
 
-        {/* ── Orb button — absolutely centered above the pill bar ── */}
+        {/*
+          ── ORB BUTTON ──
+          position:absolute relative to .gbn-root (no padding on root).
+          left:50% + translateX(-50%) = perfectly centered in the full 430px.
+          The pill has 12px margins, so the orb sits centered over the notch.
+        */}
         <button
-          className="gbn-orb"
+          className="gbn-orb-btn"
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            top: -22,
+            top: -24,
             left: "50%",
             transform: "translateX(-50%)",
-            zIndex: 10,
+            zIndex: 20,
             border: "none",
             background: "transparent",
             cursor: "pointer",
             padding: 0,
-            width: 52,
-            height: 52,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            width: 54, height: 54,
+            display: "flex", alignItems: "center", justifyContent: "center",
             WebkitTapHighlightColor: "transparent",
-          }}>
+          }}
+        >
           {/* Ripple rings */}
-          <div className="ripple-a" style={{
+          <div className="rpl" style={{
             position: "absolute", inset: 0, borderRadius: "50%",
-            border: "1.5px solid rgba(196,74,135,0.50)",
+            border: "1.5px solid rgba(196,74,135,0.48)",
             pointerEvents: "none",
           }} />
-          <div className="ripple-b" style={{
+          <div className="rpl rpl2" style={{
             position: "absolute", inset: 0, borderRadius: "50%",
-            border: "1.5px solid rgba(196,74,135,0.35)",
+            border: "1.5px solid rgba(196,74,135,0.30)",
             pointerEvents: "none",
           }} />
 
-          {/* Core */}
+          {/* Orb core */}
           <div className="orb-core" style={{
-            width: 50, height: 50, borderRadius: "50%",
-            background: "linear-gradient(150deg, #D44F93 0%, #A4005D 56%, #76003e 100%)",
+            width: 52, height: 52, borderRadius: "50%",
+            background: "linear-gradient(148deg, #D44F93 0%, #A4005D 56%, #76003e 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            border: "1.5px solid rgba(255,255,255,0.20)",
+            border: "1.5px solid rgba(255,255,255,0.22)",
             position: "relative", overflow: "hidden",
           }}>
+            {/* Top gloss — soft white arc */}
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "40%",
-              background: "linear-gradient(180deg,rgba(255,255,255,0.22),transparent)",
-              borderRadius: "50% 50% 0 0", pointerEvents: "none",
+              position: "absolute", top: 0, left: 0, right: 0, height: "44%",
+              background: "linear-gradient(180deg, rgba(255,255,255,0.26) 0%, transparent 100%)",
+              borderRadius: "50% 50% 0 0",
+              pointerEvents: "none",
             }} />
             <AiIcon />
           </div>

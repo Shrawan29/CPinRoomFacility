@@ -152,17 +152,17 @@ export default function GuestDashboard() {
 
         .ac-card {
           position:relative; overflow:hidden;
-          background: rgba(244,235,222,0.72);
-          border: 1px solid rgba(255,255,255,0.60);
+          background: rgba(244,235,222,0.82);
+          border: 1px solid rgba(255,255,255,0.62);
           border-radius:20px; padding:14px 12px 12px;
           display:flex; flex-direction:column; align-items:flex-start;
           cursor:pointer; text-align:left;
-          box-shadow: 0 8px 24px rgba(26,20,16,0.10), 0 2px 6px rgba(26,20,16,0.06), inset 0 1px 0 rgba(255,255,255,0.70);
+          box-shadow: 0 8px 32px rgba(26,20,16,0.13), 0 2px 8px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
           backdrop-filter: blur(28px) saturate(1.8);
           -webkit-backdrop-filter: blur(28px) saturate(1.8);
           transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s ease;
         }
-        .ac-card:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(26,20,16,0.13),inset 0 1px 0 rgba(255,255,255,.70); }
+        .ac-card:hover { transform:translateY(-2px); box-shadow:0 12px 36px rgba(26,20,16,0.14),inset 0 1px 0 rgba(255,255,255,.72); }
         .ac-card:active { transform:scale(.96); }
         .ac-shimmer { position:absolute;inset:0;background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.55) 50%,transparent 64%);transform:translateX(-130%);pointer-events:none;border-radius:inherit; }
         .ac-card:hover .ac-shimmer { animation:shimmer .55s ease forwards; }
