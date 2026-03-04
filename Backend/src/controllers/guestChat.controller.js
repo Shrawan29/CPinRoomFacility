@@ -147,14 +147,14 @@ const searchHotelInfo = async (args) => {
 
   let amenities = Array.isArray(info?.amenities) ? info.amenities : [];
   amenities = amenities
-    .filter((a) => a && a.available !== false)
+    .filter((a) => a)
     .filter((a) => matches(a.name))
     .slice(0, limit)
     .map((a) => ({ name: toTrimmedString(a.name), available: a.available !== false }));
 
   let services = Array.isArray(info?.services) ? info.services : [];
   services = services
-    .filter((s) => s && s.available !== false)
+    .filter((s) => s)
     .filter((s) => matches(s.name) || matches(s.description))
     .slice(0, limit)
     .map((s) => ({
@@ -475,8 +475,6 @@ const inferNeedsHotelInfo = (text) => {
   );
 };
 
-const MAX_HOTELINFO_CONTEXT_ITEMS = 16;
-
 const buildHotelInfoContext = async () => {
   const info = await HotelInfo.findOne().lean();
   if (!info) return null;
@@ -490,24 +488,25 @@ const buildHotelInfoContext = async () => {
   };
 
   const amenities = (Array.isArray(info?.amenities) ? info.amenities : [])
-    .filter((a) => a && a.available !== false)
-    .map((a) => ({ name: toTrimmedString(a.name) }))
-    .filter((a) => a.name)
-    .slice(0, MAX_HOTELINFO_CONTEXT_ITEMS);
+    .filter((a) => a)
+    .map((a) => ({
+      name: toTrimmedString(a.name),
+      available: a.available !== false,
+    }))
+    .filter((a) => a.name);
 
   const services = (Array.isArray(info?.services) ? info.services : [])
-    .filter((s) => s && s.available !== false)
+    .filter((s) => s)
     .map((s) => ({
       name: toTrimmedString(s.name),
       description: toTrimmedString(s.description),
+      available: s.available !== false,
     }))
-    .filter((s) => s.name)
-    .slice(0, MAX_HOTELINFO_CONTEXT_ITEMS);
+    .filter((s) => s.name);
 
   const policies = (Array.isArray(info?.policies) ? info.policies : [])
     .map((p) => toTrimmedString(p))
-    .filter(Boolean)
-    .slice(0, MAX_HOTELINFO_CONTEXT_ITEMS);
+    .filter(Boolean);
 
   const emergency = {
     frontDeskNumber: toTrimmedString(info?.emergency?.frontDeskNumber),
@@ -535,7 +534,7 @@ const buildRestrictedContext = async (userMessage) => {
 
   const isBroadMenuRequest = /\b(menu|food|dishes|items)\b/i.test(String(userMessage || ""));
 
-  const [menu, events, hotelInfo] = await Promise.all([
+  const [menu, events, hotelInfoContext] = await Promise.all([
     shouldFetchMenu
       ? searchMenu({
           query: isBroadMenuRequest ? "" : userMessage,
@@ -550,14 +549,17 @@ const buildRestrictedContext = async (userMessage) => {
         })
       : Promise.resolve({ count: 0, events: [] }),
     shouldFetchHotelInfo
-      ? searchHotelInfo({
-          query: userMessage,
-          limit: 12,
-        })
-      : Promise.resolve({ found: false }),
+      ? buildHotelInfoContext()
+      : Promise.resolve(null),
   ]);
 
-  return { menu, events, hotelInfo };
+  return {
+    menu,
+    events,
+    hotelInfo: hotelInfoContext
+      ? { found: true, ...hotelInfoContext }
+      : { found: false, message: "Hotel info not configured" },
+  };
 };
 
 export const guestChat = async (req, res) => {
@@ -601,6 +603,7 @@ export const guestChat = async (req, res) => {
           role: "system",
           content:
             "Hotel info context (from database). Treat this as factual. " +
+            "Amenities/services may include an 'available' flag; if available=false, it is currently unavailable. " +
             "If the user asks for more detail than shown here, call search_hotel_info.\n\n" +
             JSON.stringify(hotelInfoContext),
         }
@@ -611,7 +614,8 @@ export const guestChat = async (req, res) => {
       content:
         "You are a hotel guest assistant. You ONLY have access to three data sources: (1) hotel EVENTS, (2) the FOOD MENU, (3) HOTEL INFO (amenities/services/policies/contact/emergency). " +
         "Do not answer questions about anything else (orders, billing, rooms, staff, housekeeping, admin, guest accounts, etc). " +
-        "When you need factual info, call the provided tools. If the user asks for something outside events/menu/hotel info, refuse briefly and redirect.",
+        "When you need factual info, call the provided tools. If an amenity/service is marked available=false, tell the guest it's currently unavailable. " +
+        "If the user asks for something outside events/menu/hotel info, refuse briefly and redirect.",
     };
 
     const tools = [
