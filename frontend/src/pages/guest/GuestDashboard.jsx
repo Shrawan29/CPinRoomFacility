@@ -152,8 +152,8 @@ export default function GuestDashboard() {
 
         .ac-card {
           position:relative; overflow:hidden;
-          background: rgba(244,235,222,0.82);
-          border: 1px solid rgba(255,255,255,0.62);
+          background: linear-gradient(to bottom, rgba(255,251,245,0.97), rgba(244,235,222,0.88));
+          border: 1.2px solid rgba(255,255,255,0.68);
           border-radius:20px; padding:14px 12px 12px;
           display:flex; flex-direction:column; align-items:flex-start;
           cursor:pointer; text-align:left;
@@ -164,7 +164,15 @@ export default function GuestDashboard() {
         }
         .ac-card:hover { transform:translateY(-2px); box-shadow:0 12px 36px rgba(26,20,16,0.14),inset 0 1px 0 rgba(255,255,255,.72); }
         .ac-card:active { transform:scale(.96); }
-        .ac-shimmer { position:absolute;inset:0;background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.55) 50%,transparent 64%);transform:translateX(-130%);pointer-events:none;border-radius:inherit; }
+        /* Top shine strip — frosted glass depth */
+        .ac-card::before {
+          content:'';
+          position:absolute; top:0; left:0; right:0; height:38%;
+          background: linear-gradient(to bottom, rgba(255,255,255,0.70), rgba(255,255,255,0));
+          border-radius:20px 20px 0 0;
+          pointer-events:none; z-index:0;
+        }
+        .ac-shimmer { position:absolute;inset:0;background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.45) 50%,transparent 64%);transform:translateX(-130%);pointer-events:none;border-radius:inherit;z-index:1; }
         .ac-card:hover .ac-shimmer { animation:shimmer .55s ease forwards; }
         .ac-card:hover .ac-arrow { color:#a07828; transform:translateX(2px); }
 
@@ -271,22 +279,22 @@ export default function GuestDashboard() {
                     style={{ animation: cardsVisible ? `cardIn .5s cubic-bezier(.22,1,.36,1) ${i * 80}ms both` : "none" }}
                   >
                     <div className="ac-shimmer" />
-                    <div style={{ position:"absolute", top:-18, right:-18, width:72, height:72, borderRadius:"50%", pointerEvents:"none", opacity:.12, filter:"blur(16px)", background:action.orb }} />
-                    <div style={{ position:"absolute", top:0, left:0, right:0, height:2.5, borderRadius:"20px 20px 0 0", background:action.accent }} />
+                    <div style={{ position:"absolute", top:-18, right:-18, width:72, height:72, borderRadius:"50%", pointerEvents:"none", opacity:.12, filter:"blur(16px)", background:action.orb, zIndex:1 }} />
+                    <div style={{ position:"absolute", top:0, left:0, right:0, height:2.5, borderRadius:"20px 20px 0 0", background:action.accent, zIndex:2 }} />
                     <div style={{
                       width:38, height:38, borderRadius:11,
                       display:"flex", alignItems:"center", justifyContent:"center",
                       marginBottom:8, flexShrink:0,
                       background:action.iconBg, color:action.iconColor,
                       border:"1.5px solid rgba(164,0,93,0.10)",
-                      position:"relative", overflow:"hidden",
+                      position:"relative", overflow:"hidden", zIndex:2,
                     }}>
                       <div style={{ position:"absolute", inset:0, background:"linear-gradient(145deg,rgba(255,255,255,.4) 0%,transparent 55%)" }} />
                       <span style={{ position:"relative", zIndex:1 }}>{action.icon}</span>
                     </div>
-                    <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:600, color:"#1A1410", lineHeight:1.05, marginBottom:2 }}>{action.label}</p>
-                    <p style={{ fontSize:9, fontWeight:400, color:"#8a7a70" }}>{action.sub}</p>
-                    <div className="ac-arrow" style={{ position:"absolute", bottom:10, right:11, color:"rgba(164,0,93,0.32)", fontSize:15, lineHeight:1, transition:"all .22s" }}>›</div>
+                    <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontWeight:600, color:"#1A1410", lineHeight:1.05, marginBottom:2, position:"relative", zIndex:2 }}>{action.label}</p>
+                    <p style={{ fontSize:9, fontWeight:400, color:"#8a7a70", position:"relative", zIndex:2 }}>{action.sub}</p>
+                    <div className="ac-arrow" style={{ position:"absolute", bottom:10, right:11, color:"rgba(164,0,93,0.32)", fontSize:15, lineHeight:1, transition:"all .22s", zIndex:2 }}>›</div>
                   </button>
                 ))}
               </div>
