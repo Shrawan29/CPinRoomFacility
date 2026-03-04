@@ -148,17 +148,16 @@ function GuestBottomNav() {
 
       {/*
         LAYOUT:
-        Wrapper has paddingTop = ORB_HALF (29px) so the top half of the orb
-        is inside the wrapper and never clipped.
-        Pill starts at y = ORB_HALF inside the wrapper.
-        Orb top = 0 (wrapper top), so orb center = ORB_HALF = exactly pill top edge.
-        Result: orb is half above pill, half sitting in pill — like the reference image.
+        position:fixed so the nav floats over page content without pushing it.
+        paddingTop = ORB_HALF so the top half of the orb is never clipped.
+        Orb top:0 → orb center sits exactly on pill top edge (half in, half out).
       */}
       <div className="gbn-root" style={{
-        flexShrink: 0,
-        position: "relative",
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
         zIndex: 9999,
-        width: "100%",
         maxWidth: 430,
         margin: "0 auto",
         paddingTop: ORB_HALF,   // room for top half of orb
@@ -194,7 +193,7 @@ function GuestBottomNav() {
             transform: "translateX(-50%)",
             width: ORB + 24,             // wider than orb for smooth curve shoulders
             height: ORB_HALF + 6,        // tall enough to cover from above pill to its midpoint
-            background: "#eddfc5",       // match page background
+            background: "transparent",   // transparent so page bg shows through naturally
             borderRadius: `0 0 ${(ORB + 24) / 2}px ${(ORB + 24) / 2}px`,
             zIndex: 3,
             pointerEvents: "none",
