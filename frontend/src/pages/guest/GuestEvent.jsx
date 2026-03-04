@@ -80,11 +80,7 @@ export default function GuestEvents() {
           cursor: pointer;
           transition: transform 0.22s ease, box-shadow 0.22s ease;
         }
-        .event-card:active {
-          transform: scale(0.985);
-        }
-
-
+        .event-card:active { transform: scale(0.985); }
       `}</style>
 
       {/* ══ ROOT ══ */}
@@ -156,7 +152,8 @@ export default function GuestEvents() {
 
         {/* ② SCROLLABLE BODY */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", background: "#EFE1CF" }}>
-          <div style={{ maxWidth: 430, margin: "0 auto", padding: "16px 20px 24px" }}>
+          {/* paddingBottom: 100px — clears the fixed bottom nav */}
+          <div style={{ maxWidth: 430, margin: "0 auto", padding: "16px 20px 100px" }}>
 
             {/* Section label + count */}
             <div style={{
@@ -184,7 +181,6 @@ export default function GuestEvents() {
                     overflow: "hidden",
                     animation: `fadeUp 0.4s ease ${n * 80}ms both`,
                   }}>
-                    {/* Image placeholder */}
                     <div style={{
                       width: "100%", aspectRatio: "16/9",
                       background: "linear-gradient(135deg, rgba(164,0,93,0.06), rgba(164,0,93,0.03))",
@@ -266,7 +262,6 @@ export default function GuestEvents() {
                                 objectFit: "cover", objectPosition: "center",
                               }}
                             />
-                            {/* scrim */}
                             <div style={{
                               position: "absolute", inset: 0,
                               background: "linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.5) 100%)",
@@ -274,7 +269,6 @@ export default function GuestEvents() {
                           </>
                         )}
 
-                        {/* No image: decorative glow */}
                         {!event.image && (
                           <div style={{
                             position: "absolute", inset: 0,
@@ -282,7 +276,7 @@ export default function GuestEvents() {
                           }} />
                         )}
 
-                        {/* Status chip — top right */}
+                        {/* Status chip */}
                         <div style={{
                           position: "absolute", top: 12, right: 12,
                           display: "inline-flex", alignItems: "center", gap: 5,
@@ -290,17 +284,14 @@ export default function GuestEvents() {
                           borderRadius: 20, padding: "4px 10px",
                           border: "1px solid rgba(255,255,255,0.15)",
                         }}>
-                          <div style={{
-                            width: 5, height: 5, borderRadius: "50%",
-                            background: sc.dot, flexShrink: 0,
-                          }} />
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: sc.dot, flexShrink: 0 }} />
                           <span style={{
                             fontSize: 9, fontWeight: 700, color: "#fff",
                             letterSpacing: "0.12em", textTransform: "uppercase",
                           }}>{event.status || "EVENT"}</span>
                         </div>
 
-                        {/* Date + time chip — bottom left */}
+                        {/* Date + time chip */}
                         {(evDate || event.eventTime) && (
                           <div style={{
                             position: "absolute", bottom: 12, left: 12,
@@ -319,9 +310,7 @@ export default function GuestEvents() {
                               <span style={{ fontSize: 8, color: "rgba(249,168,212,0.4)" }}>·</span>
                             )}
                             {event.eventTime && (
-                              <span style={{
-                                fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.85)",
-                              }}>{event.eventTime}</span>
+                              <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{event.eventTime}</span>
                             )}
                           </div>
                         )}
@@ -329,13 +318,11 @@ export default function GuestEvents() {
 
                       {/* CARD BODY */}
                       <div style={{ padding: "14px 16px 16px" }}>
-                        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10 }}>
-                          <h2 style={{
-                            fontFamily: "'Cormorant Garamond', serif",
-                            fontSize: 19, fontWeight: 700, color: "#1F1F1F",
-                            margin: 0, lineHeight: 1.2, flex: 1,
-                          }}>{event.title}</h2>
-                        </div>
+                        <h2 style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontSize: 19, fontWeight: 700, color: "#1F1F1F",
+                          margin: 0, lineHeight: 1.2,
+                        }}>{event.title}</h2>
 
                         {event.description && (
                           <p style={{
@@ -346,23 +333,16 @@ export default function GuestEvents() {
                           }}>{event.description}</p>
                         )}
 
-                        {/* Location row */}
                         {(event.location || event.venue) && (
-                          <div style={{
-                            display: "flex", alignItems: "center", gap: 6,
-                            marginTop: 10,
-                          }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10 }}>
                             <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 12, height: 12, flexShrink: 0, opacity: 0.7 }}>
                               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                               <circle cx="12" cy="10" r="3" />
                             </svg>
-                            <span style={{
-                              fontSize: 11, color: "#6B6B6B", fontWeight: 400,
-                            }}>{event.location || event.venue}</span>
+                            <span style={{ fontSize: 11, color: "#6B6B6B", fontWeight: 400 }}>{event.location || event.venue}</span>
                           </div>
                         )}
 
-                        {/* View details CTA */}
                         <div style={{
                           display: "flex", alignItems: "center", justifyContent: "flex-end",
                           marginTop: 12, paddingTop: 10,
@@ -388,10 +368,8 @@ export default function GuestEvents() {
 
           </div>
         </div>
-        {/* end scrollable body */}
 
         <GuestBottomNav />
-
       </div>
     </>
   );
