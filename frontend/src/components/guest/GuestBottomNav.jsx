@@ -63,8 +63,7 @@ const navItems = [
 const ORB   = 54;   // orb diameter px
 const PILL_H = 64;  // pill height px
 const SIDE_M = 14;  // pill side margin px
-// FIX 1: Increased ORB_LIFT so orb floats properly above the pill center
-const ORB_LIFT = ORB / 2 + 10;  // orb fully above pill top + 10px extra lift
+const ORB_LIFT = 20;  // original value — how far orb center sits above pill top edge
 
 function GuestBottomNav() {
   const navigate = useNavigate();
@@ -154,8 +153,6 @@ function GuestBottomNav() {
         margin: "0 auto",
         // FIX 2: bottom gap so pill floats above screen edge
         paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
-        // Extra top padding to give orb room to render above pill without clipping
-        paddingTop: ORB_LIFT + ORB / 2,
       }}>
 
         {/* PILL */}
@@ -224,16 +221,13 @@ function GuestBottomNav() {
           </div>
         </div>
 
-        {/* ORB — FIX 1: positioned relative to wrapper using paddingTop offset */}
+        {/* ORB — restored to original positioning */}
         <button
           className="gbn-orb-btn"
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            // top of pill = paddingTop of wrapper = ORB_LIFT + ORB/2
-            // orb center should sit ORB_LIFT above pill top
-            // orb top edge = pill_top - ORB_LIFT - ORB/2 = paddingTop - ORB_LIFT - ORB/2 = 0
-            top: 0,
+            top: -(ORB_LIFT + ORB / 2),   // = -(20 + 27) = -47 from wrapper top = lifted above pill
             left: "50%",
             zIndex: 20,
             border: "none", background: "transparent",
