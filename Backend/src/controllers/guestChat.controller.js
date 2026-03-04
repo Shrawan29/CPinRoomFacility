@@ -20,6 +20,70 @@ const clampInt = (value, min, max, fallback) => {
   return Math.max(min, Math.min(max, parsed));
 };
 
+const stripMarkdownEmphasis = (text) => {
+  const s = String(text || "");
+  return s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/__(.+?)__/g, "$1");
+};
+
+const convertMarkdownTablesToBullets = (text) => {
+  const lines = String(text || "").split(/\r?\n/);
+  const out = [];
+
+  const parseRow = (line) => {
+    const trimmed = String(line || "").trim();
+    if (!trimmed.includes("|")) return null;
+    const inner = trimmed.replace(/^\|/, "").replace(/\|$/, "");
+    const cells = inner.split("|").map((c) => String(c).trim());
+    return cells.length >= 2 ? cells : null;
+  };
+
+  const isSeparatorRow = (line) => {
+    const t = String(line || "").trim();
+    if (!t.includes("|")) return false;
+    const inner = t.replace(/^\|/, "").replace(/\|$/, "");
+    const cells = inner.split("|").map((c) => c.trim());
+    return cells.length >= 2 && cells.every((c) => /^:?-{3,}:?$/.test(c));
+  };
+
+  let i = 0;
+  while (i < lines.length) {
+    const header = parseRow(lines[i]);
+    const sep = i + 1 < lines.length ? lines[i + 1] : "";
+
+    if (header && isSeparatorRow(sep)) {
+      const headers = header.map((h, idx) => (h ? h : `Column ${idx + 1}`));
+      i += 2;
+      while (i < lines.length) {
+        const row = parseRow(lines[i]);
+        if (!row) break;
+
+        const pairs = row
+          .map((cell, idx) => {
+            const key = headers[idx] || `Column ${idx + 1}`;
+            return cell ? `${key}: ${cell}` : null;
+          })
+          .filter(Boolean);
+
+        out.push(pairs.length > 0 ? `- ${pairs.join(", ")}` : "");
+        i += 1;
+      }
+
+      continue;
+    }
+
+    out.push(lines[i]);
+    i += 1;
+  }
+
+  return out.join("\n");
+};
+
+const sanitizeGuestChatReply = (reply) => {
+  const noBold = stripMarkdownEmphasis(reply);
+  const noTables = convertMarkdownTablesToBullets(noBold);
+  return String(noTables || "").trim();
+};
+
 const parseOptionalISODate = (value) => {
   const s = toTrimmedString(value);
   if (!s) return null;
@@ -889,7 +953,10 @@ export const guestChat = async (req, res) => {
         "When you need factual info, call the provided tools. " +
         "IMPORTANT: Do NOT claim an amenity/service is unavailable unless the database explicitly marks it available=false. " +
         "If you cannot find the item in hotel info, say you don't have that detail and suggest checking with the front desk. " +
-        "If the user asks for something outside events/menu/hotel info, refuse briefly and redirect.",
+        "If the user asks for something outside events/menu/hotel info, refuse briefly and redirect. " +
+        "Formatting rules for your replies: keep responses clean and easy to read. Use short paragraphs and bullet points (start bullets with '- '). " +
+        "Do NOT use tables (no markdown tables, no HTML tables). " +
+        "Do NOT use markdown emphasis markers like **bold** or __bold__. If emphasis is needed, keep it simple in plain text.",
     };
 
     const tools = [
@@ -980,7 +1047,7 @@ export const guestChat = async (req, res) => {
       });
 
       if (typeof reply === "string") {
-        return res.json({ reply });
+        return res.json({ reply: sanitizeGuestChatReply(reply) });
       }
 
       return res.status(504).json({
@@ -1041,7 +1108,7 @@ export const guestChat = async (req, res) => {
           });
 
           const fallbackMsg = fallbackCompletion.choices?.[0]?.message;
-          return res.json({ reply: fallbackMsg?.content || "" });
+          return res.json({ reply: sanitizeGuestChatReply(fallbackMsg?.content || "") });
         }
 
         throw error;
@@ -1054,7 +1121,7 @@ export const guestChat = async (req, res) => {
 
       // If no tool calls, we're done.
       if (!Array.isArray(msg.tool_calls) || msg.tool_calls.length === 0) {
-        return res.json({ reply: msg.content || "" });
+        return res.json({ reply: sanitizeGuestChatReply(msg.content || "") });
       }
 
       messages.push({
