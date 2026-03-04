@@ -201,7 +201,7 @@ export default function GuestSupport() {
           <div style={{
             margin: "0 10px 10px",
             padding: "10px 10px",
-            borderRadius: 16,
+            borderRadius: 20,
             display: "flex", gap: 8,
             borderTop: "1px solid rgba(0,0,0,0.06)",
             background: "rgba(255,255,255,0.92)",
@@ -216,7 +216,7 @@ export default function GuestSupport() {
               rows={1}
               style={{
                 flex: 1, resize: "none",
-                borderRadius: 12,
+                borderRadius: 24,
                 border: "1px solid rgba(0,0,0,0.12)",
                 padding: "10px 10px",
                 fontSize: 13, outline: "none",
