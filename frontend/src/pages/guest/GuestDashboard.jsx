@@ -22,7 +22,6 @@ const HouseIcon = () => (
   </svg>
 );
 
-// ONE reducer = ONE render per slide change. No split state = no layout jump.
 function slideReducer(state, action) {
   switch (action.type) {
     case "GO":   return { cur: action.next, exit: action.prev };
@@ -30,6 +29,9 @@ function slideReducer(state, action) {
     default:     return state;
   }
 }
+
+// FIX 1: Bottom nav height = pill(64) + orbHalf(29) + bottomGap(12) ≈ 105px
+const NAV_HEIGHT = 105;
 
 export default function GuestDashboard() {
   const { guest, loading } = useGuestAuth();
@@ -149,7 +151,6 @@ export default function GuestDashboard() {
         .ev-in  { animation: slideIn  .60s cubic-bezier(.22,1,.36,1) forwards; z-index:2; }
         .ev-out { animation: slideOut .60s cubic-bezier(.22,1,.36,1) forwards; z-index:1; }
 
-        /* Quick-action card — exact same glass as bottom nav */
         .ac-card {
           position:relative; overflow:hidden; cursor:pointer; text-align:left;
           display:flex; flex-direction:column; align-items:flex-start;
@@ -176,7 +177,7 @@ export default function GuestDashboard() {
         .dot-btn.on { width:20px; background:#A4005D; }
       `}</style>
 
-      {/* ── ROOT: fixed, full-screen, overflow hidden ── */}
+      {/* ── ROOT: fixed, full-screen ── */}
       <div style={{
         position:"fixed", inset:0,
         display:"flex", flexDirection:"column",
@@ -184,9 +185,10 @@ export default function GuestDashboard() {
         opacity: fadeIn ? 1 : 0, transition:"opacity 0.5s ease",
         fontFamily:"'DM Sans',system-ui,sans-serif", overflow:"hidden",
       }}>
-        <div style={{ flex:1, display:"flex", flexDirection:"column", maxWidth:430, width:"100%", margin:"0 auto", overflow:"hidden", minHeight:0 }}>
+        {/* FIX 1: paddingBottom = NAV_HEIGHT so body content ends above the fixed nav */}
+        <div style={{ flex:1, display:"flex", flexDirection:"column", maxWidth:430, width:"100%", margin:"0 auto", overflow:"hidden", minHeight:0, paddingBottom: NAV_HEIGHT }}>
 
-          {/* ══ HERO — explicit px height, never reflows ══ */}
+          {/* ══ HERO ══ */}
           <div style={{
             position:"relative", overflow:"hidden",
             flexShrink:0, height:200,
@@ -198,9 +200,10 @@ export default function GuestDashboard() {
             <div style={{ position:"absolute",top:-50,right:-50,width:180,height:180,borderRadius:"50%",background:"radial-gradient(circle,rgba(164,0,93,0.22),transparent 65%)",animation:"blob1 7s ease-in-out infinite",pointerEvents:"none" }} />
             <div style={{ position:"absolute",bottom:20,left:-40,width:150,height:150,borderRadius:"50%",background:"radial-gradient(circle,rgba(196,74,135,0.15),transparent 65%)",animation:"blob2 9s ease-in-out infinite",pointerEvents:"none" }} />
 
-            <div style={{ position:"relative",zIndex:2,padding:"28px 20px 46px" }}>
-              <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:8 }}>
-                <div style={{ display:"flex",flexDirection:"column",gap:4 }}>
+            {/* FIX 2: more paddingTop to push header content down for breathing room */}
+            <div style={{ position:"relative",zIndex:2,padding:"42px 20px 46px" }}>
+              <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10 }}>
+                <div style={{ display:"flex",flexDirection:"column",gap:6 }}>
                   <p style={{ fontSize:9,color:"rgba(255,255,255,.82)",fontWeight:500,letterSpacing:".24em",textTransform:"uppercase",textShadow:"0 1px 10px rgba(0,0,0,.9)",margin:0,lineHeight:1 }}>{greeting}</p>
                   <h1 style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:38,fontWeight:300,fontStyle:"italic",color:"#fff",lineHeight:1,margin:0,textShadow:"0 2px 20px rgba(0,0,0,.5)",letterSpacing:"-.01em" }}>
                     {guest?.name || "Valued Guest"}
@@ -244,16 +247,15 @@ export default function GuestDashboard() {
           </div>
           {/* end hero */}
 
-          {/* ══ BODY — flex column, NO scroll ══ */}
+          {/* ══ BODY ══ */}
           <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"12px 16px 8px", overflow:"hidden", minHeight:0, gap:0 }}>
 
-            {/* QUICK ACTIONS — fixed height so it never reflows */}
+            {/* QUICK ACTIONS */}
             <div style={{ flexShrink:0, marginBottom:10 }}>
               <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:8 }}>
                 <div style={{ width:14,height:1,background:"#A4005D",opacity:.5 }} />
                 <span style={{ fontSize:8,fontWeight:600,letterSpacing:".26em",textTransform:"uppercase",color:"#8a7a70" }}>Quick Actions</span>
               </div>
-              {/* Cards: fixed height 110px — never shrinks or grows */}
               <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, height:110 }}>
                 {actions.map((a, i) => (
                   <button key={a.label} onClick={() => navigate(a.route)} className="ac-card"
@@ -280,7 +282,7 @@ export default function GuestDashboard() {
               <div style={{ flex:1,height:1,background:"linear-gradient(to right,transparent,rgba(164,0,93,.18),transparent)" }} />
             </div>
 
-            {/* UPCOMING EVENTS — takes ALL remaining space */}
+            {/* UPCOMING EVENTS */}
             <div style={{ flex:1, display:"flex", flexDirection:"column", minHeight:0 }}>
               <div style={{ flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8 }}>
                 <div style={{ display:"flex",alignItems:"center",gap:8 }}>
@@ -300,7 +302,6 @@ export default function GuestDashboard() {
                 </div>
               ) : (
                 <div style={{ flex:1, display:"flex", flexDirection:"column", minHeight:0 }}>
-                  {/* Event card — fills remaining space, min 120px */}
                   <div style={{ flex:1,position:"relative",borderRadius:18,overflow:"hidden",minHeight:120,boxShadow:"0 8px 28px rgba(26,20,16,.14)",cursor:"pointer" }}
                     onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
                     {events.map((ev, i) => {
