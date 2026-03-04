@@ -170,7 +170,7 @@ function GuestBottomNav() {
           margin: `0 ${SIDE_M}px`,
           height: PILL_H,
           borderRadius: PILL_H / 2,
-          background: "linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(255,250,245,0.95))",
+          background: "rgba(255, 255, 255, 0.72)",
           backdropFilter: "blur(28px) saturate(1.8)",
           WebkitBackdropFilter: "blur(28px) saturate(1.8)",
           border: "1.2px solid rgba(255,255,255,0.68)",
@@ -199,13 +199,7 @@ function GuestBottomNav() {
             pointerEvents: "none",
           }} />
 
-          {/* Top gloss strip */}
-          <div style={{
-            position: "absolute", top: 0, left: 16, right: 16, height: 1,
-            background: "rgba(255,255,255,0.75)",
-            borderRadius: "32px 32px 0 0",
-            pointerEvents: "none", zIndex: 4,
-          }} />
+          {/* Top gloss strip removed */}
 
           {/* Nav row */}
           <div style={{
