@@ -199,7 +199,8 @@ export default function GuestSupport() {
 
           {/* INPUT BAR */}
           <div style={{
-            padding: 12,
+            padding: "10px 10px",
+            borderRadius: 16,
             display: "flex", gap: 8,
             borderTop: "1px solid rgba(0,0,0,0.06)",
             background: "rgba(255,255,255,0.92)",

@@ -147,7 +147,7 @@ export default function GuestOrders() {
 
         {/* ② SCROLLABLE BODY */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", background: "#EFE1CF" }}>
-          <div style={{ maxWidth: 430, margin: "0 auto", padding: "16px 20px 24px" }}>
+          <div style={{ maxWidth: 430, margin: "0 auto", padding: "16px 20px 100px" }}>
 
             {/* Section label + live indicator */}
             <div style={{
