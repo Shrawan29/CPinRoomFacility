@@ -58,6 +58,107 @@ const navItems = [
   { key: "hotel",  label: "Hotel",  route: "/guest/hotel-info", Icon: HotelIcon },
 ];
 
+// SVG pill shape with a smooth concave scallop cut out at center-top
+// W=full width, H=bar height, R=pill corner radius, SW=scallop width, SD=scallop depth, SR=scallop curve radius
+function PillWithScallop({ width = 390, height = 64, R = 32, SW = 72, SD = 22, fill = "rgba(244,235,222,0.88)" }) {
+  const cx = width / 2;
+  // Scallop: smooth cubic bezier concave arc at top-center
+  // Points where scallop meets the flat top
+  const lx = cx - SW / 2;
+  const rx = cx + SW / 2;
+  const ty = 0; // top y
+  const by = ty + SD; // bottom of scallop dip
+
+  // Control point pull — how much the curve pulls inward
+  const cp = SW * 0.28;
+
+  const path = [
+    `M ${R} ${ty}`,
+    // flat left top → scallop start
+    `L ${lx} ${ty}`,
+    // smooth concave scallop using cubic bezier
+    `C ${lx + cp} ${ty}, ${cx - cp * 0.5} ${by}, ${cx} ${by}`,
+    `C ${cx + cp * 0.5} ${by}, ${rx - cp} ${ty}, ${rx} ${ty}`,
+    // flat right top → top-right corner
+    `L ${width - R} ${ty}`,
+    // top-right rounded corner
+    `Q ${width} ${ty} ${width} ${R}`,
+    // right side
+    `L ${width} ${height - R}`,
+    // bottom-right rounded corner
+    `Q ${width} ${height} ${width - R} ${height}`,
+    // bottom
+    `L ${R} ${height}`,
+    // bottom-left rounded corner
+    `Q ${ty} ${height} ${ty} ${height - R}`,
+    // left side
+    `L ${ty} ${R}`,
+    // top-left rounded corner
+    `Q ${ty} ${ty} ${R} ${ty}`,
+    `Z`,
+  ].join(" ");
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        overflow: "visible",
+        zIndex: 0,
+      }}
+    >
+      <defs>
+        <filter id="navBlur" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="0" />
+        </filter>
+        {/* Glass gradient fill */}
+        <linearGradient id="glassGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(255,251,245,0.96)" />
+          <stop offset="100%" stopColor="rgba(244,235,222,0.84)" />
+        </linearGradient>
+        {/* Inset top shine */}
+        <linearGradient id="shineGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.75)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+        <clipPath id="pillClip">
+          <path d={path} />
+        </clipPath>
+      </defs>
+
+      {/* Drop shadow layer */}
+      <path
+        d={path}
+        fill="rgba(26,20,16,0.10)"
+        transform="translate(0, 3)"
+        style={{ filter: "blur(12px)" }}
+      />
+
+      {/* Main glass fill */}
+      <path d={path} fill="url(#glassGrad)" />
+
+      {/* Top gloss shine strip — clipped to pill */}
+      <rect
+        x="0" y="0" width={width} height={height * 0.38}
+        fill="url(#shineGrad)"
+        clipPath="url(#pillClip)"
+      />
+
+      {/* Border stroke */}
+      <path
+        d={path}
+        fill="none"
+        stroke="rgba(255,255,255,0.68)"
+        strokeWidth="1.2"
+      />
+    </svg>
+  );
+}
+
 export default function GuestBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,15 +172,6 @@ export default function GuestBottomNav() {
   }
   const isAiActive = activeKey === "ai";
 
-  /* ── Shared glass style (same as quick-action cards) ── */
-  const GLASS_BG     = "rgba(244,235,222,0.82)";
-  const GLASS_BLUR   = "blur(28px) saturate(1.8)";
-  const GLASS_BORDER = "1px solid rgba(255,255,255,0.62)";
-  const GLASS_SHADOW =
-    "0 8px 32px rgba(26,20,16,0.13)," +
-    "0 2px 8px rgba(26,20,16,0.07)," +
-    "inset 0 1px 0 rgba(255,255,255,0.72)";
-
   const Tab = ({ item, delay }) => {
     const on = activeKey === item.key;
     return (
@@ -88,12 +180,18 @@ export default function GuestBottomNav() {
         className="gbn-tab"
         style={{
           animationDelay: `${delay}s`,
-          flex: 1, height: "100%",
-          display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          gap: 4, padding: 0,
-          background: "transparent", border: "none",
-          cursor: "pointer", position: "relative",
+          flex: 1,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 4,
+          padding: 0,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          position: "relative",
           WebkitTapHighlightColor: "transparent",
           transition: "transform 0.14s ease",
         }}
@@ -110,7 +208,8 @@ export default function GuestBottomNav() {
           <item.Icon active={on} />
         </span>
         <span style={{
-          fontSize: 9.5, lineHeight: 1,
+          fontSize: 9.5,
+          lineHeight: 1,
           fontWeight: on ? 600 : 400,
           color: on ? "#A4005D" : "#b5a898",
           fontFamily: "'DM Sans', system-ui, sans-serif",
@@ -119,8 +218,10 @@ export default function GuestBottomNav() {
         }}>{item.label}</span>
         {/* Active pill underline */}
         <div style={{
-          position: "absolute", bottom: 6,
-          width: on ? 20 : 0, height: 2.5,
+          position: "absolute",
+          bottom: 6,
+          width: on ? 20 : 0,
+          height: 2.5,
           borderRadius: 2,
           background: "linear-gradient(90deg,#C44A87,#A4005D)",
           transition: "width 0.32s cubic-bezier(0.22,1,0.36,1)",
@@ -143,16 +244,14 @@ export default function GuestBottomNav() {
           to   { opacity:1; transform:translateY(0); }
         }
         @keyframes gbnOrb {
-          0%   { opacity:0; transform:scale(0.4) translateY(14px); }
-          62%  { transform:scale(1.06) translateY(-2px); }
-          100% { opacity:1; transform:scale(1) translateY(0); }
+          0%   { opacity:0; transform:translateX(-50%) scale(0.4) translateY(14px); }
+          62%  { transform:translateX(-50%) scale(1.06) translateY(-2px); }
+          100% { opacity:1; transform:translateX(-50%) scale(1) translateY(0); }
         }
-        /* Smooth ripple — scale up, fade out */
         @keyframes rippleOut {
           0%   { transform:scale(1);    opacity:0.5; }
           100% { transform:scale(2.1);  opacity:0;   }
         }
-        /* Orb glow breathe */
         @keyframes orbBreathe {
           0%,100% { box-shadow: 0 0 0 0 rgba(164,0,93,0.0),  0 4px 18px rgba(164,0,93,0.40), 0 2px 6px rgba(0,0,0,0.18); }
           50%     { box-shadow: 0 0 0 6px rgba(164,0,93,0.08), 0 6px 26px rgba(164,0,93,0.62), 0 2px 6px rgba(0,0,0,0.18); }
@@ -160,8 +259,9 @@ export default function GuestBottomNav() {
 
         .gbn-root { animation: gbnUp  0.44s cubic-bezier(0.22,1,0.36,1) both; }
         .gbn-tab  { animation: gbnTab 0.34s ease both; }
-
-        .gbn-orb-btn { animation: gbnOrb 0.50s cubic-bezier(0.22,1,0.36,1) 0.1s both; }
+        .gbn-orb-btn {
+          animation: gbnOrb 0.50s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+        }
         .gbn-orb-btn:active .orb-core { transform: scale(0.88) !important; }
 
         .orb-core {
@@ -172,11 +272,6 @@ export default function GuestBottomNav() {
         .rpl2 { animation-delay: 1.4s; }
       `}</style>
 
-      {/*
-        ── OUTER SHELL ──
-        No horizontal padding here — keep full width so left:50% is truly centered.
-        The pill gets horizontal margin via its own style.
-      */}
       <div className="gbn-root" style={{
         flexShrink: 0,
         position: "relative",
@@ -184,65 +279,46 @@ export default function GuestBottomNav() {
         width: "100%",
         maxWidth: 430,
         margin: "0 auto",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingBottom: 10,
       }}>
 
-        {/* ── Pill bar — 12px margin each side ── */}
+        {/* ── Pill bar with SVG scallop shape ── */}
         <div style={{
           margin: "0 12px",
           height: 64,
           borderRadius: 32,
-          background: GLASS_BG,
-          backdropFilter: GLASS_BLUR,
-          WebkitBackdropFilter: GLASS_BLUR,
-          border: GLASS_BORDER,
-          boxShadow: GLASS_SHADOW,
           position: "relative",
           overflow: "visible",
+          // background/border/shadow now handled by SVG
         }}>
+          {/* SVG pill with smooth center scallop */}
+          <PillWithScallop />
 
-          {/* ── Notch punch-out: circular div matching page bg color ── */}
+          {/* ── Nav row (sits above the SVG) ── */}
           <div style={{
-            position: "absolute",
-            top: -20,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 68,
-            height: 48,
-            background: "#eddfc5",
-            borderRadius: "0 0 34px 34px",
-            zIndex: 0,
-            pointerEvents: "none",
-          }} />
-
-          {/* ── White gloss strip at top of pill (matches quick-action card inset) ── */}
-          <div style={{
-            position: "absolute",
-            top: 0, left: 12, right: 12, height: 1,
-            background: "rgba(255,255,255,0.72)",
-            borderRadius: "32px 32px 0 0",
-            pointerEvents: "none",
-            zIndex: 3,
-          }} />
-
-          {/* ── Nav row ── */}
-          <div style={{
-            position: "relative", zIndex: 2,
-            display: "flex", alignItems: "center",
-            height: "100%", padding: "0 6px",
+            position: "relative",
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+            padding: "0 6px",
           }}>
             <Tab item={navItems[0]} delay={0.10} />
             <Tab item={navItems[1]} delay={0.15} />
 
             {/* Center gap — orb floats above, only label shows here */}
             <div style={{
-              flex: 1, height: "100%",
-              display: "flex", alignItems: "flex-end",
-              justifyContent: "center", paddingBottom: 7,
+              flex: 1,
+              height: "100%",
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "center",
+              paddingBottom: 7,
               pointerEvents: "none",
             }}>
               <span style={{
-                fontSize: 9.5, lineHeight: 1,
+                fontSize: 9.5,
+                lineHeight: 1,
                 fontWeight: isAiActive ? 600 : 400,
                 color: isAiActive ? "#A4005D" : "#b5a898",
                 fontFamily: "'DM Sans', system-ui, sans-serif",
@@ -255,53 +331,64 @@ export default function GuestBottomNav() {
           </div>
         </div>
 
-        {/*
-          ── ORB BUTTON ──
-          position:absolute relative to .gbn-root (no padding on root).
-          left:50% + translateX(-50%) = perfectly centered in the full 430px.
-          The pill has 12px margins, so the orb sits centered over the notch.
-        */}
+        {/* ── ORB BUTTON — centered over scallop ── */}
         <button
           className="gbn-orb-btn"
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            top: -24,
+            top: -26,
             left: "50%",
-            transform: "translateX(-50%)",
+            // Note: gbnOrb animation handles the translateX(-50%) internally
             zIndex: 20,
             border: "none",
             background: "transparent",
             cursor: "pointer",
             padding: 0,
-            width: 54, height: 54,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 54,
+            height: 54,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             WebkitTapHighlightColor: "transparent",
           }}
         >
           {/* Ripple rings */}
           <div className="rpl" style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
             border: "1.5px solid rgba(196,74,135,0.48)",
             pointerEvents: "none",
           }} />
           <div className="rpl rpl2" style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
             border: "1.5px solid rgba(196,74,135,0.30)",
             pointerEvents: "none",
           }} />
 
           {/* Orb core */}
           <div className="orb-core" style={{
-            width: 52, height: 52, borderRadius: "50%",
+            width: 52,
+            height: 52,
+            borderRadius: "50%",
             background: "linear-gradient(148deg, #D44F93 0%, #A4005D 56%, #76003e 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             border: "1.5px solid rgba(255,255,255,0.22)",
-            position: "relative", overflow: "hidden",
+            position: "relative",
+            overflow: "hidden",
           }}>
-            {/* Top gloss — soft white arc */}
+            {/* Top gloss */}
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "44%",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "44%",
               background: "linear-gradient(180deg, rgba(255,255,255,0.26) 0%, transparent 100%)",
               borderRadius: "50% 50% 0 0",
               pointerEvents: "none",
