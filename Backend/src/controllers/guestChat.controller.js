@@ -452,6 +452,8 @@ const inferNeedsEvents = (text) => {
 const inferNeedsHotelInfo = (text) => {
   const t = String(text || "").toLowerCase();
   return (
+    t.includes("facility") ||
+    t.includes("facilities") ||
     t.includes("amenit") ||
     t.includes("hotel info") ||
     t.includes("hotel") ||
@@ -459,6 +461,10 @@ const inferNeedsHotelInfo = (text) => {
     t.includes("policies") ||
     t.includes("wifi") ||
     t.includes("internet") ||
+    t.includes("ev") ||
+    t.includes("electric vehicle") ||
+    t.includes("charging") ||
+    t.includes("charger") ||
     t.includes("check out") ||
     t.includes("checkout") ||
     t.includes("late checkout") ||
@@ -664,7 +670,7 @@ export const guestChat = async (req, res) => {
 
     // Pre-fetch hotel info matches for the current question so the model reliably
     // sees the relevant items (e.g., "EV charging") even if it doesn't call tools.
-    const wantsHotelInfoNow = inferNeedsHotelInfo(userMessage);
+    const wantsHotelInfoNow = inferNeedsHotelInfo(userMessage) || isBroadHotelInfoRequest;
     const prefetchedHotelInfo = wantsHotelInfoNow
       ? await searchHotelInfo({
           query: isBroadHotelInfoRequest ? "" : userMessage,
