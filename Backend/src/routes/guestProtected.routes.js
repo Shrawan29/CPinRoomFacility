@@ -12,7 +12,7 @@ router.get("/dashboard", guestAuth, (req, res) => {
   });
 });
 
-// Chat bot (guest) — uses OpenAI, restricted to events + menu data only
+// Chat bot (guest) — uses OpenAI, restricted to events + menu + hotel info only
 router.post("/chat", guestAuth, guestChat);
 
 export default router;

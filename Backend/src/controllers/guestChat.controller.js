@@ -475,6 +475,55 @@ const inferNeedsHotelInfo = (text) => {
   );
 };
 
+const MAX_HOTELINFO_CONTEXT_ITEMS = 16;
+
+const buildHotelInfoContext = async () => {
+  const info = await HotelInfo.findOne().lean();
+  if (!info) return null;
+
+  const basicInfo = {
+    name: toTrimmedString(info?.basicInfo?.name),
+    description: toTrimmedString(info?.basicInfo?.description),
+    address: toTrimmedString(info?.basicInfo?.address),
+    contactPhone: toTrimmedString(info?.basicInfo?.contactPhone),
+    contactEmail: toTrimmedString(info?.basicInfo?.contactEmail),
+  };
+
+  const amenities = (Array.isArray(info?.amenities) ? info.amenities : [])
+    .filter((a) => a && a.available !== false)
+    .map((a) => ({ name: toTrimmedString(a.name) }))
+    .filter((a) => a.name)
+    .slice(0, MAX_HOTELINFO_CONTEXT_ITEMS);
+
+  const services = (Array.isArray(info?.services) ? info.services : [])
+    .filter((s) => s && s.available !== false)
+    .map((s) => ({
+      name: toTrimmedString(s.name),
+      description: toTrimmedString(s.description),
+    }))
+    .filter((s) => s.name)
+    .slice(0, MAX_HOTELINFO_CONTEXT_ITEMS);
+
+  const policies = (Array.isArray(info?.policies) ? info.policies : [])
+    .map((p) => toTrimmedString(p))
+    .filter(Boolean)
+    .slice(0, MAX_HOTELINFO_CONTEXT_ITEMS);
+
+  const emergency = {
+    frontDeskNumber: toTrimmedString(info?.emergency?.frontDeskNumber),
+    ambulanceNumber: toTrimmedString(info?.emergency?.ambulanceNumber),
+    fireSafetyInfo: toTrimmedString(info?.emergency?.fireSafetyInfo),
+  };
+
+  return {
+    basicInfo,
+    amenities,
+    services,
+    policies,
+    emergency,
+  };
+};
+
 const buildRestrictedContext = async (userMessage) => {
   const wantsMenu = inferNeedsMenu(userMessage);
   const wantsEvents = inferNeedsEvents(userMessage);
@@ -543,6 +592,19 @@ export const guestChat = async (req, res) => {
       ? "openai/gpt-oss-120b:free"
       : "gpt-4o-mini";
     const model = toTrimmedString(process.env.OPENAI_MODEL) || defaultModel;
+
+    // Always include a compact snapshot of hotel info so the assistant has property context
+    // without needing to call a tool first.
+    const hotelInfoContext = await buildHotelInfoContext();
+    const hotelInfoSystemContext = hotelInfoContext
+      ? {
+          role: "system",
+          content:
+            "Hotel info context (from database). Treat this as factual. " +
+            "If the user asks for more detail than shown here, call search_hotel_info.\n\n" +
+            JSON.stringify(hotelInfoContext),
+        }
+      : null;
 
     const system = {
       role: "system",
@@ -621,7 +683,12 @@ export const guestChat = async (req, res) => {
     // If the selected model/provider expects the Responses API (common for o-series), use it.
     if (shouldUseResponsesApi({ baseUrlLower, model })) {
       const responsesTools = toResponsesTools(tools);
-      const input = [system, ...history, { role: "user", content: userMessage }];
+      const input = [
+        system,
+        ...(hotelInfoSystemContext ? [hotelInfoSystemContext] : []),
+        ...history,
+        { role: "user", content: userMessage },
+      ];
 
       const reply = await runResponsesToolLoop({
         client,
@@ -641,7 +708,12 @@ export const guestChat = async (req, res) => {
       });
     }
 
-    const messages = [system, ...history, { role: "user", content: userMessage }];
+    const messages = [
+      system,
+      ...(hotelInfoSystemContext ? [hotelInfoSystemContext] : []),
+      ...history,
+      { role: "user", content: userMessage },
+    ];
 
     let round = 0;
     // Tool calling loop

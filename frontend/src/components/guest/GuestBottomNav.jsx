@@ -1,5 +1,5 @@
-﻿import { useNavigate, useLocation } from "react-router-dom";
-import { memo } from "react";
+﻿import { memo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const HomeIcon = ({ active }) => (
   <svg viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor"
@@ -34,7 +34,7 @@ const HotelIcon = ({ active }) => (
 );
 const AiIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="1.8"
-    strokeLinecap="round" strokeLinejoin="round" style={{ width: 21, height: 21 }}>
+    strokeLinecap="round" strokeLinejoin="round" style={{ width: 22, height: 22 }}>
     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
     <circle cx="9.5" cy="11.5" r="0.65" fill="rgba(255,255,255,0.95)" stroke="none" />
     <circle cx="14.5" cy="11.5" r="0.65" fill="rgba(255,255,255,0.95)" stroke="none" />
@@ -59,33 +59,29 @@ const navItems = [
   { key: "hotel",  label: "Hotel",  route: "/guest/hotel-info", Icon: HotelIcon },
 ];
 
-export default memo(function GuestBottomNav() {
+// ORB_SIZE and PILL constants — single source of truth
+const ORB   = 54;   // orb diameter px
+const PILL_H = 64;  // pill height px
+const SIDE_M = 14;  // pill side margin px
+// How far orb center sits above pill top edge
+const ORB_LIFT = 20;
+
+function GuestBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const pathname = location.pathname;
-  let activeKey = routeToKey[pathname] || "";
+  let activeKey = routeToKey[location.pathname] || "";
   if (!activeKey) {
-    if (pathname.startsWith("/guest/events"))      activeKey = "events";
-    else if (pathname.startsWith("/guest/orders")) activeKey = "orders";
-    else                                            activeKey = "home";
+    if (location.pathname.startsWith("/guest/events"))      activeKey = "events";
+    else if (location.pathname.startsWith("/guest/orders")) activeKey = "orders";
+    else                                                     activeKey = "home";
   }
   const isAiActive = activeKey === "ai";
-
-  /* ── Shared glass style (same as quick-action cards) ── */
-  const GLASS_BG     = "rgba(244,235,222,0.82)";
-  const GLASS_BLUR   = "blur(28px) saturate(1.8)";
-  const GLASS_BORDER = "1px solid rgba(255,255,255,0.62)";
-  const GLASS_SHADOW =
-    "0 8px 32px rgba(26,20,16,0.13)," +
-    "0 2px 8px rgba(26,20,16,0.07)," +
-    "inset 0 1px 0 rgba(255,255,255,0.72)";
 
   const Tab = ({ item, delay }) => {
     const on = activeKey === item.key;
     return (
-      <button
-        onClick={() => navigate(item.route)}
+      <button onClick={() => navigate(item.route)}
         className="gbn-tab"
         style={{
           animationDelay: `${delay}s`,
@@ -118,11 +114,9 @@ export default memo(function GuestBottomNav() {
           letterSpacing: "0.01em",
           transition: "color 0.22s",
         }}>{item.label}</span>
-        {/* Active pill underline */}
         <div style={{
           position: "absolute", bottom: 6,
-          width: on ? 20 : 0, height: 2.5,
-          borderRadius: 2,
+          width: on ? 20 : 0, height: 2.5, borderRadius: 2,
           background: "linear-gradient(90deg,#C44A87,#A4005D)",
           transition: "width 0.32s cubic-bezier(0.22,1,0.36,1)",
         }} />
@@ -134,49 +128,32 @@ export default memo(function GuestBottomNav() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
-
-        @keyframes gbnUp {
-          from { opacity:0; transform:translateY(60px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes gbnTab {
-          from { opacity:0; transform:translateY(8px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes gbnOrb {
-          0%   { opacity:0; transform:scale(0.4) translateY(14px); }
-          62%  { transform:scale(1.06) translateY(-2px); }
-          100% { opacity:1; transform:scale(1) translateY(0); }
-        }
-        /* Smooth ripple — scale up, fade out */
-        @keyframes rippleOut {
-          0%   { transform:scale(1);    opacity:0.5; }
-          100% { transform:scale(2.1);  opacity:0;   }
-        }
-        /* Orb glow breathe */
+        @keyframes gbnUp  { from{opacity:0;transform:translateY(60px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes gbnTab { from{opacity:0;transform:translateY(8px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes gbnOrb { 0%{opacity:0;transform:translateX(-50%) scale(0.4)} 65%{transform:translateX(-50%) scale(1.06)} 100%{opacity:1;transform:translateX(-50%) scale(1)} }
+        @keyframes rippleOut { 0%{transform:scale(1);opacity:0.5} 100%{transform:scale(2.2);opacity:0} }
         @keyframes orbBreathe {
-          0%,100% { box-shadow: 0 0 0 0 rgba(164,0,93,0.0),  0 4px 18px rgba(164,0,93,0.40), 0 2px 6px rgba(0,0,0,0.18); }
-          50%     { box-shadow: 0 0 0 6px rgba(164,0,93,0.08), 0 6px 26px rgba(164,0,93,0.62), 0 2px 6px rgba(0,0,0,0.18); }
+          0%,100%{box-shadow:0 4px 18px rgba(164,0,93,0.40),0 2px 6px rgba(0,0,0,0.16)}
+          50%    {box-shadow:0 6px 28px rgba(164,0,93,0.65),0 2px 6px rgba(0,0,0,0.16)}
         }
-
-        .gbn-root { animation: gbnUp  0.44s cubic-bezier(0.22,1,0.36,1) both; }
+        .gbn-root { animation: gbnUp 0.44s cubic-bezier(0.22,1,0.36,1) both; }
         .gbn-tab  { animation: gbnTab 0.34s ease both; }
-
         .gbn-orb-btn { animation: gbnOrb 0.50s cubic-bezier(0.22,1,0.36,1) 0.1s both; }
         .gbn-orb-btn:active .orb-core { transform: scale(0.88) !important; }
-
-        .orb-core {
-          animation: orbBreathe 2.8s ease-in-out 1s infinite;
-          transition: transform 0.18s cubic-bezier(0.22,1,0.36,1) !important;
-        }
-        .rpl { animation: rippleOut 2.8s ease-out infinite; }
-        .rpl2 { animation-delay: 1.4s; }
+        .orb-core { animation: orbBreathe 2.8s ease-in-out 1s infinite; transition: transform 0.18s cubic-bezier(0.22,1,0.36,1) !important; }
+        .rpl  { animation: rippleOut 2.8s ease-out 1.0s infinite; }
+        .rpl2 { animation: rippleOut 2.8s ease-out 2.4s infinite; }
       `}</style>
 
       {/*
-        ── OUTER SHELL ──
-        No horizontal padding here — keep full width so left:50% is truly centered.
-        The pill gets horizontal margin via its own style.
+        LAYOUT STRATEGY:
+        - Outer wrapper: position:relative, contains BOTH the pill and the orb
+        - Pill: display block, margin:0 SIDE_M, height PILL_H
+        - Orb: position:absolute on the WRAPPER
+            top = -(ORB/2) + (PILL_H/2) - ORB_LIFT   → sits centered on pill top edge, lifted by ORB_LIFT
+            left = 50%  (of wrapper = full width)
+            transform = translateX(-50%)
+        This means orb is always perfectly centered over the pill notch regardless of margins.
       */}
       <div className="gbn-root" style={{
         flexShrink: 0,
@@ -185,48 +162,48 @@ export default memo(function GuestBottomNav() {
         width: "100%",
         maxWidth: 430,
         margin: "0 auto",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        // paddingBottom for safe area goes here but MUST be accounted for in orb top calc
+        // We use marginBottom on the pill instead so wrapper height stays predictable
       }}>
 
-        {/* ── Pill bar — 12px margin each side ── */}
+        {/* PILL */}
         <div style={{
-          margin: "0 12px",
-          height: 64,
-          borderRadius: 32,
-          background: GLASS_BG,
-          backdropFilter: GLASS_BLUR,
-          WebkitBackdropFilter: GLASS_BLUR,
-          border: GLASS_BORDER,
-          boxShadow: GLASS_SHADOW,
+          margin: `0 ${SIDE_M}px`,
+          height: PILL_H,
+          borderRadius: PILL_H / 2,
+          background: "linear-gradient(to bottom, rgba(255,251,245,0.97), rgba(244,235,222,0.88))",
+          backdropFilter: "blur(28px) saturate(1.8)",
+          WebkitBackdropFilter: "blur(28px) saturate(1.8)",
+          border: "1.2px solid rgba(255,255,255,0.68)",
+          boxShadow: "0 8px 32px rgba(26,20,16,0.13), 0 2px 8px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72)",
           position: "relative",
           overflow: "visible",
+          marginBottom: "env(safe-area-inset-bottom, 8px)",
         }}>
 
-          {/* ── Notch punch-out: circular div matching page bg color ── */}
+          {/* Notch — matches page bg, punches visual hole at top-center */}
           <div style={{
             position: "absolute",
-            top: -20,
+            top: -(ORB_LIFT + ORB * 0.3),
             left: "50%",
             transform: "translateX(-50%)",
-            width: 68,
-            height: 48,
+            width: ORB + 18,
+            height: ORB_LIFT + ORB * 0.55,
             background: "#eddfc5",
-            borderRadius: "0 0 34px 34px",
+            borderRadius: `0 0 ${(ORB + 18) / 2}px ${(ORB + 18) / 2}px`,
             zIndex: 0,
             pointerEvents: "none",
           }} />
 
-          {/* ── White gloss strip at top of pill (matches quick-action card inset) ── */}
+          {/* Top gloss strip */}
           <div style={{
-            position: "absolute",
-            top: 0, left: 12, right: 12, height: 1,
-            background: "rgba(255,255,255,0.72)",
+            position: "absolute", top: 0, left: 16, right: 16, height: 1,
+            background: "rgba(255,255,255,0.75)",
             borderRadius: "32px 32px 0 0",
-            pointerEvents: "none",
-            zIndex: 3,
+            pointerEvents: "none", zIndex: 3,
           }} />
 
-          {/* ── Nav row ── */}
+          {/* Nav row */}
           <div style={{
             position: "relative", zIndex: 2,
             display: "flex", alignItems: "center",
@@ -235,7 +212,7 @@ export default memo(function GuestBottomNav() {
             <Tab item={navItems[0]} delay={0.10} />
             <Tab item={navItems[1]} delay={0.15} />
 
-            {/* Center gap — orb floats above, only label shows here */}
+            {/* Center slot — just the label, orb floats above */}
             <div style={{
               flex: 1, height: "100%",
               display: "flex", alignItems: "flex-end",
@@ -257,55 +234,42 @@ export default memo(function GuestBottomNav() {
         </div>
 
         {/*
-          ── ORB BUTTON ──
-          position:absolute relative to .gbn-root (no padding on root).
-          left:50% + translateX(-50%) = perfectly centered in the full 430px.
-          The pill has 12px margins, so the orb sits centered over the notch.
+          ORB — absolutely positioned on the outer wrapper.
+          top: pill sits at y=0 of wrapper (no top margin/padding on wrapper).
+          We want orb center to be at y = ORB_LIFT above pill top = -(ORB/2 - ORB_LIFT... wait.
+          Pill top = 0. Orb center should be at y = -ORB_LIFT from pill top.
+          Orb top edge = orb_center_y - ORB/2 = -ORB_LIFT - ORB/2
         */}
         <button
           className="gbn-orb-btn"
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            top: -24,
+            top: -(ORB_LIFT + ORB / 2),   // = -(20 + 27) = -47 from wrapper top = lifted above pill
             left: "50%",
-            transform: "translateX(-50%)",
+            // animation handles translateX(-50%) already via gbnOrb keyframe
             zIndex: 20,
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            padding: 0,
-            width: 54, height: 54,
+            border: "none", background: "transparent",
+            cursor: "pointer", padding: 0,
+            width: ORB, height: ORB,
             display: "flex", alignItems: "center", justifyContent: "center",
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          {/* Ripple rings */}
-          <div className="rpl" style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
-            border: "1.5px solid rgba(196,74,135,0.48)",
-            pointerEvents: "none",
-          }} />
-          <div className="rpl rpl2" style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
-            border: "1.5px solid rgba(196,74,135,0.30)",
-            pointerEvents: "none",
-          }} />
+          <div className="rpl"  style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1.5px solid rgba(196,74,135,0.48)", pointerEvents:"none" }} />
+          <div className="rpl2" style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1.5px solid rgba(196,74,135,0.30)", pointerEvents:"none" }} />
 
-          {/* Orb core */}
           <div className="orb-core" style={{
-            width: 52, height: 52, borderRadius: "50%",
+            width: ORB, height: ORB, borderRadius: "50%",
             background: "linear-gradient(148deg, #D44F93 0%, #A4005D 56%, #76003e 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
             border: "1.5px solid rgba(255,255,255,0.22)",
             position: "relative", overflow: "hidden",
           }}>
-            {/* Top gloss — soft white arc */}
             <div style={{
               position: "absolute", top: 0, left: 0, right: 0, height: "44%",
-              background: "linear-gradient(180deg, rgba(255,255,255,0.26) 0%, transparent 100%)",
-              borderRadius: "50% 50% 0 0",
-              pointerEvents: "none",
+              background: "linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 100%)",
+              borderRadius: "50% 50% 0 0", pointerEvents: "none",
             }} />
             <AiIcon />
           </div>
@@ -314,4 +278,6 @@ export default memo(function GuestBottomNav() {
       </div>
     </>
   );
-});
+}
+
+export default memo(GuestBottomNav);
