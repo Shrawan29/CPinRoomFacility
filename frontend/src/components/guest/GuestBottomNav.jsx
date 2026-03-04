@@ -45,7 +45,7 @@ const routeToKey = {
   "/guest/dashboard":    "home",
   "/guest/orders":       "orders",
   "/guest/support":      "ai",
-  "/guest/events":       "events",
+  "/guest/complaints":   "events",
   "/guest/hotel-info":   "hotel",
   "/guest/menu":         "orders",
   "/guest/housekeeping": "home",
@@ -55,7 +55,7 @@ const routeToKey = {
 const navItems = [
   { key: "home",   label: "Home",       route: "/guest/dashboard",  Icon: HomeIcon },
   { key: "orders", label: "Orders",     route: "/guest/orders",     Icon: OrdersIcon },
-  { key: "events", label: "Events",     route: "/guest/events",     Icon: EventsIcon },
+  { key: "events", label: "Complaints", route: "/guest/complaints", Icon: EventsIcon },
   { key: "hotel",  label: "Hotel Info", route: "/guest/hotel-info", Icon: HotelIcon },
 ];
 
@@ -69,7 +69,7 @@ function GuestBottomNav() {
 
   let activeKey = routeToKey[location.pathname] || "";
   if (!activeKey) {
-    if (location.pathname.startsWith("/guest/events"))      activeKey = "events";
+    if (location.pathname.startsWith("/guest/complaints"))  activeKey = "events";
     else if (location.pathname.startsWith("/guest/orders")) activeKey = "orders";
     else                                                     activeKey = "home";
   }
@@ -85,8 +85,12 @@ function GuestBottomNav() {
         style={{ animationDelay: `${delay}s` }}
         onClick={() => navigate(item.route)}
       >
-        <span style={{ color: on ? "#A4005D" : "#b5a898", transition: "color 0.22s",
-          transform: on ? "scale(1.08)" : "scale(1)", display: "flex", transition: "color 0.22s, transform 0.22s" }}>
+        <span style={{
+          color: on ? "#A4005D" : "#b5a898",
+          transform: on ? "scale(1.08)" : "scale(1)",
+          display: "flex",
+          transition: "color 0.22s, transform 0.22s",
+        }}>
           <IconComponent active={on} />
         </span>
         <span style={{
