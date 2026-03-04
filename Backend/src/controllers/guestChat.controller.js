@@ -126,7 +126,7 @@ const searchHotelInfo = async (args) => {
   const section = toTrimmedString(args?.section).toLowerCase();
   const limit = clampInt(args?.limit, 1, MAX_TOOL_LIMIT, 10);
 
-  const info = await HotelInfo.findOne().lean();
+  const info = await HotelInfo.findOne().sort({ updatedAt: -1, createdAt: -1 }).lean();
   if (!info) {
     return { found: false, message: "Hotel info not configured" };
   }
@@ -476,7 +476,7 @@ const inferNeedsHotelInfo = (text) => {
 };
 
 const buildHotelInfoContext = async () => {
-  const info = await HotelInfo.findOne().lean();
+  const info = await HotelInfo.findOne().sort({ updatedAt: -1, createdAt: -1 }).lean();
   if (!info) return null;
 
   const basicInfo = {
@@ -521,6 +521,69 @@ const buildHotelInfoContext = async () => {
     policies,
     emergency,
   };
+};
+
+const formatHotelInfoContextForPrompt = (ctx) => {
+  if (!ctx) return "";
+
+  const lines = [];
+  const name = toTrimmedString(ctx?.basicInfo?.name);
+  if (name) lines.push(`Hotel Name: ${name}`);
+
+  const address = toTrimmedString(ctx?.basicInfo?.address);
+  if (address) lines.push(`Address: ${address}`);
+
+  const contactPhone = toTrimmedString(ctx?.basicInfo?.contactPhone);
+  const contactEmail = toTrimmedString(ctx?.basicInfo?.contactEmail);
+  if (contactPhone) lines.push(`Contact Phone: ${contactPhone}`);
+  if (contactEmail) lines.push(`Contact Email: ${contactEmail}`);
+
+  const description = toTrimmedString(ctx?.basicInfo?.description);
+  if (description) lines.push(`Description: ${description}`);
+
+  const amenities = Array.isArray(ctx?.amenities) ? ctx.amenities : [];
+  if (amenities.length > 0) {
+    lines.push("\nAmenities:");
+    for (const a of amenities) {
+      const label = toTrimmedString(a?.name);
+      if (!label) continue;
+      lines.push(`- ${label} (${a?.available === false ? "unavailable" : "available"})`);
+    }
+  }
+
+  const services = Array.isArray(ctx?.services) ? ctx.services : [];
+  if (services.length > 0) {
+    lines.push("\nServices:");
+    for (const s of services) {
+      const label = toTrimmedString(s?.name);
+      if (!label) continue;
+      const availability = s?.available === false ? "unavailable" : "available";
+      const desc = toTrimmedString(s?.description);
+      lines.push(`- ${label} (${availability})${desc ? ` — ${desc}` : ""}`);
+    }
+  }
+
+  const policies = Array.isArray(ctx?.policies) ? ctx.policies : [];
+  if (policies.length > 0) {
+    lines.push("\nPolicies:");
+    for (const p of policies) {
+      const policy = toTrimmedString(p);
+      if (policy) lines.push(`- ${policy}`);
+    }
+  }
+
+  const emergency = ctx?.emergency || {};
+  const frontDesk = toTrimmedString(emergency?.frontDeskNumber);
+  const ambulance = toTrimmedString(emergency?.ambulanceNumber);
+  const fire = toTrimmedString(emergency?.fireSafetyInfo);
+  if (frontDesk || ambulance || fire) {
+    lines.push("\nEmergency:");
+    if (frontDesk) lines.push(`- Front Desk: ${frontDesk}`);
+    if (ambulance) lines.push(`- Ambulance: ${ambulance}`);
+    if (fire) lines.push(`- Fire Safety: ${fire}`);
+  }
+
+  return lines.join("\n");
 };
 
 const buildRestrictedContext = async (userMessage) => {
@@ -602,9 +665,11 @@ export const guestChat = async (req, res) => {
       ? {
           role: "system",
           content:
-            "Hotel info context (from database). Treat this as factual. " +
+            "Hotel info context (from database). Treat this as factual and consult it BEFORE answering. " +
             "Amenities/services may include an 'available' flag; if available=false, it is currently unavailable. " +
-            "If the user asks for more detail than shown here, call search_hotel_info.\n\n" +
+            "If the answer is not present in this context, call search_hotel_info.\n\n" +
+            formatHotelInfoContextForPrompt(hotelInfoContext) +
+            "\n\nRaw JSON:\n" +
             JSON.stringify(hotelInfoContext),
         }
       : null;

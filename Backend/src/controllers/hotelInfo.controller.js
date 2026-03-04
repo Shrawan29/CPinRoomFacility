@@ -5,7 +5,7 @@ export const upsertHotelInfo = async (req, res) => {
   const info = await HotelInfo.findOneAndUpdate(
     {},
     req.body,
-    { upsert: true, new: true }
+    { upsert: true, new: true, setDefaultsOnInsert: true, sort: { updatedAt: -1, createdAt: -1 } }
   );
 
   res.json({
@@ -16,6 +16,6 @@ export const upsertHotelInfo = async (req, res) => {
 
 // GUEST (READ)
 export const getHotelInfo = async (req, res) => {
-  const info = await HotelInfo.findOne();
+  const info = await HotelInfo.findOne().sort({ updatedAt: -1, createdAt: -1 });
   res.json(info);
 };

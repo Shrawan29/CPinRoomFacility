@@ -3,7 +3,7 @@ import ServiceRequest from "../models/ServiceRequest.js";
 import HotelInfo from "../models/HotelInfo.js";
 
 const resolveHotelId = async () => {
-  let hotel = await HotelInfo.findOne().select("_id");
+  let hotel = await HotelInfo.findOne().sort({ updatedAt: -1, createdAt: -1 }).select("_id");
   if (!hotel) {
     const name = String(process.env.HOTEL_NAME || "Hotel").trim() || "Hotel";
     hotel = await HotelInfo.create({
