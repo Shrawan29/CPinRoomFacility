@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
@@ -168,6 +169,15 @@ export default function SuperAdminDashboard() {
           <p className="text-[var(--text-muted)] text-sm mb-4">
             Navigate to manage guests, rooms, or create new admins from the sidebar menu.
           </p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/admin/complaints"
+              className="px-4 py-2 rounded-lg bg-[var(--brand)] text-white text-sm"
+            >
+              View Feedbacks
+            </Link>
+          </div>
         </div>
       </div>
     </AdminLayout>

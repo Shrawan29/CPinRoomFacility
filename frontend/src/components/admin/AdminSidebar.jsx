@@ -18,7 +18,7 @@ export default function AdminSidebar() {
     { label: "Hotel Info", path: "/admin/hotel-info" },
     { label: "Events", path: "/admin/events" },
     { label: "Reports", path: "/admin/reports" },
-    { label: "Complaints", path: "/admin/complaints" },
+    { label: "Feedbacks", path: "/admin/complaints" },
   ];
 
   const diningAdminMenu = [

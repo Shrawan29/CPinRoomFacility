@@ -118,7 +118,7 @@ export default function GuestComplaints() {
               <div style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: 18, fontWeight: 700, color: "#1F1F1F", lineHeight: 1.1,
-              }}>Complaints & Feedback</div>
+              }}>Feedbacks</div>
               <div style={{ fontSize: 11, color: "#6B6B6B", marginTop: 2 }}>
                 Tell us what went wrong or how to improve
               </div>

@@ -55,7 +55,7 @@ const routeToKey = {
 const navItems = [
   { key: "home",   label: "Home",       route: "/guest/dashboard",  Icon: HomeIcon },
   { key: "orders", label: "Orders",     route: "/guest/orders",     Icon: OrdersIcon },
-  { key: "events", label: "Complaints", route: "/guest/complaints", Icon: EventsIcon },
+  { key: "events", label: "Feedbacks",  route: "/guest/complaints", Icon: EventsIcon },
   { key: "hotel",  label: "Hotel Info", route: "/guest/hotel-info", Icon: HotelIcon },
 ];
 

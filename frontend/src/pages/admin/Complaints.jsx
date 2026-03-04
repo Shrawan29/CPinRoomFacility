@@ -42,7 +42,7 @@ export default function ComplaintsAdmin() {
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Complaints & Feedback</h1>
+          <h1 className="text-2xl font-semibold">Feedbacks</h1>
           <div className="text-sm text-[var(--text-muted)] mt-1">
             {loading ? "Loading…" : `${count} submission${count === 1 ? "" : "s"}`}
           </div>
