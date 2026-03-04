@@ -170,7 +170,7 @@ function GuestBottomNav() {
           margin: `0 ${SIDE_M}px`,
           height: PILL_H,
           borderRadius: PILL_H / 2,
-          background: "linear-gradient(to bottom, rgba(255,251,245,0.97), rgba(244,235,222,0.88))",
+          background: "linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(255,250,245,0.95))",
           backdropFilter: "blur(28px) saturate(1.8)",
           WebkitBackdropFilter: "blur(28px) saturate(1.8)",
           border: "1.2px solid rgba(255,255,255,0.68)",
