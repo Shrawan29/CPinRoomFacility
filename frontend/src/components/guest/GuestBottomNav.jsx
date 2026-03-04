@@ -337,7 +337,7 @@ export default function GuestBottomNav() {
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            top: -26,
+            top: -10,
             left: "50%",
             // Note: gbnOrb animation handles the translateX(-50%) internally
             zIndex: 20,
