@@ -4,17 +4,8 @@ import { getGuestMenu, placeOrder } from "../../services/guest.service";
 import { useNavigate } from "react-router-dom";
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
-// Match dashboard nav height exactly
+// Nav height: pill(64) + orbHalf(29) + bottomGap(12)
 const NAV_HEIGHT = 105;
-
-// The glass card style used on dashboard quick actions — single source of truth
-const GLASS = {
-  background: "linear-gradient(to bottom, rgba(255,251,245,0.97), rgba(244,235,222,0.88))",
-  backdropFilter: "blur(28px) saturate(1.8)",
-  WebkitBackdropFilter: "blur(28px) saturate(1.8)",
-  border: "1.2px solid rgba(255,255,255,0.68)",
-  boxShadow: "0 8px 32px rgba(26,20,16,0.13), 0 2px 8px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72)",
-};
 
 export default function MenuBrowse() {
   const { token, guest } = useGuestAuth();
@@ -93,7 +84,10 @@ export default function MenuBrowse() {
     try {
       setSubmitting(true);
       await placeOrder({
-        items: cart.map((item) => ({ menuItemId: item._id, qty: item.quantity })),
+        items: cart.map((item) => ({
+          menuItemId: item._id,
+          qty: item.quantity,
+        })),
         notes: String(orderNotes || "").trim(),
       });
       setCart([]);
@@ -110,6 +104,9 @@ export default function MenuBrowse() {
     ALL: "✦", Starters: "🥗", Mains: "🍽️",
     Desserts: "🍮", Beverages: "☕", Breakfast: "🌅", Snacks: "🥨",
   };
+
+  // Cart bar height for scroll padding
+  const CART_BAR_H = cartItemCount > 0 ? 72 : 0;
 
   return (
     <>
@@ -155,14 +152,12 @@ export default function MenuBrowse() {
         }
 
         .card-item {
+          background: #fff;
           border-radius: 20px;
-          border: 1.2px solid rgba(255,255,255,0.68);
-          box-shadow: 0 8px 32px rgba(26,20,16,0.13), 0 2px 8px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
+          border: 1px solid rgba(164,0,93,0.07);
+          box-shadow: 0 2px 14px rgba(164,0,93,0.06);
           transition: transform 0.22s ease, box-shadow 0.22s ease;
           overflow: hidden;
-          background: linear-gradient(to bottom, rgba(255,251,245,0.97), rgba(244,235,222,0.88));
-          backdrop-filter: blur(28px) saturate(1.8);
-          -webkit-backdrop-filter: blur(28px) saturate(1.8);
         }
         .card-item:active { transform: scale(0.98); }
 
@@ -216,20 +211,14 @@ export default function MenuBrowse() {
         {/* ① HEADER */}
         <div style={{
           flexShrink: 0,
-          ...GLASS,
+          background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(164,0,93,0.1)",
+          boxShadow: "0 2px 12px rgba(30,21,16,0.06)",
         }}>
-          {/* top shine strip */}
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, height: "38%",
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.70), rgba(255,255,255,0))",
-            pointerEvents: "none",
-          }} />
           <div style={{
             display: "flex", alignItems: "center",
             padding: "12px 16px", gap: 12,
             maxWidth: 430, margin: "0 auto",
-            position: "relative",
           }}>
             <button
               onClick={() => navigate("/guest/dashboard")}
@@ -277,16 +266,21 @@ export default function MenuBrowse() {
           </div>
         </div>
 
-        {/* ② SCROLLABLE BODY */}
+        {/* ② SCROLLABLE BODY — padding accounts for nav + cart bar */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", background: "#EFE1CF" }}>
-          <div style={{ maxWidth: 430, margin: "0 auto", paddingBottom: NAV_HEIGHT + 16 }}>
+          <div style={{
+            maxWidth: 430, margin: "0 auto",
+            // Always reserve space for nav; also reserve for cart bar when visible
+            paddingBottom: NAV_HEIGHT + CART_BAR_H + 16,
+          }}>
 
             {/* SEARCH */}
             <div style={{ padding: "16px 20px 0" }}>
               <div style={{
                 display: "flex", alignItems: "center", gap: 10,
-                ...GLASS,
-                borderRadius: 16, padding: "10px 14px",
+                background: "#fff", borderRadius: 16, padding: "10px 14px",
+                border: "1px solid rgba(164,0,93,0.1)",
+                boxShadow: "0 2px 10px rgba(164,0,93,0.05)",
               }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="1.8"
                   strokeLinecap="round" strokeLinejoin="round"
@@ -333,17 +327,11 @@ export default function MenuBrowse() {
                       onClick={() => setSelectedCategory(cat)}
                       style={{
                         padding: "8px 14px", borderRadius: 50,
-                        background: isActive
-                          ? "linear-gradient(90deg,#A4005D,#C44A87)"
-                          : GLASS.background,
+                        background: isActive ? "linear-gradient(90deg,#A4005D,#C44A87)" : "#fff",
                         color: isActive ? "#fff" : "#6B6B6B",
                         fontSize: 12, fontWeight: isActive ? 700 : 500,
-                        border: isActive ? "none" : GLASS.border,
-                        boxShadow: isActive
-                          ? "0 4px 14px rgba(164,0,93,0.28)"
-                          : GLASS.boxShadow,
-                        backdropFilter: GLASS.backdropFilter,
-                        WebkitBackdropFilter: GLASS.WebkitBackdropFilter,
+                        border: isActive ? "none" : "1px solid rgba(164,0,93,0.12)",
+                        boxShadow: isActive ? "0 4px 14px rgba(164,0,93,0.28)" : "0 1px 6px rgba(0,0,0,0.05)",
                       }}
                     >
                       <span style={{ marginRight: 4, fontSize: 11 }}>{categoryIcons[cat] || "◆"}</span>
@@ -382,7 +370,8 @@ export default function MenuBrowse() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {[1, 2, 3].map((n) => (
                     <div key={n} style={{
-                      ...GLASS, borderRadius: 20, padding: 16,
+                      background: "rgba(255,255,255,0.6)", borderRadius: 20, padding: 16,
+                      border: "1px solid rgba(164,0,93,0.06)",
                       animation: `fadeUp 0.5s ease ${n * 80}ms both`,
                     }}>
                       <div style={{ display: "flex", gap: 12 }}>
@@ -397,7 +386,10 @@ export default function MenuBrowse() {
                   ))}
                 </div>
               ) : error ? (
-                <div style={{ ...GLASS, borderRadius: 18, padding: 20, textAlign: "center" }}>
+                <div style={{
+                  background: "#fff", borderRadius: 18, padding: 20, textAlign: "center",
+                  border: "1px solid rgba(164,0,93,0.1)",
+                }}>
                   <p style={{ fontSize: 13, color: "#A4005D", fontWeight: 500, margin: "0 0 10px 0" }}>{error}</p>
                   <button onClick={fetchMenu} style={{
                     padding: "8px 18px", borderRadius: 10,
@@ -406,7 +398,10 @@ export default function MenuBrowse() {
                   }}>Retry</button>
                 </div>
               ) : filteredItems.length === 0 ? (
-                <div style={{ ...GLASS, borderRadius: 18, padding: "28px 20px", textAlign: "center" }}>
+                <div style={{
+                  background: "#fff", borderRadius: 18, padding: "28px 20px", textAlign: "center",
+                  border: "1px solid rgba(164,0,93,0.07)",
+                }}>
                   <p style={{
                     fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: "#6B6B6B",
                     fontStyle: "italic", margin: 0,
@@ -425,107 +420,97 @@ export default function MenuBrowse() {
                         className="card-item"
                         style={{ animation: `fadeUp 0.45s ease ${Math.min(i, 6) * 55}ms both` }}
                       >
-                        {/* inner top shine */}
-                        <div style={{
-                          position: "relative", overflow: "hidden",
-                        }}>
-                          <div style={{
-                            position: "absolute", top: 0, left: 0, right: 0, height: "38%",
-                            background: "linear-gradient(to bottom, rgba(255,255,255,0.70), rgba(255,255,255,0))",
-                            borderRadius: "20px 20px 0 0", pointerEvents: "none", zIndex: 1,
-                          }} />
-                          <div style={{ padding: "16px 16px 14px", position: "relative", zIndex: 2 }}>
-                            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                                  {item.isVeg !== undefined && (
-                                    <div style={{
-                                      width: 14, height: 14, borderRadius: 3, flexShrink: 0,
-                                      border: `1.5px solid ${item.isVeg ? "#22c55e" : "#ef4444"}`,
-                                      display: "flex", alignItems: "center", justifyContent: "center",
-                                    }}>
-                                      <div style={{
-                                        width: 7, height: 7, borderRadius: "50%",
-                                        background: item.isVeg ? "#22c55e" : "#ef4444",
-                                      }} />
-                                    </div>
-                                  )}
-                                  <p style={{
-                                    fontFamily: "'Cormorant Garamond', serif",
-                                    fontSize: 16, fontWeight: 600, color: "#1F1F1F",
-                                    margin: 0, lineHeight: 1.2,
-                                  }}>{item.name}</p>
-                                </div>
-                                {item.description && (
-                                  <p style={{
-                                    fontSize: 11.5, color: "#7a6a60", fontWeight: 300,
-                                    margin: "0 0 8px 0", lineHeight: 1.45,
-                                    display: "-webkit-box", WebkitLineClamp: 2,
-                                    WebkitBoxOrient: "vertical", overflow: "hidden",
-                                  }}>{item.description}</p>
-                                )}
-                                <p style={{
-                                  fontSize: 15, fontWeight: 700, color: "#A4005D",
-                                  margin: 0, fontFamily: "'Cormorant Garamond', serif",
-                                }}>₹{item.price}</p>
-                              </div>
-
-                              <div style={{ flexShrink: 0, display: "flex", alignItems: "flex-end", paddingTop: 2 }}>
-                                {qty === 0 ? (
-                                  <button
-                                    onClick={() => addToCart(item)}
-                                    style={{
-                                      background: "linear-gradient(90deg,#A4005D,#C44A87)",
-                                      color: "#fff", border: "none", borderRadius: 12,
-                                      padding: "9px 16px", fontSize: 13, fontWeight: 700,
-                                      cursor: "pointer", letterSpacing: "0.04em",
-                                      boxShadow: "0 3px 10px rgba(164,0,93,0.25)",
-                                      animation: "scaleIn 0.3s ease",
-                                    }}
-                                    onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.94)"; }}
-                                    onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-                                  >Add +</button>
-                                ) : (
+                        <div style={{ padding: "16px 16px 14px" }}>
+                          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                                {item.isVeg !== undefined && (
                                   <div style={{
-                                    display: "flex", alignItems: "center", gap: 8,
-                                    background: "rgba(164,0,93,0.07)", borderRadius: 12,
-                                    padding: "4px 6px", border: "1px solid rgba(164,0,93,0.14)",
-                                    animation: "scaleIn 0.25s ease",
+                                    width: 14, height: 14, borderRadius: 3, flexShrink: 0,
+                                    border: `1.5px solid ${item.isVeg ? "#22c55e" : "#ef4444"}`,
+                                    display: "flex", alignItems: "center", justifyContent: "center",
                                   }}>
-                                    <button
-                                      className="qty-btn"
-                                      onClick={() => updateQuantity(item._id, qty - 1)}
-                                      style={{
-                                        width: 28, height: 28, borderRadius: 8,
-                                        background: "rgba(164,0,93,0.12)", border: "none",
-                                        color: "#A4005D", cursor: "pointer",
-                                        display: "flex", alignItems: "center", justifyContent: "center",
-                                      }}
-                                    >
-                                      {qty === 1 ? (
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="2.5" style={{ width: 12, height: 12 }}>
-                                          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-                                        </svg>
-                                      ) : <span style={{ fontSize: 16, fontWeight: 700 }}>−</span>}
-                                    </button>
-                                    <span style={{
-                                      fontSize: 14, fontWeight: 700, color: "#A4005D",
-                                      minWidth: 16, textAlign: "center",
-                                    }}>{qty}</span>
-                                    <button
-                                      className="qty-btn"
-                                      onClick={() => updateQuantity(item._id, qty + 1)}
-                                      style={{
-                                        width: 28, height: 28, borderRadius: 8,
-                                        background: "linear-gradient(90deg,#A4005D,#C44A87)",
-                                        border: "none", color: "#fff", fontSize: 18, fontWeight: 700,
-                                        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                                        boxShadow: "0 2px 6px rgba(164,0,93,0.2)",
-                                      }}
-                                    >+</button>
+                                    <div style={{
+                                      width: 7, height: 7, borderRadius: "50%",
+                                      background: item.isVeg ? "#22c55e" : "#ef4444",
+                                    }} />
                                   </div>
                                 )}
+                                <p style={{
+                                  fontFamily: "'Cormorant Garamond', serif",
+                                  fontSize: 16, fontWeight: 600, color: "#1F1F1F",
+                                  margin: 0, lineHeight: 1.2,
+                                }}>{item.name}</p>
                               </div>
+                              {item.description && (
+                                <p style={{
+                                  fontSize: 11.5, color: "#7a6a60", fontWeight: 300,
+                                  margin: "0 0 8px 0", lineHeight: 1.45,
+                                  display: "-webkit-box", WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical", overflow: "hidden",
+                                }}>{item.description}</p>
+                              )}
+                              <p style={{
+                                fontSize: 15, fontWeight: 700, color: "#A4005D",
+                                margin: 0, fontFamily: "'Cormorant Garamond', serif",
+                              }}>₹{item.price}</p>
+                            </div>
+
+                            <div style={{ flexShrink: 0, display: "flex", alignItems: "flex-end", paddingTop: 2 }}>
+                              {qty === 0 ? (
+                                <button
+                                  onClick={() => addToCart(item)}
+                                  style={{
+                                    background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                                    color: "#fff", border: "none", borderRadius: 12,
+                                    padding: "9px 16px", fontSize: 13, fontWeight: 700,
+                                    cursor: "pointer", letterSpacing: "0.04em",
+                                    boxShadow: "0 3px 10px rgba(164,0,93,0.25)",
+                                    animation: "scaleIn 0.3s ease",
+                                  }}
+                                  onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.94)"; }}
+                                  onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                                >Add +</button>
+                              ) : (
+                                <div style={{
+                                  display: "flex", alignItems: "center", gap: 8,
+                                  background: "rgba(164,0,93,0.07)", borderRadius: 12,
+                                  padding: "4px 6px", border: "1px solid rgba(164,0,93,0.14)",
+                                  animation: "scaleIn 0.25s ease",
+                                }}>
+                                  <button
+                                    className="qty-btn"
+                                    onClick={() => updateQuantity(item._id, qty - 1)}
+                                    style={{
+                                      width: 28, height: 28, borderRadius: 8,
+                                      background: "rgba(164,0,93,0.12)", border: "none",
+                                      color: "#A4005D", cursor: "pointer",
+                                      display: "flex", alignItems: "center", justifyContent: "center",
+                                    }}
+                                  >
+                                    {qty === 1 ? (
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="2.5" style={{ width: 12, height: 12 }}>
+                                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+                                      </svg>
+                                    ) : <span style={{ fontSize: 16, fontWeight: 700 }}>−</span>}
+                                  </button>
+                                  <span style={{
+                                    fontSize: 14, fontWeight: 700, color: "#A4005D",
+                                    minWidth: 16, textAlign: "center",
+                                  }}>{qty}</span>
+                                  <button
+                                    className="qty-btn"
+                                    onClick={() => updateQuantity(item._id, qty + 1)}
+                                    style={{
+                                      width: 28, height: 28, borderRadius: 8,
+                                      background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                                      border: "none", color: "#fff", fontSize: 18, fontWeight: 700,
+                                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                                      boxShadow: "0 2px 6px rgba(164,0,93,0.2)",
+                                    }}
+                                  >+</button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -546,43 +531,47 @@ export default function MenuBrowse() {
           </div>
         </div>
 
-        {/* ③ CART BAR */}
+        {/* ③ CART BAR — fixed above the bottom nav, never overlaps it */}
         {cartItemCount > 0 && (
           <div style={{
-            flexShrink: 0,
-            ...GLASS,
-            borderTop: "1px solid rgba(164,0,93,0.15)",
+            position: "fixed",
+            bottom: NAV_HEIGHT,   // sits directly on top of the fixed nav
+            left: 0, right: 0,
+            zIndex: 9998,         // just below nav (9999) but above everything else
             padding: "10px 20px",
+            background: "rgba(255,255,255,0.97)",
+            backdropFilter: "blur(20px)",
+            borderTop: "1px solid rgba(164,0,93,0.15)",
+            maxWidth: 430,
+            margin: "0 auto",
           }}>
-            <div style={{ maxWidth: 430, margin: "0 auto" }}>
-              <button
-                onClick={() => setShowCart(true)}
-                style={{
-                  width: "100%", padding: "13px 20px",
-                  background: "linear-gradient(90deg,#A4005D,#C44A87)",
-                  color: "#fff", border: "none", borderRadius: 16,
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 18px rgba(164,0,93,0.35)",
-                  animation: "cartBounce 0.5s ease",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{
-                    background: "rgba(255,255,255,0.25)", borderRadius: 8,
-                    padding: "3px 9px", fontSize: 12, fontWeight: 700,
-                  }}>{cartItemCount}</span>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>View Cart</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 18, fontWeight: 700,
-                  }}>₹{cartTotal}</span>
-                  <span style={{ opacity: 0.8 }}>↑</span>
-                </div>
-              </button>
-            </div>
+            <button
+              onClick={() => setShowCart(true)}
+              style={{
+                width: "100%", padding: "13px 20px",
+                background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                color: "#fff", border: "none", borderRadius: 16,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                cursor: "pointer",
+                boxShadow: "0 4px 18px rgba(164,0,93,0.35)",
+                animation: "cartBounce 0.5s ease",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{
+                  background: "rgba(255,255,255,0.25)", borderRadius: 8,
+                  padding: "3px 9px", fontSize: 12, fontWeight: 700,
+                }}>{cartItemCount}</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>View Cart</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 18, fontWeight: 700,
+                }}>₹{cartTotal}</span>
+                <span style={{ opacity: 0.8 }}>↑</span>
+              </div>
+            </button>
           </div>
         )}
 
@@ -603,7 +592,7 @@ export default function MenuBrowse() {
                 background: "#EFE1CF",
                 borderRadius: "24px 24px 0 0",
                 maxHeight: "80vh", overflowY: "auto",
-                zIndex: 101,
+                zIndex: 10001,
                 animation: "slideUp 0.38s cubic-bezier(0.22,1,0.36,1) both",
                 paddingBottom: "env(safe-area-inset-bottom, 0px)",
               }}
@@ -641,7 +630,8 @@ export default function MenuBrowse() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
                   {cart.map((item) => (
                     <div key={item._id} style={{
-                      ...GLASS, borderRadius: 16, padding: "12px 14px",
+                      background: "#fff", borderRadius: 16, padding: "12px 14px",
+                      border: "1px solid rgba(164,0,93,0.07)",
                       display: "flex", alignItems: "center", gap: 12,
                     }}>
                       <div style={{ flex: 1 }}>
@@ -683,7 +673,8 @@ export default function MenuBrowse() {
                 </div>
 
                 <div style={{
-                  ...GLASS, borderRadius: 16, padding: "14px 16px",
+                  background: "#fff", borderRadius: 16, padding: "14px 16px",
+                  border: "1px solid rgba(164,0,93,0.1)",
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                   marginBottom: 16,
                 }}>
@@ -711,9 +702,9 @@ export default function MenuBrowse() {
                     placeholder="E.g. no onions, extra spicy, allergies…"
                     style={{
                       width: "100%", borderRadius: 14,
-                      border: GLASS.border,
+                      border: "1px solid rgba(164,0,93,0.14)",
                       padding: "10px 12px", fontSize: 13, outline: "none",
-                      background: "linear-gradient(to bottom, rgba(255,251,245,0.97), rgba(244,235,222,0.88))",
+                      background: "rgba(255,255,255,0.95)",
                     }}
                   />
                 </div>
@@ -748,8 +739,7 @@ export default function MenuBrowse() {
             }} />
             <div style={{
               position: "fixed", top: "50%", left: "50%",
-              ...GLASS,
-              borderRadius: 24, padding: "24px",
+              background: "#EFE1CF", borderRadius: 24, padding: "24px",
               maxWidth: 380, width: "90%", zIndex: 111,
               boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
               animation: "popIn 0.38s cubic-bezier(0.22,1,0.36,1) both",
@@ -776,8 +766,9 @@ export default function MenuBrowse() {
               </p>
 
               <div style={{
-                ...GLASS, padding: "12px 14px", borderRadius: 16,
+                background: "#fff", padding: "12px 14px", borderRadius: 16,
                 marginBottom: 12, maxHeight: 180, overflowY: "auto",
+                border: "1px solid rgba(164,0,93,0.08)",
               }}>
                 {cart.map((item) => (
                   <div key={item._id} style={{
@@ -802,7 +793,8 @@ export default function MenuBrowse() {
 
               {String(orderNotes || "").trim() && (
                 <div style={{
-                  ...GLASS, padding: "10px 14px", borderRadius: 16, marginBottom: 12,
+                  background: "#fff", padding: "10px 14px", borderRadius: 16, marginBottom: 12,
+                  border: "1px solid rgba(164,0,93,0.08)",
                 }}>
                   <div style={{
                     fontSize: 11, fontWeight: 800, letterSpacing: "0.16em",
