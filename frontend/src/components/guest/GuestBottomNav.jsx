@@ -59,12 +59,13 @@ const navItems = [
   { key: "hotel",  label: "Hotel",  route: "/guest/hotel-info", Icon: HotelIcon },
 ];
 
-// ORB_SIZE and PILL constants — single source of truth
-const ORB   = 54;   // orb diameter px
-const PILL_H = 64;  // pill height px
-const SIDE_M = 14;  // pill side margin px
-const ORB_LIFT = 18;
-const WRAPPER_PAD_TOP = ORB_LIFT + ORB; // ensures orb never clips out of wrapper
+// ── Constants ─────────────────────────────────────────────────────────────────
+const ORB    = 58;   // orb diameter px
+const PILL_H = 64;   // pill height px
+const SIDE_M = 14;   // pill side margin px
+// Orb center sits exactly on pill top edge → half above pill, half below
+// Wrapper paddingTop = ORB/2 so the top half of the orb is never clipped
+const ORB_HALF = ORB / 2;  // 29px
 
 function GuestBottomNav() {
   const navigate = useNavigate();
@@ -145,6 +146,14 @@ function GuestBottomNav() {
         .rpl2 { animation: rippleOut 2.8s ease-out 2.4s infinite; }
       `}</style>
 
+      {/*
+        LAYOUT:
+        Wrapper has paddingTop = ORB_HALF (29px) so the top half of the orb
+        is inside the wrapper and never clipped.
+        Pill starts at y = ORB_HALF inside the wrapper.
+        Orb top = 0 (wrapper top), so orb center = ORB_HALF = exactly pill top edge.
+        Result: orb is half above pill, half sitting in pill — like the reference image.
+      */}
       <div className="gbn-root" style={{
         flexShrink: 0,
         position: "relative",
@@ -152,10 +161,8 @@ function GuestBottomNav() {
         width: "100%",
         maxWidth: 430,
         margin: "0 auto",
-        // FIX 2: bottom gap so pill floats above screen edge
+        paddingTop: ORB_HALF,   // room for top half of orb
         paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
-        // Give wrapper top room so the orb (which sits above the pill) isn't clipped
-        paddingTop: WRAPPER_PAD_TOP,
         overflow: "visible",
       }}>
 
@@ -173,17 +180,23 @@ function GuestBottomNav() {
           overflow: "visible",
         }}>
 
-          {/* Notch — matches page bg, punches visual hole at top-center */}
+          {/*
+            NOTCH — a curved scoop cut into the top of the pill.
+            Positioned so its bottom half aligns with the pill top edge.
+            Uses box-shadow trick: the div itself is transparent,
+            the pill bg peeks through and the shadow paints the page-bg color
+            outward to create the curved "shelf" effect.
+          */}
           <div style={{
             position: "absolute",
-            top: -(ORB_LIFT + ORB * 0.3),
+            top: -ORB_HALF - 6,          // sit above pill top
             left: "50%",
             transform: "translateX(-50%)",
-            width: ORB + 18,
-            height: ORB_LIFT + ORB * 0.55,
-            background: "#eddfc5",
-            borderRadius: `0 0 ${(ORB + 18) / 2}px ${(ORB + 18) / 2}px`,
-            zIndex: 0,
+            width: ORB + 24,             // wider than orb for smooth curve shoulders
+            height: ORB_HALF + 6,        // tall enough to cover from above pill to its midpoint
+            background: "#eddfc5",       // match page background
+            borderRadius: `0 0 ${(ORB + 24) / 2}px ${(ORB + 24) / 2}px`,
+            zIndex: 3,
             pointerEvents: "none",
           }} />
 
@@ -192,7 +205,7 @@ function GuestBottomNav() {
             position: "absolute", top: 0, left: 16, right: 16, height: 1,
             background: "rgba(255,255,255,0.75)",
             borderRadius: "32px 32px 0 0",
-            pointerEvents: "none", zIndex: 3,
+            pointerEvents: "none", zIndex: 4,
           }} />
 
           {/* Nav row */}
@@ -204,7 +217,7 @@ function GuestBottomNav() {
             <Tab item={navItems[0]} delay={0.10} />
             <Tab item={navItems[1]} delay={0.15} />
 
-            {/* Center slot — just the label, orb floats above */}
+            {/* Center slot — spacer for orb + label at bottom */}
             <div style={{
               flex: 1, height: "100%",
               display: "flex", alignItems: "flex-end",
@@ -225,15 +238,19 @@ function GuestBottomNav() {
           </div>
         </div>
 
-        {/* ORB — floats above pill center. top = WRAPPER_PAD_TOP - ORB_LIFT - ORB/2 = ORB/2 */}
+        {/*
+          ORB — top:0 on wrapper means its top edge is at wrapper top.
+          Since wrapper has paddingTop = ORB_HALF, the pill top is at y = ORB_HALF.
+          So orb center (at y = ORB_HALF) sits exactly on the pill top edge.
+          → Perfect half-in / half-out positioning like the reference.
+        */}
         <button
           className="gbn-orb-btn"
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            top: WRAPPER_PAD_TOP - ORB_LIFT - ORB / 2,  // = (18+54) - 18 - 27 = 27px from wrapper top
+            top: 0,
             left: "50%",
-            transform: "translateX(-50%)",
             zIndex: 20,
             border: "none", background: "transparent",
             cursor: "pointer", padding: 0,
