@@ -4,16 +4,16 @@ import { guestChat } from "../../services/chat.service";
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
 const MAX_LOCAL_HISTORY = 10;
+const NAV_HEIGHT = 76; // pill(64) + bottomGap(12)
 
 export default function GuestSupport() {
   const navigate = useNavigate();
 
   const [fadeIn, setFadeIn] = useState(false);
-
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Ask me about today’s menu, upcoming events, or hotel services.",
+      content: "Ask me about today's menu, upcoming events, or hotel services.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -59,25 +59,18 @@ export default function GuestSupport() {
     setMessages(nextMessages);
 
     try {
-      const data = await guestChat({
-        message: text,
-        history: historyForApi,
-      });
-
+      const data = await guestChat({ message: text, history: historyForApi });
       const reply = String(data?.reply || "").trim();
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: reply || "Sorry — I couldn’t generate a reply." },
+        { role: "assistant", content: reply || "Sorry — I couldn't generate a reply." },
       ]);
     } catch (e) {
       const msg = e?.response?.data?.message || e?.message || "Chat failed. Please try again.";
       setError(msg);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "I couldn’t reach the chat service. Please try again.",
-        },
+        { role: "assistant", content: "I couldn't reach the chat service. Please try again." },
       ]);
     } finally {
       setSending(false);
@@ -95,61 +88,42 @@ export default function GuestSupport() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&display=swap');
-
         @keyframes fadeUp {
           from { opacity:0; transform:translateY(14px); }
           to   { opacity:1; transform:translateY(0); }
         }
-
-
       `}</style>
 
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          background: "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
-          opacity: fadeIn ? 1 : 0,
-          transition: "opacity 0.5s ease",
-        }}
-      >
+      <div style={{
+        position: "fixed", inset: 0,
+        display: "flex", flexDirection: "column",
+        background: "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))",
+        opacity: fadeIn ? 1 : 0,
+        transition: "opacity 0.5s ease",
+      }}>
+
         {/* HEADER */}
-        <div
-          style={{
-            flexShrink: 0,
-            background: "rgba(255,255,255,0.97)",
-            backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(164,0,93,0.1)",
-            boxShadow: "0 2px 12px rgba(30,21,16,0.06)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "12px 16px",
-              gap: 12,
-              maxWidth: 430,
-              margin: "0 auto",
-            }}
-          >
+        <div style={{
+          flexShrink: 0,
+          background: "rgba(255,255,255,0.97)",
+          backdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(164,0,93,0.1)",
+          boxShadow: "0 2px 12px rgba(30,21,16,0.06)",
+        }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "12px 16px", gap: 12,
+            maxWidth: 430, margin: "0 auto",
+          }}>
             <button
               type="button"
               onClick={() => navigate("/guest/dashboard")}
               aria-label="Back"
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
+                width: 36, height: 36, borderRadius: "50%",
                 background: "rgba(164,0,93,0.07)",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
                 color: "#A4005D",
               }}
             >
@@ -157,17 +131,10 @@ export default function GuestSupport() {
             </button>
 
             <div style={{ textAlign: "center", flex: 1 }}>
-              <div
-                style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: "#1F1F1F",
-                  lineHeight: 1.1,
-                }}
-              >
-                Guest Assistant
-              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 18, fontWeight: 700, color: "#1F1F1F", lineHeight: 1.1,
+              }}>Guest Assistant</div>
               <div style={{ fontSize: 11, color: "#6B6B6B", marginTop: 2 }}>
                 Chat about menu, events, and services
               </div>
@@ -177,26 +144,19 @@ export default function GuestSupport() {
           </div>
         </div>
 
-        {/* CHAT BODY */}
-        <div
-          style={{
-            flex: 1,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            maxWidth: 430,
-            width: "100%",
-            margin: "0 auto",
-          }}
-        >
-          <div
-            ref={listRef}
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: 14,
-            }}
-          >
+        {/* CHAT BODY — paddingBottom pushes input above fixed nav */}
+        <div style={{
+          flex: 1,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: 430,
+          width: "100%",
+          margin: "0 auto",
+          paddingBottom: NAV_HEIGHT,
+        }}>
+          {/* Messages list */}
+          <div ref={listRef} style={{ flex: 1, overflowY: "auto", padding: 14 }}>
             {messages.map((m, idx) => {
               const isUser = m.role === "user";
               return (
@@ -206,23 +166,23 @@ export default function GuestSupport() {
                     display: "flex",
                     justifyContent: isUser ? "flex-end" : "flex-start",
                     marginBottom: 10,
-                    animation: `fadeUp 0.35s ease both`,
+                    animation: "fadeUp 0.35s ease both",
                   }}
                 >
-                  <div
-                    style={{
-                      maxWidth: "85%",
-                      padding: "10px 12px",
-                      borderRadius: 14,
-                      whiteSpace: "pre-wrap",
-                      fontSize: 13,
-                      lineHeight: 1.35,
-                      background: isUser ? "var(--brand)" : "rgba(255,255,255,0.92)",
-                      color: isUser ? "white" : "var(--text-primary)",
-                      border: isUser ? "none" : "1px solid rgba(0,0,0,0.06)",
-                      boxShadow: isUser ? "0 8px 18px rgba(164,0,93,0.14)" : "0 2px 12px rgba(30,21,16,0.05)",
-                    }}
-                  >
+                  <div style={{
+                    maxWidth: "85%",
+                    padding: "10px 12px",
+                    borderRadius: 14,
+                    whiteSpace: "pre-wrap",
+                    fontSize: 13,
+                    lineHeight: 1.35,
+                    background: isUser ? "var(--brand)" : "rgba(255,255,255,0.92)",
+                    color: isUser ? "white" : "var(--text-primary)",
+                    border: isUser ? "none" : "1px solid rgba(0,0,0,0.06)",
+                    boxShadow: isUser
+                      ? "0 8px 18px rgba(164,0,93,0.14)"
+                      : "0 2px 12px rgba(30,21,16,0.05)",
+                  }}>
                     {m.content}
                   </div>
                 </div>
@@ -230,28 +190,21 @@ export default function GuestSupport() {
             })}
 
             {sending && (
-              <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
-                Thinking…
-              </div>
+              <div style={{ color: "var(--text-muted)", fontSize: 12 }}>Thinking…</div>
             )}
-
             {error && (
-              <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>
-                {error}
-              </div>
+              <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>{error}</div>
             )}
           </div>
 
-          {/* INPUT */}
-          <div
-            style={{
-              padding: 12,
-              display: "flex",
-              gap: 8,
-              borderTop: "1px solid rgba(0,0,0,0.06)",
-              background: "rgba(255,255,255,0.92)",
-            }}
-          >
+          {/* INPUT BAR */}
+          <div style={{
+            padding: 12,
+            display: "flex", gap: 8,
+            borderTop: "1px solid rgba(0,0,0,0.06)",
+            background: "rgba(255,255,255,0.92)",
+            flexShrink: 0,
+          }}>
             <textarea
               ref={inputRef}
               value={input}
@@ -260,13 +213,11 @@ export default function GuestSupport() {
               placeholder="Type a message…"
               rows={1}
               style={{
-                flex: 1,
-                resize: "none",
+                flex: 1, resize: "none",
                 borderRadius: 12,
                 border: "1px solid rgba(0,0,0,0.12)",
                 padding: "10px 10px",
-                fontSize: 13,
-                outline: "none",
+                fontSize: 13, outline: "none",
                 background: "white",
               }}
             />
@@ -275,22 +226,15 @@ export default function GuestSupport() {
               onClick={send}
               disabled={sending || !String(input).trim()}
               style={{
-                padding: "10px 12px",
-                borderRadius: 12,
+                padding: "10px 12px", borderRadius: 12,
                 border: "none",
-                background:
-                  sending || !String(input).trim()
-                    ? "rgba(164,0,93,0.35)"
-                    : "var(--brand)",
-                color: "white",
-                fontWeight: 600,
-                fontSize: 13,
-                cursor:
-                  sending || !String(input).trim() ? "not-allowed" : "pointer",
+                background: sending || !String(input).trim()
+                  ? "rgba(164,0,93,0.35)"
+                  : "var(--brand)",
+                color: "white", fontWeight: 600, fontSize: 13,
+                cursor: sending || !String(input).trim() ? "not-allowed" : "pointer",
               }}
-            >
-              Send
-            </button>
+            >Send</button>
           </div>
         </div>
 
