@@ -2,66 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
-import api from "../../services/api";
-
-const toTrimmed = (v) => String(v ?? "").trim();
-
-const keywordMatch = (text, keywords) => {
-  const t = String(text || "").toLowerCase();
-  return keywords.some((k) => t.includes(k));
-};
-
-const iconForName = (name) => {
-  const n = String(name || "").toLowerCase();
-  if (n.includes("pool")) return "🏊";
-  if (n.includes("spa") || n.includes("sauna")) return "🧖";
-  if (n.includes("gym") || n.includes("fitness")) return "💪";
-  if (n.includes("wifi") || n.includes("internet")) return "📡";
-  if (n.includes("charge") || n.includes("ev") || n.includes("electric")) return "⚡";
-  if (n.includes("parking") || n.includes("valet")) return "🅿️";
-  if (n.includes("laundry")) return "👕";
-  if (n.includes("luggage")) return "🧳";
-  if (n.includes("restaurant") || n.includes("dining") || n.includes("bar") || n.includes("cafe")) return "🍽️";
-  if (n.includes("meeting") || n.includes("business") || n.includes("conference") || n.includes("banquet")) return "💼";
-  return "🏨";
-};
 
 export default function GuestHotelInfo() {
   const { guest } = useGuestAuth();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("dining");
   const [fadeIn, setFadeIn] = useState(false);
-  const [hotelInfo, setHotelInfo] = useState(null);
-  const [loadingInfo, setLoadingInfo] = useState(true);
-  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     const t = setTimeout(() => setFadeIn(true), 50);
     return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      setLoadingInfo(true);
-      setLoadError("");
-      try {
-        const res = await api.get("/hotel-info");
-        if (!mounted) return;
-        setHotelInfo(res.data || null);
-      } catch (e) {
-        if (!mounted) return;
-        setLoadError(e?.response?.data?.message || e?.message || "Failed to load hotel info");
-        setHotelInfo(null);
-      } finally {
-        if (mounted) setLoadingInfo(false);
-      }
-    };
-
-    load();
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   const categories = [
@@ -74,149 +24,94 @@ export default function GuestHotelInfo() {
     { key: "checkout",   label: "Check-out",  emoji: "🔑" },
   ];
 
-  const basicName = toTrimmed(hotelInfo?.basicInfo?.name) || "Hotel";
-  const guestDisplay = hotelInfo?.guestDisplay && typeof hotelInfo.guestDisplay === "object" ? hotelInfo.guestDisplay : null;
-  const amenities = Array.isArray(hotelInfo?.amenities) ? hotelInfo.amenities : [];
-  const services = Array.isArray(hotelInfo?.services) ? hotelInfo.services : [];
-  const policies = Array.isArray(hotelInfo?.policies) ? hotelInfo.policies : [];
-
-  const contacts = (() => {
-    const fromGuestDisplay = guestDisplay?.contactCard?.items;
-    if (Array.isArray(fromGuestDisplay) && fromGuestDisplay.length > 0) {
-      return fromGuestDisplay
-        .map((c) => ({ icon: String(c?.icon || "").trim(), label: toTrimmed(c?.label) }))
-        .filter((c) => c.label);
-    }
-
-    const items = [];
-    const phone = toTrimmed(hotelInfo?.basicInfo?.contactPhone);
-    const email = toTrimmed(hotelInfo?.basicInfo?.contactEmail);
-    const frontDesk = toTrimmed(hotelInfo?.emergency?.frontDeskNumber);
-
-    if (phone) items.push({ icon: "📞", label: phone });
-    if (frontDesk) items.push({ icon: "🛎️", label: frontDesk });
-    if (email) items.push({ icon: "✉️", label: email });
-
-    return items.length > 0 ? items : [{ icon: "🛎️", label: "Please contact the front desk" }];
-  })();
-
-  const diningKeywords = ["dining", "restaurant", "bistro", "bar", "cafe", "café", "room service", "breakfast", "lunch", "dinner"];
-  const wellnessKeywords = ["pool", "spa", "sauna", "gym", "fitness", "massage"];
-  const businessKeywords = ["business", "meeting", "conference", "banquet", "mice", "boardroom"];
-  const wifiKeywords = ["wifi", "wi-fi", "internet"];
-
-  const facilityPool = [
-    ...amenities.map((a) => ({
-      name: toTrimmed(a?.name),
-      available: a?.available !== false,
-      type: "amenity",
-    })),
-    ...services.map((s) => ({
-      name: toTrimmed(s?.name),
-      description: toTrimmed(s?.description),
-      available: s?.available !== false,
-      type: "service",
-    })),
-  ].filter((x) => x.name);
-
-  const byCategory = {
-    dining: facilityPool.filter((x) => keywordMatch(x.name, diningKeywords) || keywordMatch(x.description, diningKeywords)),
-    wellness: facilityPool.filter((x) => keywordMatch(x.name, wellnessKeywords) || keywordMatch(x.description, wellnessKeywords)),
-    business: facilityPool.filter((x) => keywordMatch(x.name, businessKeywords) || keywordMatch(x.description, businessKeywords)),
-    wifi: facilityPool.filter((x) => keywordMatch(x.name, wifiKeywords) || keywordMatch(x.description, wifiKeywords)),
-  };
-
-  const derivedData = {
+  const data = {
     dining: {
-      headline: "Dining",
-      sub: "Restaurants and dining services",
+      headline: "Culinary Experiences",
+      sub: "Four distinctive venues, one unforgettable stay",
       accent: "linear-gradient(135deg,#5c001a 0%,#A4005D 100%)",
-      items: byCategory.dining.map((x) => ({
-        name: x.name,
-        icon: iconForName(x.name),
-        desc: x.description || "",
-        tag: x.available ? "Available" : "Unavailable",
-      })),
+      items: [
+        { name: "Freakk de Bistro",   icon: "🍸", desc: "All-day dining with eclectic continental & Indian flavours",        hours: "7:00 AM – 11:00 PM",  tag: "All-Day Dining" },
+        { name: "Bougainvillea",       icon: "🌸", desc: "Speciality restaurant featuring multi-cuisine gourmet offerings",   hours: "12:00 PM – 11:30 PM", tag: "Speciality"     },
+        { name: "Meeting Point",       icon: "☕", desc: "Casual café-lounge for quick bites, beverages & informal meetings", hours: "6:00 AM – 10:00 PM",  tag: "Café Lounge"    },
+        { name: "High Steaks Rooftop", icon: "🥩", desc: "Rooftop bar & grill with panoramic city views and premium steaks", hours: "5:00 PM – 1:00 AM",   tag: "Rooftop Bar"    },
+        { name: "In-room Dining",      icon: "🛎️", desc: "24/7 room service delivered directly to your door",               hours: "Available 24/7",       tag: "Room Service"   },
+      ],
     },
     wellness: {
-      headline: "Wellness",
-      sub: "Spa, gym, pool and recreation",
+      headline: "Spa & Recreation",
+      sub: "Rejuvenate body, mind and soul",
       accent: "linear-gradient(135deg,#2d1500 0%,#8a5200 100%)",
-      items: byCategory.wellness.map((x) => ({
-        name: x.name,
-        icon: iconForName(x.name),
-        desc: x.description || "",
-        tag: x.available ? "Available" : "Unavailable",
-      })),
+      items: [
+        { name: "Swimming Pool", icon: "🏊", desc: "Temperature-controlled outdoor pool with sun deck and poolside service", hours: "6:00 AM – 9:00 PM",  tag: "Outdoor"  },
+        { name: "Spa & Sauna",   icon: "🧖", desc: "Traditional sauna and wellness treatments for complete relaxation",      hours: "9:00 AM – 9:00 PM",  tag: "Wellness" },
+        { name: "Gym & Fitness", icon: "💪", desc: "State-of-the-art cardio machines, free weights & more",                 hours: "5:30 AM – 10:00 PM", tag: "Fitness"  },
+      ],
     },
     business: {
-      headline: "Business",
-      sub: "Business and event facilities",
+      headline: "Business & Events",
+      sub: "World-class MICE facilities in the heart of Nagpur",
       accent: "linear-gradient(135deg,#082036 0%,#1a6a8a 100%)",
-      items: byCategory.business.map((x) => ({
-        name: x.name,
-        icon: iconForName(x.name),
-        desc: x.description || "",
-        tag: x.available ? "Available" : "Unavailable",
-      })),
+      items: [
+        { name: "Business Centre",   icon: "💼", desc: "High-speed internet, printing, scanning & secretarial support",                          hours: "8:00 AM – 8:00 PM", tag: "Business" },
+        { name: "MICE Facilities",   icon: "🎤", desc: "Banquets & conference halls: Palacio, Millennium, Sammelan, Grand Millennium, Sapphire",  hours: "On request",         tag: "Events"   },
+        { name: "Board Room",        icon: "📋", desc: "Private boardroom with AV equipment, ideal for executive meetings",                       hours: "On request",         tag: "Meeting"  },
+        { name: "Concierge Service", icon: "🎩", desc: "Dedicated concierge for travel arrangements, tickets, tours & more",                      hours: "Available 24/7",     tag: "Service"  },
+      ],
     },
     facilities: {
-      headline: "Facilities",
-      sub: "Amenities and services at the hotel",
+      headline: "Hotel Facilities",
+      sub: "Every convenience, thoughtfully provided",
       accent: "linear-gradient(135deg,#0e2e0e 0%,#2d6b2d 100%)",
-      items: facilityPool.map((x) => ({
-        name: x.name,
-        icon: iconForName(x.name),
-        desc: x.description || "",
-        tag: x.available ? "Available" : "Unavailable",
-      })),
+      items: [
+        { name: "Airport Pickup / Drop",   icon: "✈️", desc: "Complimentary or chargeable airport transfers arranged by concierge", hours: "On request",         tag: "Transfer"    },
+        { name: "Valet Parking",           icon: "🅿️", desc: "Secure valet parking service available for all guests",               hours: "Available 24/7",     tag: "Parking"     },
+        { name: "Express Laundry",         icon: "👕", desc: "Same-day laundry and dry-cleaning service for your convenience",       hours: "8:00 AM – 8:00 PM", tag: "Laundry"     },
+        { name: "Left Luggage Room",       icon: "🧳", desc: "Secure luggage storage before check-in and after check-out",           hours: "Available 24/7",     tag: "Storage"     },
+        { name: "Electric Charging Point", icon: "⚡", desc: "EV charging stations available in the hotel parking area",             hours: "Available 24/7",     tag: "EV Friendly" },
+      ],
     },
     wifi: {
-      headline: "Wi-Fi",
-      sub: "Connectivity information",
+      headline: "Wi-Fi & Connectivity",
+      sub: "High-speed internet throughout the hotel",
       accent: "linear-gradient(135deg,#1a1a3e 0%,#4a4a9e 100%)",
       details: [
-        ...(byCategory.wifi.length > 0
-          ? byCategory.wifi.slice(0, 10).map((x) => ({
-              label: x.name,
-              value: x.description || (x.available ? "Available" : "Unavailable"),
-              icon: iconForName(x.name),
-            }))
-          : [{ label: "Wi-Fi", value: "Ask front desk for Wi‑Fi details.", icon: "📡" }]),
+        { label: "Network Name (SSID)", value: "CentrePoint-Guest",                icon: "📶" },
+        { label: "Password",            value: "Guest@2024",                       icon: "🔐" },
+        { label: "Speed",               value: "100 Mbps",                         icon: "⚡" },
+        { label: "Coverage",            value: "Entire hotel including all rooms",  icon: "🏨" },
+        { label: "Tech Support",        value: "Dial 0 from room phone",           icon: "📞" },
       ],
     },
     emergency: {
-      headline: "Emergency",
-      sub: "Emergency and safety contacts",
+      headline: "Emergency & Safety",
+      sub: "We're here for you, every hour of every day",
       accent: "linear-gradient(135deg,#3e0000 0%,#8b0000 100%)",
       details: [
-        { label: "Front Desk", value: toTrimmed(hotelInfo?.emergency?.frontDeskNumber) || "—", icon: "🛎️" },
-        { label: "Ambulance", value: toTrimmed(hotelInfo?.emergency?.ambulanceNumber) || "—", icon: "🏥" },
-        { label: "Fire Safety", value: toTrimmed(hotelInfo?.emergency?.fireSafetyInfo) || "—", icon: "🔥" },
+        { label: "Emergency Hotline",  value: "0 (from room phone)",    icon: "🆘" },
+        { label: "Reception",          value: "Ext. 1",                 icon: "🛎️" },
+        { label: "Security",           value: "Ext. 2",                 icon: "🔒" },
+        { label: "Medical Assistance", value: "Ext. 3",                 icon: "🏥" },
+        { label: "Fire Emergency",     value: "Ext. 4",                 icon: "🔥" },
+        { label: "In-room Safe",       value: "Available in all rooms", icon: "🗃️" },
+        { label: "Direct Hotel Line",  value: "0712-6699000",           icon: "📞" },
       ],
     },
     checkout: {
-      headline: "Check-out",
-      sub: "Policies related to check-out",
+      headline: "Check-out Information",
+      sub: "Seamless departure, lasting memories",
       accent: "linear-gradient(135deg,#1a1200 0%,#6b5200 100%)",
-      details: (() => {
-        const checkoutPolicies = policies
-          .map((p) => toTrimmed(p))
-          .filter(Boolean)
-          .filter((p) => p.toLowerCase().includes("checkout") || p.toLowerCase().includes("check-out"));
-        if (checkoutPolicies.length === 0) {
-          return [{ label: "Check-out", value: "Ask front desk for check‑out policy.", icon: "🔑" }];
-        }
-        return checkoutPolicies.slice(0, 12).map((p, idx) => ({
-          label: `Policy ${idx + 1}`,
-          value: p,
-          icon: "📄",
-        }));
-      })(),
+      details: [
+        { label: "Check-out Time",  value: "12:00 PM (Noon)",                            icon: "🕛" },
+        { label: "Late Check-out",  value: "Available on request (extra charges apply)",  icon: "🕑" },
+        { label: "Luggage Storage", value: "Available after check-out",                   icon: "🧳" },
+        { label: "Early Check-in",  value: "Subject to room availability",                icon: "🌅" },
+        { label: "Return Keys To",  value: "Front Desk",                                  icon: "🗝️" },
+        { label: "Billing Queries", value: "Dial 1 or visit Front Desk",                 icon: "🧾" },
+      ],
     },
   };
 
-  const active = (guestDisplay && guestDisplay[activeCategory]) ? guestDisplay[activeCategory] : derivedData[activeCategory];
+  const active = data[activeCategory];
 
   return (
     <>
@@ -263,7 +158,7 @@ export default function GuestHotelInfo() {
             }}>←</button>
 
             <div style={{ flex: 1, textAlign: "center" }}>
-              <p style={{ fontSize: 9, color: "#6B6B6B", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 1px 0" }}>{basicName}</p>
+              <p style={{ fontSize: 9, color: "#6B6B6B", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 1px 0" }}>Centre Point Nagpur</p>
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, fontStyle: "italic", color: "#1F1F1F", margin: 0, lineHeight: 1 }}>Hotel Amenities</h1>
             </div>
 
@@ -312,18 +207,6 @@ export default function GuestHotelInfo() {
 
             {/* SECTION CONTENT */}
             <div style={{ padding: "16px 20px 0" }}>
-              {loadingInfo && (
-                <div style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(164,0,93,0.08)", borderRadius: 16, padding: 14, marginBottom: 14 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: "#6B6B6B" }}>Loading hotel info…</p>
-                </div>
-              )}
-
-              {!loadingInfo && loadError && (
-                <div style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 16, padding: 14, marginBottom: 14 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: "#b91c1c" }}>{loadError}</p>
-                </div>
-              )}
-
               <div style={{ marginBottom: 16, animation: "fadeUp 0.45s ease both" }}>
                 <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#6B6B6B", margin: "0 0 2px 0" }}>
                   {categories.find(c => c.key === activeCategory)?.label}
@@ -336,14 +219,6 @@ export default function GuestHotelInfo() {
               {/* CARD LIST */}
               {active.items && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {active.items.length === 0 && !loadingInfo && (
-                    <div style={{ background: "rgba(255,255,255,0.9)", border: "1px solid rgba(164,0,93,0.08)", borderRadius: 16, padding: 14 }}>
-                      <p style={{ margin: 0, fontSize: 12, color: "#6B6B6B" }}>No items configured in this category.</p>
-                      <p style={{ margin: "6px 0 0 0", fontSize: 11, color: "#9B8B80" }}>
-                        Admins can update this from the Admin → Hotel Info page.
-                      </p>
-                    </div>
-                  )}
                   {active.items.map((item, i) => (
                     <div key={item.name} className="amenity-card" style={{ animation: `cardIn 0.45s cubic-bezier(0.22,1,0.36,1) ${i * 55}ms both` }}>
                       <div style={{ height: 3, background: active.accent }} />
@@ -354,16 +229,11 @@ export default function GuestHotelInfo() {
                             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 600, color: "#1F1F1F", margin: 0, lineHeight: 1.1 }}>{item.name}</p>
                             {item.tag && <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", background: "rgba(164,0,93,0.08)", color: "#A4005D", border: "1px solid rgba(164,0,93,0.12)", borderRadius: 6, padding: "2px 8px" }}>{item.tag}</span>}
                           </div>
-                          {item.desc ? (
-                            <p style={{ fontSize: 11.5, color: "#7a6a60", fontWeight: 300, lineHeight: 1.45, margin: "0 0 8px 0", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.desc}</p>
-                          ) : null}
-
-                          {item.hours ? (
-                            <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F6EADB", borderRadius: 8, padding: "4px 10px" }}>
-                              <span style={{ fontSize: 10 }}>⏰</span>
-                              <span style={{ fontSize: 10, color: "#A4005D", fontWeight: 600, letterSpacing: "0.04em" }}>{item.hours}</span>
-                            </div>
-                          ) : null}
+                          <p style={{ fontSize: 11.5, color: "#7a6a60", fontWeight: 300, lineHeight: 1.45, margin: "0 0 8px 0", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.desc}</p>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F6EADB", borderRadius: 8, padding: "4px 10px" }}>
+                            <span style={{ fontSize: 10 }}>⏰</span>
+                            <span style={{ fontSize: 10, color: "#A4005D", fontWeight: 600, letterSpacing: "0.04em" }}>{item.hours}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -409,7 +279,11 @@ export default function GuestHotelInfo() {
                 <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(249,168,212,0.7)", margin: "0 0 4px 0" }}>Need Help?</p>
                 <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 300, fontStyle: "italic", color: "#fff", margin: "0 0 12px 0" }}>We're always here for you</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {contacts.map((c) => (
+                  {[
+                    { icon: "📞", label: "+91 9266923456" },
+                    { icon: "📞", label: "0712-6699000" },
+                    { icon: "✉️", label: "info.nagpur@cpgh.in" },
+                  ].map((c) => (
                     <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 13 }}>{c.icon}</span>
                       <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", fontWeight: 400 }}>{c.label}</span>
