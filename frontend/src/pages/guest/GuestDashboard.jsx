@@ -4,18 +4,21 @@ import GuestBottomNav from "../../components/guest/GuestBottomNav";
 import hotelbg from "../../assets/hotel-bg.jpg";
 import logo from "../../assets/logo.png";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import { getGuestEvents } from "../../services/event.service";
 
+// ── Memoize bottom nav so event-slide state changes never re-render it ──
+const StableBottomNav = memo(GuestBottomNav);
+
 const FoodIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 22, height: 22 }}>
     <path d="M6 18h12" /><path d="M7 18v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1" />
     <path d="M8 12h8" /><path d="M5 12a7 7 0 0 1 14 0" /><path d="M12 9v-1" />
   </svg>
 );
 
 const HouseIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24 }}>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 22, height: 22 }}>
     <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z" />
     <path d="M9 21V12h6v9" />
   </svg>
@@ -203,7 +206,6 @@ export default function GuestDashboard() {
           {/* ══ HERO ══ */}
           <div style={{
             position: "relative", overflow: "hidden", flexShrink: 0,
-            maxHeight: "38vh",
             animation: "heroFade 0.65s cubic-bezier(0.22,1,0.36,1) both",
           }}>
             <img src={hotelbg} alt="Hotel" style={{
@@ -215,7 +217,7 @@ export default function GuestDashboard() {
             <div style={{ position:"absolute", top:-50, right:-50, width:180, height:180, borderRadius:"50%", background:"radial-gradient(circle,rgba(164,0,93,0.22),transparent 65%)", animation:"blob1 7s ease-in-out infinite", pointerEvents:"none" }} />
             <div style={{ position:"absolute", bottom:20, left:-40, width:150, height:150, borderRadius:"50%", background:"radial-gradient(circle,rgba(196,74,135,0.15),transparent 65%)", animation:"blob2 9s ease-in-out infinite", pointerEvents:"none" }} />
 
-            <div style={{ position:"relative", zIndex:2, padding:"28px 20px 44px" }}>
+            <div style={{ position:"relative", zIndex:2, padding:"30px 20px 48px" }}>
               <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:8 }}>
                 <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
                   <p style={{ fontSize:9, color:"rgba(255,255,255,.82)", fontWeight:500, letterSpacing:".24em", textTransform:"uppercase", textShadow:"0 1px 10px rgba(0,0,0,.9)", margin:0, lineHeight:1 }}>{greeting}</p>
@@ -265,15 +267,15 @@ export default function GuestDashboard() {
           {/* end hero */}
 
           {/* ══ BODY ══ */}
-          <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"10px 14px 6px", overflow:"hidden", minHeight:0 }}>
+          <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"12px 16px 8px", overflow:"hidden", minHeight:0 }}>
 
             {/* QUICK ACTIONS */}
-            <div style={{ flexShrink:0, marginBottom:8 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+            <div style={{ flexShrink:0, marginBottom:10 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
                 <div style={{ width:14, height:1, background:"#A4005D", opacity:.5 }} />
                 <span style={{ fontSize:8, fontWeight:600, letterSpacing:".26em", textTransform:"uppercase", color:"#8a7a70" }}>Quick Actions</span>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                 {quickActions.map((action, i) => (
                   <button key={action.label} onClick={() => navigate(action.route)} className="ac-card"
                     style={{ animation: cardsVisible ? `cardIn .5s cubic-bezier(.22,1,.36,1) ${i * 80}ms both` : "none" }}
@@ -301,15 +303,15 @@ export default function GuestDashboard() {
             </div>
 
             {/* DIVIDER */}
-            <div style={{ flexShrink:0, display:"flex", alignItems:"center", gap:12, marginBottom:8 }}>
+            <div style={{ flexShrink:0, display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
               <div style={{ flex:1, height:1, background:"linear-gradient(to right,transparent,rgba(164,0,93,.18),transparent)" }} />
               <div style={{ width:4, height:4, background:"rgba(164,0,93,.28)", transform:"rotate(45deg)", flexShrink:0 }} />
               <div style={{ flex:1, height:1, background:"linear-gradient(to right,transparent,rgba(164,0,93,.18),transparent)" }} />
             </div>
 
-            {/* UPCOMING EVENTS — takes remaining flex space */}
+            {/* UPCOMING EVENTS */}
             <div style={{ flex:1, display:"flex", flexDirection:"column", minHeight:0 }}>
-              <div style={{ flexShrink:0, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
+              <div style={{ flexShrink:0, display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                   <div style={{ width:14, height:1, background:"#A4005D", opacity:.5 }} />
                   <span style={{ fontSize:8, fontWeight:600, letterSpacing:".26em", textTransform:"uppercase", color:"#8a7a70" }}>Upcoming Events</span>
@@ -335,7 +337,8 @@ export default function GuestDashboard() {
                   {/* Event card fills remaining flex space */}
                   <div
                     style={{
-                      flex:1, position:"relative", borderRadius:18, overflow:"hidden", minHeight:0,
+                      flex:1, position:"relative", borderRadius:18, overflow:"hidden",
+                      minHeight:160,
                       boxShadow:"0 8px 28px rgba(26,20,16,.14)", cursor:"pointer",
                     }}
                     onTouchStart={handleTouchStart}
@@ -391,7 +394,7 @@ export default function GuestDashboard() {
                   </div>
 
                   {/* Dots */}
-                  <div style={{ flexShrink:0, display:"flex", justifyContent:"center", gap:6, marginTop:6 }}>
+                  <div style={{ flexShrink:0, display:"flex", justifyContent:"center", gap:6, marginTop:8 }}>
                     {upcomingEvents.map((_, i) => (
                       <button key={i} className={`dot-btn${i === currentEventIndex ? " on" : ""}`} onClick={() => goToEvent(i)} />
                     ))}
@@ -405,7 +408,7 @@ export default function GuestDashboard() {
 
         </div>
 
-        <GuestBottomNav />
+        <StableBottomNav />
       </div>
     </>
   );
