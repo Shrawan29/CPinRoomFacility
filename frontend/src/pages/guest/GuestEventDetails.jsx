@@ -119,7 +119,7 @@ export default function GuestEventDetails() {
         }}>
           <div style={{
             display: "flex", alignItems: "center",
-            padding: "12px 16px", gap: 12,
+            padding: "12px 16px 100px", gap: 12,
             maxWidth: 430, margin: "0 auto",
           }}>
             <button
