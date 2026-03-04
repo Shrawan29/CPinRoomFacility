@@ -75,11 +75,20 @@ export default function GuestHotelInfo() {
   ];
 
   const basicName = toTrimmed(hotelInfo?.basicInfo?.name) || "Hotel";
+  const guestDisplay = hotelInfo?.guestDisplay && typeof hotelInfo.guestDisplay === "object" ? hotelInfo.guestDisplay : null;
+  const guestDisplayData = (guestDisplay && typeof guestDisplay?.data === "object") ? guestDisplay.data : guestDisplay;
   const amenities = Array.isArray(hotelInfo?.amenities) ? hotelInfo.amenities : [];
   const services = Array.isArray(hotelInfo?.services) ? hotelInfo.services : [];
   const policies = Array.isArray(hotelInfo?.policies) ? hotelInfo.policies : [];
 
   const contacts = (() => {
+    const fromGuestDisplay = guestDisplayData?.contactCard?.items;
+    if (Array.isArray(fromGuestDisplay) && fromGuestDisplay.length > 0) {
+      return fromGuestDisplay
+        .map((c) => ({ icon: String(c?.icon || "").trim(), label: toTrimmed(c?.label) }))
+        .filter((c) => c.label);
+    }
+
     const items = [];
     const phone = toTrimmed(hotelInfo?.basicInfo?.contactPhone);
     const email = toTrimmed(hotelInfo?.basicInfo?.contactEmail);
@@ -118,7 +127,7 @@ export default function GuestHotelInfo() {
     wifi: facilityPool.filter((x) => keywordMatch(x.name, wifiKeywords) || keywordMatch(x.description, wifiKeywords)),
   };
 
-  const data = {
+  const derivedData = {
     dining: {
       headline: "Dining",
       sub: "Restaurants and dining services",
@@ -208,7 +217,7 @@ export default function GuestHotelInfo() {
     },
   };
 
-  const active = data[activeCategory];
+  const active = (guestDisplayData && guestDisplayData[activeCategory]) ? guestDisplayData[activeCategory] : derivedData[activeCategory];
 
   return (
     <>
@@ -348,6 +357,13 @@ export default function GuestHotelInfo() {
                           </div>
                           {item.desc ? (
                             <p style={{ fontSize: 11.5, color: "#7a6a60", fontWeight: 300, lineHeight: 1.45, margin: "0 0 8px 0", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.desc}</p>
+                          ) : null}
+
+                          {item.hours ? (
+                            <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#F6EADB", borderRadius: 8, padding: "4px 10px" }}>
+                              <span style={{ fontSize: 10 }}>⏰</span>
+                              <span style={{ fontSize: 10, color: "#A4005D", fontWeight: 600, letterSpacing: "0.04em" }}>{item.hours}</span>
+                            </div>
                           ) : null}
                         </div>
                       </div>

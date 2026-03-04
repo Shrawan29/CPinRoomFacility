@@ -40,6 +40,13 @@ const hotelInfoSchema = new mongoose.Schema(
       frontDeskNumber: String,
       ambulanceNumber: String,
       fireSafetyInfo: String
+    },
+
+    // Optional: full guest-facing content structure (legacy GuestHotelInfo page)
+    // Includes fields like headline/sub/accent + item hours/tags + wifi/emergency/checkout details.
+    guestDisplay: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
     }
   },
   { timestamps: true }

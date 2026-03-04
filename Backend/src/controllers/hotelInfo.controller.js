@@ -2,10 +2,18 @@ import HotelInfo from "../models/HotelInfo.js";
 
 // ADMIN / SUPER_ADMIN
 export const upsertHotelInfo = async (req, res) => {
+  // Important: use $set to avoid replacing the whole document.
+  // The Admin UI may not send optional fields like `guestDisplay`.
   const info = await HotelInfo.findOneAndUpdate(
     {},
-    req.body,
-    { upsert: true, new: true, setDefaultsOnInsert: true, sort: { updatedAt: -1, createdAt: -1 } }
+    { $set: req.body },
+    {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+      runValidators: true,
+      sort: { updatedAt: -1, createdAt: -1 },
+    }
   );
 
   res.json({
