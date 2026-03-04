@@ -63,8 +63,8 @@ const navItems = [
 const ORB   = 54;   // orb diameter px
 const PILL_H = 64;  // pill height px
 const SIDE_M = 14;  // pill side margin px
-// How far orb center sits above pill top edge
-const ORB_LIFT = 20;
+// FIX 1: Increased ORB_LIFT so orb floats properly above the pill center
+const ORB_LIFT = ORB / 2 + 10;  // orb fully above pill top + 10px extra lift
 
 function GuestBottomNav() {
   const navigate = useNavigate();
@@ -145,16 +145,6 @@ function GuestBottomNav() {
         .rpl2 { animation: rippleOut 2.8s ease-out 2.4s infinite; }
       `}</style>
 
-      {/*
-        LAYOUT STRATEGY:
-        - Outer wrapper: position:relative, contains BOTH the pill and the orb
-        - Pill: display block, margin:0 SIDE_M, height PILL_H
-        - Orb: position:absolute on the WRAPPER
-            top = -(ORB/2) + (PILL_H/2) - ORB_LIFT   → sits centered on pill top edge, lifted by ORB_LIFT
-            left = 50%  (of wrapper = full width)
-            transform = translateX(-50%)
-        This means orb is always perfectly centered over the pill notch regardless of margins.
-      */}
       <div className="gbn-root" style={{
         flexShrink: 0,
         position: "relative",
@@ -162,8 +152,10 @@ function GuestBottomNav() {
         width: "100%",
         maxWidth: 430,
         margin: "0 auto",
-        // paddingBottom for safe area goes here but MUST be accounted for in orb top calc
-        // We use marginBottom on the pill instead so wrapper height stays predictable
+        // FIX 2: bottom gap so pill floats above screen edge
+        paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
+        // Extra top padding to give orb room to render above pill without clipping
+        paddingTop: ORB_LIFT + ORB / 2,
       }}>
 
         {/* PILL */}
@@ -178,7 +170,6 @@ function GuestBottomNav() {
           boxShadow: "0 8px 32px rgba(26,20,16,0.13), 0 2px 8px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72)",
           position: "relative",
           overflow: "visible",
-          marginBottom: "env(safe-area-inset-bottom, 8px)",
         }}>
 
           {/* Notch — matches page bg, punches visual hole at top-center */}
@@ -233,21 +224,17 @@ function GuestBottomNav() {
           </div>
         </div>
 
-        {/*
-          ORB — absolutely positioned on the outer wrapper.
-          top: pill sits at y=0 of wrapper (no top margin/padding on wrapper).
-          We want orb center to be at y = ORB_LIFT above pill top = -(ORB/2 - ORB_LIFT... wait.
-          Pill top = 0. Orb center should be at y = -ORB_LIFT from pill top.
-          Orb top edge = orb_center_y - ORB/2 = -ORB_LIFT - ORB/2
-        */}
+        {/* ORB — FIX 1: positioned relative to wrapper using paddingTop offset */}
         <button
           className="gbn-orb-btn"
           onClick={() => navigate("/guest/support")}
           style={{
             position: "absolute",
-            top: -(ORB_LIFT + ORB / 2),   // = -(20 + 27) = -47 from wrapper top = lifted above pill
+            // top of pill = paddingTop of wrapper = ORB_LIFT + ORB/2
+            // orb center should sit ORB_LIFT above pill top
+            // orb top edge = pill_top - ORB_LIFT - ORB/2 = paddingTop - ORB_LIFT - ORB/2 = 0
+            top: 0,
             left: "50%",
-            // animation handles translateX(-50%) already via gbnOrb keyframe
             zIndex: 20,
             border: "none", background: "transparent",
             cursor: "pointer", padding: 0,
