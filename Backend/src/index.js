@@ -24,6 +24,7 @@ import qrRoutes from "./routes/qr.routes.js";
 import hotelInfoRoutes from "./routes/hotelInfo.routes.js";
 import eventRoutes from "./routes/event.routes.js";
 import housekeepingRoutes from "./routes/housekeeping.routes.js";
+import complaintsRoutes from "./routes/complaints.routes.js";
 
 // models (used in debug routes)
 import Room from "./models/Room.js";
@@ -145,6 +146,9 @@ app.use("/guest/events", guestEventRoutes);
 
 // housekeeping
 app.use("/api/housekeeping", housekeepingRoutes);
+
+// complaints / feedback
+app.use("/api/complaints", complaintsRoutes);
 
 /* =========================================================
    TEST & DEBUG ROUTES

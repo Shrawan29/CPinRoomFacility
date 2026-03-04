@@ -119,6 +119,7 @@ export default function GuestDashboard() {
   const actions = [
     { icon: <FoodIcon />,  label: "Food Order",   sub: "In-room dining",  route: "/guest/menu",         accent: "linear-gradient(135deg,#A4005D,#C44A87)", iconBg: "rgba(164,0,93,0.07)",   iconColor: "#A4005D", orb: "radial-gradient(circle,#A4005D,transparent)" },
     { icon: <HouseIcon />, label: "Housekeeping", sub: "Room essentials", route: "/guest/housekeeping", accent: "linear-gradient(135deg,#c9a96e,#b8883a)", iconBg: "rgba(160,120,40,0.08)", iconColor: "#a07828", orb: "radial-gradient(circle,#a07828,transparent)" },
+    { icon: <HouseIcon />, label: "Complaints",   sub: "Feedback & help",  route: "/guest/complaints",  accent: "linear-gradient(135deg,#c9a96e,#b8883a)", iconBg: "rgba(160,120,40,0.08)", iconColor: "#a07828", orb: "radial-gradient(circle,#a07828,transparent)" },
   ];
 
   return (

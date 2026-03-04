@@ -34,9 +34,11 @@ import GuestEventDetails from "./pages/guest/GuestEventDetails";
 import GuestHotelInfo from "./pages/guest/GuestHotelInfo";
 import GuestHousekeeping from "./pages/guest/GuestHousekeeping";
 import GuestSupport from "./pages/guest/GuestSupport";
+import GuestComplaints from "./pages/guest/GuestComplaints";
 
 // Housekeeping admin
 import HousekeepingDashboard from "./pages/admin/housekeeping/HousekeepingDashboard";
+import ComplaintsAdmin from "./pages/admin/Complaints";
 
 
 // Routes
@@ -154,6 +156,15 @@ function App() {
         }
       />
 
+      <Route
+        path="/admin/complaints"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+            <ComplaintsAdmin />
+          </ProtectedRoute>
+        }
+      />
+
       {/* PUBLIC — MUST NOT BE PROTECTED */}
       <Route path="/guest/login" element={<GuestLogin />} />
       <Route path="/guest/access-fallback" element={<GuestAccessFallback />} />
@@ -236,6 +247,15 @@ function App() {
         element={
           <GuestProtectedRoute>
             <GuestSupport />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/complaints"
+        element={
+          <GuestProtectedRoute>
+            <GuestComplaints />
           </GuestProtectedRoute>
         }
       />
