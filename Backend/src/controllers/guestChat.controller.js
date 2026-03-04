@@ -658,6 +658,31 @@ export const guestChat = async (req, res) => {
       : "gpt-4o-mini";
     const model = toTrimmedString(process.env.OPENAI_MODEL) || defaultModel;
 
+    const isBroadHotelInfoRequest = /\b(facilit(?:y|ies)|amenit(?:y|ies)|services?|what (do|does) (you|the hotel) have|available facilities)\b/i.test(
+      userMessage
+    );
+
+    // Pre-fetch hotel info matches for the current question so the model reliably
+    // sees the relevant items (e.g., "EV charging") even if it doesn't call tools.
+    const wantsHotelInfoNow = inferNeedsHotelInfo(userMessage);
+    const prefetchedHotelInfo = wantsHotelInfoNow
+      ? await searchHotelInfo({
+          query: isBroadHotelInfoRequest ? "" : userMessage,
+          limit: 20,
+        })
+      : null;
+
+    const prefetchedHotelInfoSystemContext = prefetchedHotelInfo
+      ? {
+          role: "system",
+          content:
+            "Relevant HOTEL INFO matches for this question (from database). Treat as factual. " +
+            "Only say something is unavailable if it explicitly has available=false. " +
+            "If the relevant item is not present here, call search_hotel_info.\n\n" +
+            JSON.stringify(prefetchedHotelInfo),
+        }
+      : null;
+
     // Always include a compact snapshot of hotel info so the assistant has property context
     // without needing to call a tool first.
     const hotelInfoContext = await buildHotelInfoContext();
@@ -679,7 +704,9 @@ export const guestChat = async (req, res) => {
       content:
         "You are a hotel guest assistant. You ONLY have access to three data sources: (1) hotel EVENTS, (2) the FOOD MENU, (3) HOTEL INFO (amenities/services/policies/contact/emergency). " +
         "Do not answer questions about anything else (orders, billing, rooms, staff, housekeeping, admin, guest accounts, etc). " +
-        "When you need factual info, call the provided tools. If an amenity/service is marked available=false, tell the guest it's currently unavailable. " +
+        "When you need factual info, call the provided tools. " +
+        "IMPORTANT: Do NOT claim an amenity/service is unavailable unless the database explicitly marks it available=false. " +
+        "If you cannot find the item in hotel info, say you don't have that detail and suggest checking with the front desk. " +
         "If the user asks for something outside events/menu/hotel info, refuse briefly and redirect.",
     };
 
@@ -755,6 +782,7 @@ export const guestChat = async (req, res) => {
       const input = [
         system,
         ...(hotelInfoSystemContext ? [hotelInfoSystemContext] : []),
+        ...(prefetchedHotelInfoSystemContext ? [prefetchedHotelInfoSystemContext] : []),
         ...history,
         { role: "user", content: userMessage },
       ];
@@ -780,6 +808,7 @@ export const guestChat = async (req, res) => {
     const messages = [
       system,
       ...(hotelInfoSystemContext ? [hotelInfoSystemContext] : []),
+      ...(prefetchedHotelInfoSystemContext ? [prefetchedHotelInfoSystemContext] : []),
       ...history,
       { role: "user", content: userMessage },
     ];
