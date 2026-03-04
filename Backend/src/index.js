@@ -31,6 +31,7 @@ import Admin from "./models/Admin.js";
 import QRToken from "./models/QRToken.js";
 import GuestCredential from "./models/GuestCredential.js";
 import GuestSession from "./models/GuestSession.js";
+import Order from "./models/Order.js";
 
 // middleware
 import adminAuth from "./middleware/adminAuth.middleware.js";
@@ -41,6 +42,23 @@ import guestEventRoutes from "./routes/guestEvent.routes.js";
 
 dotenv.config();
 connectDB();
+
+// Auto-deliver food orders 10 minutes after status becomes READY.
+// This runs server-side so it does not depend on any UI polling.
+const AUTO_DELIVER_AFTER_MS = 10 * 60 * 1000;
+const AUTO_DELIVER_POLL_MS = 60 * 1000;
+setInterval(async () => {
+  try {
+    const cutoff = new Date(Date.now() - AUTO_DELIVER_AFTER_MS);
+    await Order.updateMany(
+      { status: "READY", updatedAt: { $lte: cutoff } },
+      { $set: { status: "DELIVERED" } }
+    );
+  } catch (e) {
+    // Keep the server running even if this periodic task fails.
+    console.error("Auto-delivery loop failed:", e?.message || e);
+  }
+}, AUTO_DELIVER_POLL_MS);
 
 // Initialize event scheduler when server starts
 initializeEventScheduler();

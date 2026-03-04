@@ -1,6 +1,16 @@
 import Order from "../models/Order.js";
 import MenuItem from "../models/MenuItem.js";
 
+const AUTO_DELIVER_AFTER_MS = 10 * 60 * 1000;
+
+const autoDeliverReadyOrdersForRoom = async (roomNumber) => {
+  const cutoff = new Date(Date.now() - AUTO_DELIVER_AFTER_MS);
+  await Order.updateMany(
+    { roomNumber, status: "READY", updatedAt: { $lte: cutoff } },
+    { $set: { status: "DELIVERED" } }
+  );
+};
+
 /**
  * GUEST → Place Order
  */
@@ -63,6 +73,8 @@ export const placeOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const { roomNumber } = req.guest;
+
+    await autoDeliverReadyOrdersForRoom(roomNumber);
 
     const orders = await Order.find({ roomNumber })
       .sort({ createdAt: -1 })

@@ -7,7 +7,7 @@ import api from "../../services/api";
 const statusConfig = {
   pending:    { bg: "rgba(251,191,36,0.12)",  text: "#92400e", dot: "#f59e0b",  label: "Pending"    },
   preparing:  { bg: "rgba(59,130,246,0.1)",   text: "#1e40af", dot: "#3b82f6",  label: "Preparing"  },
-  ready:      { bg: "rgba(139,92,246,0.1)",   text: "#5b21b6", dot: "#8b5cf6",  label: "Ready"      },
+  ready:      { bg: "rgba(139,92,246,0.1)",   text: "#5b21b6", dot: "#8b5cf6",  label: "On the way"  },
   delivered:  { bg: "rgba(34,197,94,0.1)",    text: "#065f46", dot: "#22c55e",  label: "Delivered"  },
   cancelled:  { bg: "rgba(239,68,68,0.08)",   text: "#991b1b", dot: "#ef4444",  label: "Cancelled"  },
 };

@@ -1,10 +1,22 @@
 import Order from "../models/Order.js";
 
+const AUTO_DELIVER_AFTER_MS = 10 * 60 * 1000;
+
+const autoDeliverReadyOrders = async () => {
+  const cutoff = new Date(Date.now() - AUTO_DELIVER_AFTER_MS);
+  await Order.updateMany(
+    { status: "READY", updatedAt: { $lte: cutoff } },
+    { $set: { status: "DELIVERED" } }
+  );
+};
+
 /**
  * DINING_ADMIN → Get all active orders
  */
 export const getKitchenOrders = async (req, res) => {
   try {
+    await autoDeliverReadyOrders();
+
     const orders = await Order.find({
       status: { $ne: "DELIVERED" },
     }).sort({ createdAt: 1 });
@@ -23,7 +35,11 @@ export const updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    const allowed = ["PREPARING", "READY", "DELIVERED"];
+    // Kitchen has only 2 manual steps:
+    // 1) Accept order -> PREPARING
+    // 2) Order leaved / on way -> READY
+    // DELIVERED is set automatically after 10 minutes in READY.
+    const allowed = ["PREPARING", "READY"];
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
@@ -31,6 +47,17 @@ export const updateOrderStatus = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
+    }
+
+    const current = String(order.status || "");
+    const isValidTransition =
+      (current === "PLACED" && status === "PREPARING") ||
+      (current === "PREPARING" && status === "READY");
+
+    if (!isValidTransition) {
+      return res.status(409).json({
+        message: `Invalid status transition from ${current} to ${status}`,
+      });
     }
 
     order.status = status;

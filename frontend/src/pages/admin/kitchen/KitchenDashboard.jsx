@@ -195,6 +195,26 @@ export default function KitchenDashboard() {
     }
   };
 
+  const getStatusUi = (status) => {
+    switch (status) {
+      case "PLACED":
+        return { label: "Accept Order", tone: "placed" };
+      case "PREPARING":
+        return { label: "Order Accepted", tone: "accepted" };
+      case "READY":
+        return { label: "Order On Way", tone: "onway" };
+      default:
+        return { label: status || "—", tone: "other" };
+    }
+  };
+
+  const toneColors = {
+    placed: { border: "#f59e0b", pillBg: "#fef3c7", pillText: "#92400e" },
+    accepted: { border: "#3b82f6", pillBg: "#dbeafe", pillText: "#1e40af" },
+    onway: { border: "#8b5cf6", pillBg: "#ede9fe", pillText: "#5b21b6" },
+    other: { border: "#6b7280", pillBg: "#e5e7eb", pillText: "#374151" },
+  };
+
   return (
     <AdminLayout>
       <div className="flex items-center justify-between gap-3 mb-6">
@@ -259,17 +279,19 @@ export default function KitchenDashboard() {
             No active orders
           </p>
         ) : (
-          orders.map((order) => (
-            <div
-              key={order._id}
-              className="bg-[--bg-secondary] p-5 rounded-xl shadow-sm border-l-4"
-              style={{
-                borderLeftColor: 
-                  order.status === "PLACED" ? "#f59e0b" :
-                  order.status === "PREPARING" ? "#3b82f6" :
-                  order.status === "READY" ? "#10b981" : "#6b7280"
-              }}
-            >
+          orders.map((order) => {
+            const statusUi = getStatusUi(order.status);
+            const colors = toneColors[statusUi.tone] || toneColors.other;
+            const notesText = String(order.notes || "").trim();
+
+            return (
+              <div
+                key={order._id}
+                className="bg-[--bg-secondary] p-5 rounded-xl shadow-sm border-l-4"
+                style={{
+                  borderLeftColor: colors.border,
+                }}
+              >
               <div className="flex justify-between mb-2">
                 <div>
                   <h3 className="font-semibold text-lg">
@@ -283,17 +305,11 @@ export default function KitchenDashboard() {
                 <span 
                   className="text-sm font-medium px-3 py-1 rounded-full h-fit"
                   style={{
-                    backgroundColor: 
-                      order.status === "PLACED" ? "#fef3c7" :
-                      order.status === "PREPARING" ? "#dbeafe" :
-                      order.status === "READY" ? "#d1fae5" : "#e5e7eb",
-                    color:
-                      order.status === "PLACED" ? "#92400e" :
-                      order.status === "PREPARING" ? "#1e40af" :
-                      order.status === "READY" ? "#065f46" : "#374151"
+                    backgroundColor: colors.pillBg,
+                    color: colors.pillText,
                   }}
                 >
-                  {order.status}
+                  {statusUi.label}
                 </span>
               </div>
 
@@ -306,10 +322,23 @@ export default function KitchenDashboard() {
                 ))}
               </ul>
 
+              {notesText && (
+                <div
+                  className="text-sm mb-3 px-3 py-2 rounded-lg border"
+                  style={{
+                    backgroundColor: "rgba(245, 158, 11, 0.08)",
+                    borderColor: "rgba(245, 158, 11, 0.25)",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  <span className="font-semibold">Special notes:</span> {notesText}
+                </div>
+              )}
+
               <div className="flex gap-2">
                 {order.status === "PLACED" && (
                   <Action
-                    label="Start Preparing"
+                    label="Accept Order"
                     onClick={() => updateStatus(order._id, "PREPARING")}
                     loading={updating === order._id}
                   />
@@ -317,22 +346,21 @@ export default function KitchenDashboard() {
 
                 {order.status === "PREPARING" && (
                   <Action
-                    label="Mark Ready"
+                    label="Order leaved"
                     onClick={() => updateStatus(order._id, "READY")}
                     loading={updating === order._id}
                   />
                 )}
 
                 {order.status === "READY" && (
-                  <Action
-                    label="Delivered"
-                    onClick={() => updateStatus(order._id, "DELIVERED")}
-                    loading={updating === order._id}
-                  />
+                  <div className="text-sm text-[--text-muted] flex items-center">
+                    Delivered automatically after 10 minutes
+                  </div>
                 )}
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </AdminLayout>
