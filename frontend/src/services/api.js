@@ -12,7 +12,6 @@ api.interceptors.request.use(
     // Public routes
     const isPublic =
       config.url?.startsWith("/menu/guest") ||
-      config.url?.startsWith("/hotel-info") ||
       config.url?.includes("/guest/auth");
 
     if (isPublic) return config;

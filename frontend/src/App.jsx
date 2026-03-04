@@ -17,6 +17,7 @@ import KitchenMenu from "./pages/admin/kitchen/KitchenMenu";
 
 // QR
 import QRCodeManager from "./pages/admin/QRCodeManager";
+import HotelInfo from "./pages/admin/HotelInfo";
 
 // Guest
 import GuestLogin from "./pages/guest/GuestLogin";
@@ -131,6 +132,15 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <QRCodeManager />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/hotel-info"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
+            <HotelInfo />
           </ProtectedRoute>
         }
       />
