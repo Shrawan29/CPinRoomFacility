@@ -55,20 +55,45 @@ export default function GuestHousekeeping() {
     [quantities]
   );
 
-  const load = async () => {
-    setLoading(true);
+  const load = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const data = await getHousekeepingRequests();
       setRequests(data?.requests || []);
     } catch (e) {
-      setError(e?.response?.data?.message || "Failed to load requests");
+      // For background refresh, keep the UI stable and don't spam errors.
+      if (!silent) {
+        setError(e?.response?.data?.message || "Failed to load requests");
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
+
+  // Auto-refresh only on the "My Requests" tab.
+  useEffect(() => {
+    if (activeTab !== "history") return;
+
+    let cancelled = false;
+
+    const tick = async () => {
+      if (cancelled) return;
+      await load({ silent: true });
+    };
+
+    // Refresh immediately when switching to the tab.
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [activeTab]);
 
   const updateQty = (name, delta) => {
     setQuantities((prev) => ({
