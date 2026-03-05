@@ -18,6 +18,7 @@ export default function AdminEvents() {
 
   const [form, setForm] = useState({
     title: "",
+    shortDescription: "",
     description: "",
     image: "",
     eventDate: "",
@@ -208,6 +209,7 @@ export default function AdminEvents() {
       setMessage("Event added successfully");
       setForm({
         title: "",
+        shortDescription: "",
         description: "",
         image: "",
         eventDate: "",
@@ -419,7 +421,23 @@ export default function AdminEvents() {
 
                 <div>
                   <label className="block text-sm font-medium text-[--text-primary] mb-1">
-                    Description
+                    One-line Description
+                  </label>
+                  <input
+                    value={form.shortDescription}
+                    maxLength={160}
+                    onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
+                    className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition"
+                    placeholder="Short summary shown on event cards (max 160 chars)"
+                  />
+                  <div className="text-xs text-[--text-muted] mt-1">
+                    Shown on the guest event cards/slider.
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[--text-primary] mb-1">
+                    Full Description
                   </label>
                   <textarea
                     value={form.description}
@@ -428,7 +446,7 @@ export default function AdminEvents() {
                     }
                     className="w-full text-base bg-white border border-black/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[--brand] focus:border-transparent transition resize-none"
                     rows={3}
-                    placeholder="Event details and description..."
+                    placeholder="Full event details (shown on details page)..."
                   />
                 </div>
 
@@ -480,7 +498,7 @@ export default function AdminEvents() {
                       {/* Image on top */}
                       {event.image ? (
                         <div
-                          className="w-full flex items-center justify-center rounded-lg border border-black/10 overflow-hidden bg-gradient-to-br from-[--bg-secondary] to-[--bg-primary]"
+                          className="w-full flex items-center justify-center rounded-lg border border-black/10 overflow-hidden bg-linear-to-br from-[--bg-secondary] to-[--bg-primary]"
                           style={{ aspectRatio: "16 / 9", minHeight: 120 }}
                         >
                           <img
@@ -523,9 +541,9 @@ export default function AdminEvents() {
                           </span>
                         </div>
 
-                        {event.description && (
+                        {(event.shortDescription || event.description) && (
                           <p className="text-sm text-[--text-muted] mt-3 line-clamp-2">
-                            {event.description}
+                            {event.shortDescription || event.description}
                           </p>
                         )}
 

@@ -1,12 +1,54 @@
 import Event from "../models/Event.js";
 
+const MAX_SHORT_DESCRIPTION_LEN = 160;
+const MAX_DESCRIPTION_LEN = 5000;
+
+const toTrimmedString = (value) => {
+  if (value === undefined || value === null) return "";
+  return String(value).trim();
+};
+
+const normalizeShortDescription = (value) => {
+  const s = toTrimmedString(value).replace(/\s+/g, " ");
+  if (s.length > MAX_SHORT_DESCRIPTION_LEN) {
+    return { ok: false, value: "", message: `Short description must be at most ${MAX_SHORT_DESCRIPTION_LEN} characters` };
+  }
+  return { ok: true, value: s, message: "" };
+};
+
+const normalizeDescription = (value) => {
+  const s = toTrimmedString(value);
+  if (s.length > MAX_DESCRIPTION_LEN) {
+    return { ok: false, value: "", message: `Description must be at most ${MAX_DESCRIPTION_LEN} characters` };
+  }
+  return { ok: true, value: s, message: "" };
+};
+
+const deriveShortDescription = (shortDescription, description) => {
+  const shortNorm = normalizeShortDescription(shortDescription);
+  if (!shortNorm.ok) return shortNorm;
+  if (shortNorm.value) return shortNorm;
+
+  const descNorm = normalizeDescription(description);
+  if (!descNorm.ok) return descNorm;
+  if (!descNorm.value) return { ok: true, value: "", message: "" };
+
+  const firstNonEmptyLine = descNorm.value
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .find((l) => Boolean(l)) || "";
+
+  const derived = firstNonEmptyLine.replace(/\s+/g, " ").slice(0, MAX_SHORT_DESCRIPTION_LEN).trim();
+  return { ok: true, value: derived, message: "" };
+};
+
 /* =========================
    ADMIN / SUPER_ADMIN
    ========================= */
 
 export const createEvent = async (req, res) => {
   try {
-    const { title, description, eventDate, location, contact, link, status, image, eventTime } = req.body;
+    const { title, shortDescription, description, eventDate, location, contact, link, status, image, eventTime } = req.body;
 
     if (!title || !eventDate) {
       return res.status(400).json({
@@ -18,9 +60,16 @@ export const createEvent = async (req, res) => {
       return res.status(413).json({ message: "Event image is too large" });
     }
 
+    const descNorm = normalizeDescription(description);
+    if (!descNorm.ok) return res.status(400).json({ message: descNorm.message });
+
+    const shortNorm = deriveShortDescription(shortDescription, descNorm.value);
+    if (!shortNorm.ok) return res.status(400).json({ message: shortNorm.message });
+
     const event = await Event.create({
       title,
-      description,
+      shortDescription: shortNorm.value,
+      description: descNorm.value,
       image: image ? String(image) : "",
       eventDate,
       eventTime,
@@ -42,9 +91,26 @@ export const updateEvent = async (req, res) => {
       return res.status(413).json({ message: "Event image is too large" });
     }
 
+    const update = { ...req.body };
+
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, "description")) {
+      const descNorm = normalizeDescription(req.body.description);
+      if (!descNorm.ok) return res.status(400).json({ message: descNorm.message });
+      update.description = descNorm.value;
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(req.body || {}, "shortDescription") ||
+      Object.prototype.hasOwnProperty.call(req.body || {}, "description")
+    ) {
+      const shortNorm = deriveShortDescription(req.body.shortDescription, update.description);
+      if (!shortNorm.ok) return res.status(400).json({ message: shortNorm.message });
+      update.shortDescription = shortNorm.value;
+    }
+
     const event = await Event.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      update,
       { new: true }
     );
 

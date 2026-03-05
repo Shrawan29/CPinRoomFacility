@@ -324,13 +324,13 @@ export default function GuestEvents() {
                           margin: 0, lineHeight: 1.2,
                         }}>{event.title}</h2>
 
-                        {event.description && (
+                        {(event.shortDescription || event.description) && (
                           <p style={{
                             fontSize: 12, color: "#7a6a60", fontWeight: 300,
                             margin: "6px 0 0 0", lineHeight: 1.5,
-                            display: "-webkit-box", WebkitLineClamp: 2,
+                            display: "-webkit-box", WebkitLineClamp: 1,
                             WebkitBoxOrient: "vertical", overflow: "hidden",
-                          }}>{event.description}</p>
+                          }}>{event.shortDescription || event.description}</p>
                         )}
 
                         {(event.location || event.venue) && (

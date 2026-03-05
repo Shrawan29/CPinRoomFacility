@@ -328,7 +328,7 @@ export default function GuestDashboard() {
                                 </div>
                               )}
                               <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:700,color:"#fff",lineHeight:1.1,margin:0,textShadow:"0 2px 14px rgba(0,0,0,.6)" }}>{ev.title||ev.name}</p>
-                              {ev.description && <p style={{ fontSize:11.5,color:"rgba(255,255,255,.72)",fontWeight:400,lineHeight:1.4,margin:0,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden",textShadow:"0 1px 4px rgba(0,0,0,.4)" }}>{ev.description}</p>}
+                              {(ev.shortDescription || ev.description) && <p style={{ fontSize:11.5,color:"rgba(255,255,255,.72)",fontWeight:400,lineHeight:1.4,margin:0,display:"-webkit-box",WebkitLineClamp:1,WebkitBoxOrient:"vertical",overflow:"hidden",textShadow:"0 1px 4px rgba(0,0,0,.4)" }}>{ev.shortDescription || ev.description}</p>}
                               {(ev.location||ev.venue) && (
                                 <div style={{ display:"flex",alignItems:"center",gap:5 }}>
                                   <svg viewBox="0 0 24 24" fill="none" stroke="#F9A8D4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width:11,height:11,flexShrink:0 }}>
