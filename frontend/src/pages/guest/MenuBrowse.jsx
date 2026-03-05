@@ -4,8 +4,12 @@ import { getGuestMenu, placeOrder } from "../../services/guest.service";
 import { useNavigate } from "react-router-dom";
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
-// Nav height: pill(64) + orbHalf(29) + bottomGap(12)
-const NAV_HEIGHT = 105;
+// Nav height: pill(64) + bottomGap(12)
+// (Matches `GuestBottomNav` which uses PILL_H=64 and paddingBottom=max(12px, safe-area))
+const NAV_HEIGHT = 76;
+
+// `GuestBottomNav` uses zIndex: 9999
+const OVERLAY_Z = 10050;
 
 export default function MenuBrowse() {
   const { token, guest } = useGuestAuth();
@@ -537,11 +541,9 @@ export default function MenuBrowse() {
             position: "fixed",
             bottom: NAV_HEIGHT,   // sits directly on top of the fixed nav
             left: 0, right: 0,
-            zIndex: 80,         // just below nav (9999) but above everything else
+            zIndex: 9998,       // just below nav (9999)
             padding: "10px 20px",
-            background: "rgba(255,255,255,0.97)",
-            backdropFilter: "blur(20px)",
-            borderTop: "1px solid rgba(164,0,93,0.15)",
+            background: "transparent",
             maxWidth: 430,
             margin: "0 auto",
           }}>
@@ -581,7 +583,7 @@ export default function MenuBrowse() {
         {showCart && (
           <>
             <div style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 90,
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: OVERLAY_Z,
               animation: "fadeIn 0.3s ease",
             }} onClick={() => setShowCart(false)} />
             <div
@@ -592,7 +594,7 @@ export default function MenuBrowse() {
                 background: "#EFE1CF",
                 borderRadius: "24px 24px 0 0",
                 maxHeight: "80vh", overflowY: "auto",
-                zIndex: 100,
+                zIndex: OVERLAY_Z + 1,
                 animation: "slideUp 0.38s cubic-bezier(0.22,1,0.36,1) both",
                 paddingBottom: "env(safe-area-inset-bottom, 0px)",
               }}
@@ -734,13 +736,13 @@ export default function MenuBrowse() {
         {showConfirmation && (
           <>
             <div style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 110,
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: OVERLAY_Z + 2,
               animation: "fadeIn 0.3s ease",
             }} />
             <div style={{
               position: "fixed", top: "50%", left: "50%",
               background: "#EFE1CF", borderRadius: 24, padding: "24px",
-              maxWidth: 380, width: "90%", zIndex: 111,
+              maxWidth: 380, width: "90%", zIndex: OVERLAY_Z + 3,
               boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
               animation: "popIn 0.38s cubic-bezier(0.22,1,0.36,1) both",
             }}>
