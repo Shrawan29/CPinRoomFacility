@@ -194,7 +194,7 @@ export default function MenuBrowse() {
         {successMessage && (
           <div style={{
             position: "fixed", top: 24, left: "50%",
-            zIndex: 200,
+            zIndex: 70,
             background: "linear-gradient(135deg,#1c8a5c,#22c47a)",
             color: "#fff", padding: "12px 22px",
             borderRadius: 50, boxShadow: "0 6px 24px rgba(0,0,0,0.2)",
@@ -537,7 +537,7 @@ export default function MenuBrowse() {
             position: "fixed",
             bottom: NAV_HEIGHT,   // sits directly on top of the fixed nav
             left: 0, right: 0,
-            zIndex: 9998,         // just below nav (9999) but above everything else
+            zIndex: 80,         // just below nav (9999) but above everything else
             padding: "10px 20px",
             background: "rgba(255,255,255,0.97)",
             backdropFilter: "blur(20px)",
@@ -581,7 +581,7 @@ export default function MenuBrowse() {
         {showCart && (
           <>
             <div style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 100,
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 90,
               animation: "fadeIn 0.3s ease",
             }} onClick={() => setShowCart(false)} />
             <div
@@ -592,7 +592,7 @@ export default function MenuBrowse() {
                 background: "#EFE1CF",
                 borderRadius: "24px 24px 0 0",
                 maxHeight: "80vh", overflowY: "auto",
-                zIndex: 10001,
+                zIndex: 100,
                 animation: "slideUp 0.38s cubic-bezier(0.22,1,0.36,1) both",
                 paddingBottom: "env(safe-area-inset-bottom, 0px)",
               }}
