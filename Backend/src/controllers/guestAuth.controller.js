@@ -2,6 +2,7 @@ import crypto from "crypto";
 import Room from "../models/Room.js";
 import GuestCredential from "../models/GuestCredential.js";
 import GuestSession from "../models/GuestSession.js";
+import dataSyncService from "../services/dataSync.service.js";
 import {
   extractLastNameFromGuestName,
   normalizeGuestName,
@@ -9,6 +10,11 @@ import {
   normalizePasswordInput,
   normalizeRoomNumber,
 } from "../utils/guestName.util.js";
+
+const shouldAutoSyncOnGuestLogin = () => {
+  // Default: enabled. Set GUEST_LOGIN_AUTO_SYNC=false to disable.
+  return String(process.env.GUEST_LOGIN_AUTO_SYNC || "true").toLowerCase() !== "false";
+};
 
 /**
  * Guest Login - Username & Password
@@ -40,9 +46,21 @@ export const guestLogin = async (req, res) => {
       "status"
     );
     if (!room || room.status !== "OCCUPIED") {
-      return res.status(403).json({
-        message: "No guest registered for this room",
-      });
+      if (shouldAutoSyncOnGuestLogin()) {
+        await dataSyncService.syncRoom(normalizedRoomNumber);
+        const roomAfterSync = await Room.findOne({ roomNumber: normalizedRoomNumber }).select(
+          "status"
+        );
+        if (!roomAfterSync || roomAfterSync.status !== "OCCUPIED") {
+          return res.status(403).json({
+            message: "No guest registered for this room",
+          });
+        }
+      } else {
+        return res.status(403).json({
+          message: "No guest registered for this room",
+        });
+      }
     }
 
     // Find guest credential
@@ -53,6 +71,53 @@ export const guestLogin = async (req, res) => {
     });
 
     if (!credential) {
+      if (shouldAutoSyncOnGuestLogin()) {
+        await dataSyncService.syncRoom(normalizedRoomNumber);
+        const credentialAfterSync = await GuestCredential.findOne({
+          guestName: normalizedGuestName,
+          roomNumber: normalizedRoomNumber,
+          status: "ACTIVE",
+        });
+        if (!credentialAfterSync) {
+          return res.status(401).json({
+            message: "Invalid guest name or room number",
+          });
+        }
+
+        // Continue with the refreshed credential
+        const refreshed = credentialAfterSync;
+
+        // Verify password
+        let passwordMatch = await refreshed.comparePassword(normalizedPassword);
+        if (!passwordMatch && underscorePassword && underscorePassword !== normalizedPassword) {
+          passwordMatch = await refreshed.comparePassword(underscorePassword);
+        }
+        if (!passwordMatch && legacyPassword && legacyPassword !== normalizedPassword) {
+          passwordMatch = await refreshed.comparePassword(legacyPassword);
+        }
+        if (!passwordMatch) {
+          return res.status(401).json({ message: "Invalid password" });
+        }
+
+        // Create guest session
+        const sessionId = crypto.randomBytes(32).toString("hex");
+
+        await GuestSession.create({
+          sessionId,
+          guestName: normalizedGuestName,
+          roomNumber: normalizedRoomNumber,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        });
+
+        return res.json({
+          token: sessionId,
+          guest: {
+            guestName: normalizedGuestName,
+            roomNumber: normalizedRoomNumber,
+          },
+        });
+      }
+
       return res.status(401).json({
         message: "Invalid guest name or room number",
       });
@@ -118,9 +183,21 @@ export const guestLoginByLastName = async (req, res) => {
       "status"
     );
     if (!room || room.status !== "OCCUPIED") {
-      return res.status(403).json({
-        message: "No guest registered for this room",
-      });
+      if (shouldAutoSyncOnGuestLogin()) {
+        await dataSyncService.syncRoom(normalizedRoomNumber);
+        const roomAfterSync = await Room.findOne({ roomNumber: normalizedRoomNumber }).select(
+          "status"
+        );
+        if (!roomAfterSync || roomAfterSync.status !== "OCCUPIED") {
+          return res.status(403).json({
+            message: "No guest registered for this room",
+          });
+        }
+      } else {
+        return res.status(403).json({
+          message: "No guest registered for this room",
+        });
+      }
     }
 
     const credentials = await GuestCredential.find({
@@ -134,6 +211,72 @@ export const guestLoginByLastName = async (req, res) => {
     });
 
     if (matching.length === 0) {
+      if (shouldAutoSyncOnGuestLogin()) {
+        await dataSyncService.syncRoom(normalizedRoomNumber);
+        const credentialsAfterSync = await GuestCredential.find({
+          roomNumber: normalizedRoomNumber,
+          status: "ACTIVE",
+        }).select("guestName roomNumber passwordHash");
+
+        const matchingAfterSync = credentialsAfterSync.filter((c) => {
+          const credLastName = extractLastNameFromGuestName(c.guestName);
+          return credLastName === normalizedLastName;
+        });
+
+        if (matchingAfterSync.length === 0) {
+          return res.status(401).json({ message: "Invalid last name for room" });
+        }
+
+        matchingAfterSync.sort((a, b) =>
+          String(a.guestName).localeCompare(String(b.guestName))
+        );
+        const credential = matchingAfterSync[0];
+
+        // Enforce password scheme: roomno_lastname (case-insensitive)
+        const expectedPassword = normalizePasswordInput(
+          `${normalizedRoomNumber}_${normalizedLastName}`
+        );
+        const providedPassword = normalizePasswordInput(password);
+        const providedUnderscore = normalizePasswordInput(
+          String(password || "")
+            .replace(/\s+/g, "_")
+            .trim()
+        );
+
+        let passwordMatch = await credential.comparePassword(providedPassword);
+        if (!passwordMatch && providedUnderscore && providedUnderscore !== providedPassword) {
+          passwordMatch = await credential.comparePassword(providedUnderscore);
+        }
+
+        if (
+          passwordMatch &&
+          providedPassword !== expectedPassword &&
+          providedUnderscore !== expectedPassword
+        ) {
+          passwordMatch = false;
+        }
+        if (!passwordMatch) {
+          return res.status(401).json({ message: "Invalid password for room" });
+        }
+
+        const sessionId = crypto.randomBytes(32).toString("hex");
+
+        await GuestSession.create({
+          sessionId,
+          guestName: normalizeGuestName(credential.guestName),
+          roomNumber: normalizedRoomNumber,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        });
+
+        return res.json({
+          token: sessionId,
+          guest: {
+            guestName: normalizeGuestName(credential.guestName),
+            roomNumber: normalizedRoomNumber,
+          },
+        });
+      }
+
       return res.status(401).json({ message: "Invalid last name for room" });
     }
 
