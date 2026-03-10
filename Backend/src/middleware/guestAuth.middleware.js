@@ -1,4 +1,5 @@
 import GuestSession from "../models/GuestSession.js";
+import Room from "../models/Room.js";
 
 const guestAuth = async (req, res, next) => {
   try {
@@ -22,6 +23,14 @@ const guestAuth = async (req, res, next) => {
     if (session.expiresAt < new Date()) {
       return res.status(401).json({
         message: "Session expired"
+      });
+    }
+
+    // If the guest has checked out (room is AVAILABLE), invalidate the session.
+    const room = await Room.findOne({ roomNumber: session.roomNumber }).select("status").lean();
+    if (!room || room.status !== "OCCUPIED") {
+      return res.status(401).json({
+        message: "Session ended"
       });
     }
 

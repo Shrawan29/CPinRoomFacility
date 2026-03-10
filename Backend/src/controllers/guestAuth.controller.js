@@ -11,6 +11,14 @@ import {
   normalizeRoomNumber,
 } from "../utils/guestName.util.js";
 
+const DEFAULT_GUEST_SESSION_TTL_HOURS = 8;
+
+const computeGuestSessionExpiresAt = () => {
+  const hours = Number(process.env.GUEST_SESSION_HOURS || DEFAULT_GUEST_SESSION_TTL_HOURS);
+  const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_GUEST_SESSION_TTL_HOURS;
+  return new Date(Date.now() + ttlHours * 60 * 60 * 1000);
+};
+
 const shouldAutoSyncOnGuestLogin = () => {
   // Default: enabled. Set GUEST_LOGIN_AUTO_SYNC=false to disable.
   return String(process.env.GUEST_LOGIN_AUTO_SYNC || "true").toLowerCase() !== "false";
@@ -106,7 +114,7 @@ export const guestLogin = async (req, res) => {
           sessionId,
           guestName: normalizedGuestName,
           roomNumber: normalizedRoomNumber,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          expiresAt: computeGuestSessionExpiresAt(),
         });
 
         return res.json({
@@ -142,7 +150,7 @@ export const guestLogin = async (req, res) => {
       sessionId,
       guestName: normalizedGuestName,
       roomNumber: normalizedRoomNumber,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expiresAt: computeGuestSessionExpiresAt(),
     });
 
     res.json({
@@ -265,7 +273,7 @@ export const guestLoginByLastName = async (req, res) => {
           sessionId,
           guestName: normalizeGuestName(credential.guestName),
           roomNumber: normalizedRoomNumber,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          expiresAt: computeGuestSessionExpiresAt(),
         });
 
         return res.json({
@@ -312,7 +320,7 @@ export const guestLoginByLastName = async (req, res) => {
       sessionId,
       guestName: normalizeGuestName(credential.guestName),
       roomNumber: normalizedRoomNumber,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      expiresAt: computeGuestSessionExpiresAt(),
     });
 
     return res.json({

@@ -7,7 +7,7 @@ export const generateAdminToken = (admin) => {
       role: admin.role
     },
     process.env.JWT_ADMIN_SECRET,
-    { expiresIn: "8h" }
+    { expiresIn: "48h" }
   );
 };
  

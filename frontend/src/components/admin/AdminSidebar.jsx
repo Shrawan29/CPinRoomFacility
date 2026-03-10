@@ -11,6 +11,7 @@ export default function AdminSidebar() {
 
   const superAdminMenu = [
     { label: "Dashboard", path: "/admin/super/dashboard" },
+    { label: "Guest Sessions", path: "/admin/super/guest-sessions" },
     { label: "Create Admin", path: "/admin/super/create-admin" },
     { label: "Manage Admins", path: "/admin/super/admins" },
     { label: "Rooms", path: "/admin/super/rooms" },
@@ -60,7 +61,7 @@ export default function AdminSidebar() {
                 block px-6 py-3 text-sm transition
                 ${
                   active
-                    ? "bg-[var(--brand)] text-white"
+                    ? "bg-(--brand) text-white"
                     : "text-white/80 hover:bg-white/10"
                 }
               `}

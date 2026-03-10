@@ -6,6 +6,7 @@ import SuperAdminDashboard from "./pages/admin/super/SuperAdminDashboard";
 import CreateAdmin from "./pages/admin/super/CreateAdmin";
 import AdminList from "./pages/admin/super/AdminList";
 import RoomsList from "./pages/admin/super/RoomsList";
+import ActiveGuestSessions from "./pages/admin/super/ActiveGuestSessions";
 
 // Reports & Events (SUPER_ADMIN only)
 import Reports from "./pages/admin/Reports";
@@ -85,6 +86,15 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <RoomsList />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/super/guest-sessions"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+            <ActiveGuestSessions />
           </ProtectedRoute>
         }
       />

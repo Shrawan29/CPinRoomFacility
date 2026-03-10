@@ -12,7 +12,8 @@ api.interceptors.request.use(
     // Public routes
     const isPublic =
       config.url?.startsWith("/menu/guest") ||
-      config.url?.includes("/guest/auth");
+      config.url?.includes("/guest/auth") ||
+      config.url?.startsWith("/admin/login");
 
     if (isPublic) return config;
 
@@ -31,6 +32,57 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error),
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window === "undefined") return Promise.reject(error);
+
+    const status = error?.response?.status;
+    if (status !== 401) return Promise.reject(error);
+
+    const requestUrl = String(error?.config?.url || "");
+
+    const headers = error?.config?.headers;
+    const getHeader = (name) => {
+      if (!headers) return undefined;
+      if (typeof headers.get === "function") return headers.get(name);
+      return headers[name] ?? headers[name.toLowerCase()];
+    };
+
+    // Avoid redirect loops / interference on login endpoints.
+    const isAuthEndpoint =
+      requestUrl.startsWith("/admin/login") || requestUrl.includes("/guest/auth");
+    if (isAuthEndpoint) return Promise.reject(error);
+
+    const isAdminRequest = requestUrl.startsWith("/admin");
+    const isGuestRequest = requestUrl.startsWith("/guest");
+
+    const hasAdminAuthHeader = Boolean(getHeader("Authorization"));
+    const hasGuestSessionHeader = Boolean(getHeader("x-guest-session"));
+
+    if (isAdminRequest || hasAdminAuthHeader) {
+      localStorage.removeItem("admin_token");
+      localStorage.removeItem("admin_data");
+      if (window.location.pathname !== "/") {
+        window.location.assign("/");
+      }
+      return Promise.reject(error);
+    }
+
+    if (isGuestRequest || hasGuestSessionHeader) {
+      localStorage.removeItem("guest_session");
+      localStorage.removeItem("guest_token");
+      localStorage.removeItem("guest_data");
+      if (!window.location.pathname.startsWith("/guest/access-fallback")) {
+        window.location.assign("/guest/access-fallback?reason=session-expired");
+      }
+      return Promise.reject(error);
+    }
+
+    return Promise.reject(error);
+  },
 );
 
 export default api;

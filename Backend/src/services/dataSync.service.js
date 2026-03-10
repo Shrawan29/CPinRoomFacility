@@ -12,7 +12,7 @@ import {
 
 const SYNC_SOURCE = "HOTEL_SYNC";
 const DEFAULT_SYNC_INTERVAL_MS = 10_000;
-const DEFAULT_SESSION_TTL_DAYS = 7;
+const DEFAULT_SESSION_TTL_HOURS = 8;
 
 const stableSessionId = (roomNumber, guestLabel) => {
   const input = `${roomNumber}::${guestLabel}`;
@@ -21,10 +21,16 @@ const stableSessionId = (roomNumber, guestLabel) => {
 };
 
 const computeExpiresAt = () => {
-  const days = Number(process.env.HOTEL_GUEST_SESSION_DAYS || DEFAULT_SESSION_TTL_DAYS);
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + (Number.isFinite(days) ? days : DEFAULT_SESSION_TTL_DAYS));
-  return expiresAt;
+  const hoursEnv = process.env.HOTEL_GUEST_SESSION_HOURS;
+  const daysEnv = process.env.HOTEL_GUEST_SESSION_DAYS;
+
+  const hoursFromEnv = Number(hoursEnv);
+  const hoursFromDays = Number(daysEnv) * 24;
+  const ttlHours = Number.isFinite(hoursFromEnv) && hoursFromEnv > 0
+    ? hoursFromEnv
+    : (Number.isFinite(hoursFromDays) && hoursFromDays > 0 ? hoursFromDays : DEFAULT_SESSION_TTL_HOURS);
+
+  return new Date(Date.now() + ttlHours * 60 * 60 * 1000);
 };
 
 const toRoomStatus = (hotelRoomDoc) => {

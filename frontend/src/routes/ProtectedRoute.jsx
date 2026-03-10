@@ -1,8 +1,17 @@
+import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import api from "../services/api";
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const { token, admin, loading } = useAdminAuth();
+
+  useEffect(() => {
+    if (loading || !token || !admin) return;
+    api.get("/admin/protected-test").catch(() => {
+      // 401 handling + redirects are managed centrally in api interceptors.
+    });
+  }, [loading, token, admin]);
 
   // ⏳ Wait until auth state is restored
   if (loading) {

@@ -8,6 +8,45 @@ const adminClient = axios.create({ baseURL });
 const getGuestSession = () => localStorage.getItem("guest_session");
 const getAdminToken = () => localStorage.getItem("admin_token");
 
+const redirectGuestExpired = () => {
+  localStorage.removeItem("guest_session");
+  localStorage.removeItem("guest_token");
+  localStorage.removeItem("guest_data");
+
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/guest/access-fallback")) {
+    window.location.assign("/guest/access-fallback?reason=session-expired");
+  }
+};
+
+const redirectAdminExpired = () => {
+  localStorage.removeItem("admin_token");
+  localStorage.removeItem("admin_data");
+
+  if (typeof window !== "undefined" && window.location.pathname !== "/") {
+    window.location.assign("/");
+  }
+};
+
+guestClient.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error?.response?.status === 401) {
+      redirectGuestExpired();
+    }
+    return Promise.reject(error);
+  },
+);
+
+adminClient.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error?.response?.status === 401) {
+      redirectAdminExpired();
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const createHousekeepingRequest = async ({ items, note }) => {
   const session = getGuestSession();
   const res = await guestClient.post(

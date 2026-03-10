@@ -1,8 +1,36 @@
+import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useGuestAuth } from "../context/GuestAuthContext";
+import api from "../services/api";
 
 export default function GuestProtectedRoute({ children }) {
   const { token, loading } = useGuestAuth();
+
+  useEffect(() => {
+    if (loading || !token) return;
+
+    let cancelled = false;
+
+    const validate = async () => {
+      try {
+        await api.get("/guest/dashboard");
+      } catch {
+        // 401 handling + redirects are managed centrally in api interceptors.
+      }
+    };
+
+    validate();
+
+    const intervalId = setInterval(() => {
+      if (cancelled) return;
+      validate();
+    }, 15_000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [loading, token]);
 
   // Loading screen
   if (loading) {
