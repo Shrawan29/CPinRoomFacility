@@ -4,6 +4,7 @@ import allowRoles from "../middleware/role.middleware.js";
 import { 
   getAdminDashboardStats,
   getAllGuests,
+  getRegisteredGuests,
   getAllRooms,
   getSyncStatus
 } from "../controllers/adminDashboard.controller.js";
@@ -22,6 +23,13 @@ router.get(
   adminAuth,
   allowRoles("SUPER_ADMIN"),
   getAllGuests
+);
+
+router.get(
+  "/registered-guests",
+  adminAuth,
+  allowRoles("SUPER_ADMIN"),
+  getRegisteredGuests
 );
 
 router.get(

@@ -1,5 +1,6 @@
 import Room from "../models/Room.js";
 import GuestSession from "../models/GuestSession.js";
+import GuestCredential from "../models/GuestCredential.js";
 import Order from "../models/Order.js";
 import mongoose from "mongoose";
 import dataSyncService from "../services/dataSync.service.js";
@@ -70,6 +71,22 @@ export const getAllGuests = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to load guests",
+    });
+  }
+};
+
+export const getRegisteredGuests = async (req, res) => {
+  try {
+    const guests = await GuestCredential.find({ status: "ACTIVE" })
+      .select("guestName roomNumber source updatedAt")
+      .collation({ locale: "en", numericOrdering: true })
+      .sort({ roomNumber: 1, guestName: 1 })
+      .lean();
+
+    res.json(guests);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to load registered guests",
     });
   }
 };

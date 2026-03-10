@@ -53,7 +53,7 @@ export default function RoomsList() {
         if (!silent) setLoading(true);
         const [roomsRes, guestsRes] = await Promise.all([
           api.get("/admin/dashboard/rooms"),
-          api.get("/admin/dashboard/guests"),
+          api.get("/admin/dashboard/registered-guests"),
         ]);
 
         if (cancelled) return;
@@ -88,7 +88,7 @@ export default function RoomsList() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="bg-[var(--bg-secondary)] p-6 rounded-xl">
+        <div className="bg-(--bg-secondary) p-6 rounded-xl">
           Loading rooms…
         </div>
       </AdminLayout>
@@ -109,8 +109,10 @@ export default function RoomsList() {
   const occupiedRooms = rooms.filter((r) => r.status === "OCCUPIED");
 
   const guestsByRoom = guests.reduce((acc, guest) => {
-    const isActive = new Date(guest?.expiresAt) > new Date();
-    if (!isActive) return acc;
+    if (guest?.expiresAt) {
+      const isActive = new Date(guest.expiresAt) > new Date();
+      if (!isActive) return acc;
+    }
 
     const roomNumber = String(guest?.roomNumber ?? "").trim();
     if (!roomNumber) return acc;
@@ -127,19 +129,19 @@ export default function RoomsList() {
     <AdminLayout>
       {/* Page Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
+        <h2 className="text-2xl font-semibold text-(--text-primary)">
           All Rooms
         </h2>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+        <p className="text-sm text-(--text-muted) mt-1">
           View all hotel rooms and their status
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="bg-[var(--bg-secondary)] p-6 rounded-xl shadow-sm">
-          <p className="text-[var(--text-muted)] text-sm mb-2">Total Rooms</p>
-          <p className="text-3xl font-bold text-[var(--text-primary)]">
+        <div className="bg-(--bg-secondary) p-6 rounded-xl shadow-sm">
+          <p className="text-(--text-muted) text-sm mb-2">Total Rooms</p>
+          <p className="text-3xl font-bold text-(--text-primary)">
             {rooms.length}
           </p>
         </div>
@@ -160,10 +162,10 @@ export default function RoomsList() {
       </div>
 
       {/* Table */}
-      <div className="bg-[var(--bg-secondary)] rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-(--bg-secondary) rounded-xl shadow-sm overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-black/5 text-left text-sm text-[var(--text-muted)]">
+            <tr className="bg-black/5 text-left text-sm text-(--text-muted)">
               <th className="px-5 py-3">Room Number</th>
               <th className="px-5 py-3">Status</th>
               <th className="px-5 py-3">Guests</th>
@@ -177,7 +179,7 @@ export default function RoomsList() {
               <tr>
                 <td
                   colSpan="5"
-                  className="px-5 py-6 text-center text-[var(--text-muted)]"
+                  className="px-5 py-6 text-center text-(--text-muted)"
                 >
                   No rooms found
                 </td>
@@ -188,7 +190,7 @@ export default function RoomsList() {
                   key={room._id}
                   className="border-t border-black/10 hover:bg-black/5 transition"
                 >
-                  <td className="px-5 py-4 text-[var(--text-primary)] font-medium">
+                  <td className="px-5 py-4 text-(--text-primary) font-medium">
                     {room.roomNumber}
                   </td>
 
@@ -204,7 +206,7 @@ export default function RoomsList() {
                     </span>
                   </td>
 
-                  <td className="px-5 py-4 text-[var(--text-muted)] text-sm">
+                  <td className="px-5 py-4 text-(--text-muted) text-sm">
                     {(() => {
                       if (room.status === "AVAILABLE") return "-";
                       const set = guestsByRoom[String(room.roomNumber)] || null;
@@ -213,12 +215,12 @@ export default function RoomsList() {
                     })()}
                   </td>
 
-                  <td className="px-5 py-4 text-[var(--text-muted)] text-sm">
+                  <td className="px-5 py-4 text-(--text-muted) text-sm">
                     {new Date(room.createdAt).toLocaleDateString()} at{" "}
                     {new Date(room.createdAt).toLocaleTimeString()}
                   </td>
 
-                  <td className="px-5 py-4 text-[var(--text-muted)] text-sm">
+                  <td className="px-5 py-4 text-(--text-muted) text-sm">
                     {new Date(room.updatedAt).toLocaleDateString()} at{" "}
                     {new Date(room.updatedAt).toLocaleTimeString()}
                   </td>
