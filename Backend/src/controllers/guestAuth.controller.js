@@ -14,6 +14,36 @@ import {
 const DEFAULT_GUEST_SESSION_TTL_HOURS = 8;
 const DEFAULT_GUEST_SESSION_RETENTION_DAYS = 7;
 
+const getGuestSessionTtlMs = () => {
+  const hours = Number(process.env.GUEST_SESSION_HOURS || DEFAULT_GUEST_SESSION_TTL_HOURS);
+  const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_GUEST_SESSION_TTL_HOURS;
+  return ttlHours * 60 * 60 * 1000;
+};
+
+const endExistingGuestSessions = async ({ roomNumber, guestName }) => {
+  const now = new Date();
+  const ttlMs = getGuestSessionTtlMs();
+  const cutoffLegacy = new Date(now.getTime() - ttlMs);
+
+  await GuestSession.updateMany(
+    {
+      source: "APP",
+      roomNumber,
+      guestName,
+      $and: [
+        { $or: [{ endedAt: { $exists: false } }, { endedAt: null }] },
+        {
+          $or: [
+            { authExpiresAt: { $gt: now } },
+            { authExpiresAt: { $exists: false }, createdAt: { $gte: cutoffLegacy } },
+          ],
+        },
+      ],
+    },
+    { $set: { endedAt: now, authExpiresAt: now } }
+  );
+};
+
 const computeGuestSessionAuthExpiresAt = () => {
   const hours = Number(process.env.GUEST_SESSION_HOURS || DEFAULT_GUEST_SESSION_TTL_HOURS);
   const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_GUEST_SESSION_TTL_HOURS;
@@ -117,8 +147,7 @@ export const guestLogin = async (req, res) => {
         // Create guest session
         const sessionId = crypto.randomBytes(32).toString("hex");
 
-        await GuestSession.deleteMany({
-          source: "APP",
+        await endExistingGuestSessions({
           roomNumber: normalizedRoomNumber,
           guestName: normalizedGuestName,
         });
@@ -160,8 +189,7 @@ export const guestLogin = async (req, res) => {
     // Create guest session
     const sessionId = crypto.randomBytes(32).toString("hex");
 
-    await GuestSession.deleteMany({
-      source: "APP",
+    await endExistingGuestSessions({
       roomNumber: normalizedRoomNumber,
       guestName: normalizedGuestName,
     });
@@ -292,8 +320,7 @@ export const guestLoginByLastName = async (req, res) => {
 
         const resolvedGuestName = normalizeGuestName(credential.guestName);
 
-        await GuestSession.deleteMany({
-          source: "APP",
+        await endExistingGuestSessions({
           roomNumber: normalizedRoomNumber,
           guestName: resolvedGuestName,
         });
@@ -348,8 +375,7 @@ export const guestLoginByLastName = async (req, res) => {
 
     const resolvedGuestName = normalizeGuestName(credential.guestName);
 
-    await GuestSession.deleteMany({
-      source: "APP",
+    await endExistingGuestSessions({
       roomNumber: normalizedRoomNumber,
       guestName: resolvedGuestName,
     });

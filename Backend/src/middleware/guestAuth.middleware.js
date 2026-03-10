@@ -44,6 +44,14 @@ const guestAuth = async (req, res, next) => {
       : (Number.isFinite(createdAtMs) ? createdAtMs + ttlMs : NaN);
 
     if (Number.isFinite(effectiveAuthExpiryMs) && Date.now() > effectiveAuthExpiryMs) {
+      const endedAt = new Date(effectiveAuthExpiryMs);
+      await GuestSession.updateOne(
+        {
+          sessionId,
+          $or: [{ endedAt: { $exists: false } }, { endedAt: null }, { endedAt: { $gt: endedAt } }],
+        },
+        { $set: { endedAt, authExpiresAt: endedAt } }
+      );
       return res.status(401).json({
         message: "Session expired"
       });
@@ -52,6 +60,14 @@ const guestAuth = async (req, res, next) => {
     // If the guest has checked out (room is AVAILABLE), invalidate the session.
     const room = await Room.findOne({ roomNumber: session.roomNumber }).select("status").lean();
     if (!room || room.status !== "OCCUPIED") {
+      const endedAt = new Date();
+      await GuestSession.updateOne(
+        {
+          sessionId,
+          $or: [{ endedAt: { $exists: false } }, { endedAt: null }, { endedAt: { $gt: endedAt } }],
+        },
+        { $set: { endedAt, authExpiresAt: endedAt } }
+      );
       return res.status(401).json({
         message: "Session ended"
       });
