@@ -110,6 +110,12 @@ export const guestLogin = async (req, res) => {
         // Create guest session
         const sessionId = crypto.randomBytes(32).toString("hex");
 
+        await GuestSession.deleteMany({
+          source: "APP",
+          roomNumber: normalizedRoomNumber,
+          guestName: normalizedGuestName,
+        });
+
         await GuestSession.create({
           sessionId,
           guestName: normalizedGuestName,
@@ -145,6 +151,12 @@ export const guestLogin = async (req, res) => {
 
     // Create guest session
     const sessionId = crypto.randomBytes(32).toString("hex");
+
+    await GuestSession.deleteMany({
+      source: "APP",
+      roomNumber: normalizedRoomNumber,
+      guestName: normalizedGuestName,
+    });
 
     await GuestSession.create({
       sessionId,
@@ -269,9 +281,17 @@ export const guestLoginByLastName = async (req, res) => {
 
         const sessionId = crypto.randomBytes(32).toString("hex");
 
+        const resolvedGuestName = normalizeGuestName(credential.guestName);
+
+        await GuestSession.deleteMany({
+          source: "APP",
+          roomNumber: normalizedRoomNumber,
+          guestName: resolvedGuestName,
+        });
+
         await GuestSession.create({
           sessionId,
-          guestName: normalizeGuestName(credential.guestName),
+          guestName: resolvedGuestName,
           roomNumber: normalizedRoomNumber,
           expiresAt: computeGuestSessionExpiresAt(),
         });
@@ -316,9 +336,17 @@ export const guestLoginByLastName = async (req, res) => {
 
     const sessionId = crypto.randomBytes(32).toString("hex");
 
+    const resolvedGuestName = normalizeGuestName(credential.guestName);
+
+    await GuestSession.deleteMany({
+      source: "APP",
+      roomNumber: normalizedRoomNumber,
+      guestName: resolvedGuestName,
+    });
+
     await GuestSession.create({
       sessionId,
-      guestName: normalizeGuestName(credential.guestName),
+      guestName: resolvedGuestName,
       roomNumber: normalizedRoomNumber,
       expiresAt: computeGuestSessionExpiresAt(),
     });

@@ -4,6 +4,14 @@ import Order from "../models/Order.js";
 import mongoose from "mongoose";
 import dataSyncService from "../services/dataSync.service.js";
 
+const DEFAULT_GUEST_SESSION_TTL_HOURS = 8;
+
+const getGuestSessionCutoff = () => {
+  const hours = Number(process.env.GUEST_SESSION_HOURS || DEFAULT_GUEST_SESSION_TTL_HOURS);
+  const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_GUEST_SESSION_TTL_HOURS;
+  return new Date(Date.now() - ttlHours * 60 * 60 * 1000);
+};
+
 export const getAdminDashboardStats = async (req, res) => {
   try {
     const todayStart = new Date();
@@ -12,6 +20,7 @@ export const getAdminDashboardStats = async (req, res) => {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
+    const sessionCutoff = getGuestSessionCutoff();
     const [
       totalRooms,
       availableRooms,
@@ -22,7 +31,11 @@ export const getAdminDashboardStats = async (req, res) => {
       Room.countDocuments(),
       Room.countDocuments({ status: "AVAILABLE" }),
       Room.countDocuments({ status: "OCCUPIED" }),
-      GuestSession.countDocuments({ expiresAt: { $gt: new Date() } }),
+      GuestSession.countDocuments({
+        source: "APP",
+        createdAt: { $gte: sessionCutoff },
+        expiresAt: { $gt: new Date() },
+      }),
       Order.countDocuments({
         createdAt: { $gte: todayStart, $lte: todayEnd },
       }),
@@ -44,7 +57,12 @@ export const getAdminDashboardStats = async (req, res) => {
 
 export const getAllGuests = async (req, res) => {
   try {
-    const guests = await GuestSession.find({ expiresAt: { $gt: new Date() } })
+    const sessionCutoff = getGuestSessionCutoff();
+    const guests = await GuestSession.find({
+      source: "APP",
+      createdAt: { $gte: sessionCutoff },
+      expiresAt: { $gt: new Date() },
+    })
       .sort({ syncedAt: -1, updatedAt: -1, createdAt: -1 })
       .lean();
 

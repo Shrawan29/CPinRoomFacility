@@ -1,6 +1,14 @@
 import GuestSession from "../models/GuestSession.js";
 import Room from "../models/Room.js";
 
+const DEFAULT_GUEST_SESSION_TTL_HOURS = 8;
+
+const getGuestSessionTtlMs = () => {
+  const hours = Number(process.env.GUEST_SESSION_HOURS || DEFAULT_GUEST_SESSION_TTL_HOURS);
+  const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_GUEST_SESSION_TTL_HOURS;
+  return ttlHours * 60 * 60 * 1000;
+};
+
 const guestAuth = async (req, res, next) => {
   try {
     const sessionId = req.headers["x-guest-session"];
@@ -21,6 +29,16 @@ const guestAuth = async (req, res, next) => {
 
     // Check session expiry
     if (session.expiresAt < new Date()) {
+      return res.status(401).json({
+        message: "Session expired"
+      });
+    }
+
+    // Enforce TTL from login time (createdAt) so old sessions never exceed the configured hours.
+    const ttlMs = getGuestSessionTtlMs();
+    const createdAtMs = session?.createdAt ? new Date(session.createdAt).getTime() : NaN;
+    if (Number.isFinite(createdAtMs) && Date.now() > createdAtMs + ttlMs) {
+      await GuestSession.deleteOne({ _id: session._id });
       return res.status(401).json({
         message: "Session expired"
       });
