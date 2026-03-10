@@ -33,7 +33,7 @@ export default function ActiveGuestSessions() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [windowMode, setWindowMode] = useState("24h");
+  const [windowMode, setWindowMode] = useState("active");
   const [fromInput, setFromInput] = useState(() => {
     const to = new Date();
     const from = new Date(to.getTime() - 24 * 60 * 60 * 1000);
@@ -42,6 +42,7 @@ export default function ActiveGuestSessions() {
   const [toInput, setToInput] = useState(() => toLocalInputValue(new Date()));
   const [serverFrom, setServerFrom] = useState(null);
   const [serverTo, setServerTo] = useState(null);
+  const [serverMode, setServerMode] = useState("");
 
   const applyPreset = (mode) => {
     const to = new Date();
@@ -61,7 +62,9 @@ export default function ActiveGuestSessions() {
         const from = parseLocalInputValue(fromInput);
         const to = parseLocalInputValue(toInput);
         const params = {};
-        if (from && to) {
+        if (windowMode === "active") {
+          params.mode = "active";
+        } else if (from && to) {
           params.from = from.toISOString();
           params.to = to.toISOString();
         } else {
@@ -75,6 +78,7 @@ export default function ActiveGuestSessions() {
         setServerTo(payload?.to || null);
         setSessions(Array.isArray(payload?.sessions) ? payload.sessions : []);
         setError(null);
+        setServerMode(typeof payload?.mode === "string" ? payload.mode : "");
       } catch (err) {
         if (cancelled) return;
         setError(err?.response?.data?.message || "Failed to load active sessions");
@@ -108,12 +112,15 @@ export default function ActiveGuestSessions() {
             onChange={(e) => {
               const next = String(e.target.value);
               setWindowMode(next);
-              applyPreset(next === "week" ? "week" : "24h");
+              if (next === "week" || next === "24h") {
+                applyPreset(next);
+              }
             }}
             className="px-3 py-2 rounded-lg bg-(--bg-secondary) text-sm text-(--text-primary)"
           >
+            <option value="active">Active now</option>
             <option value="24h">Previous 24 hours</option>
-            <option value="week">Previous week</option>
+            <option value="week">Previous 7 days</option>
           </select>
 
           <div className="flex items-center gap-2">
@@ -140,8 +147,16 @@ export default function ActiveGuestSessions() {
 
       {serverFrom && serverTo && (
         <div className="mb-4 text-sm text-(--text-muted)">
-          Showing sessions active between <span className="font-medium text-(--text-primary)">{fmt(serverFrom)}</span> and{" "}
-          <span className="font-medium text-(--text-primary)">{fmt(serverTo)}</span>.
+          {serverMode === "active" ? (
+            <>
+              Showing sessions active at <span className="font-medium text-(--text-primary)">{fmt(serverTo)}</span>.
+            </>
+          ) : (
+            <>
+              Showing sessions active between <span className="font-medium text-(--text-primary)">{fmt(serverFrom)}</span> and{" "}
+              <span className="font-medium text-(--text-primary)">{fmt(serverTo)}</span>.
+            </>
+          )}
         </div>
       )}
 

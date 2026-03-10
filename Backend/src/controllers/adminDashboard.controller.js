@@ -33,22 +33,22 @@ export const getAdminDashboardStats = async (req, res) => {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    const sessionCutoff = getGuestSessionCutoff();
     const now = new Date();
-    const [
-      totalRooms,
-      availableRooms,
-      occupiedRooms,
-      activeSessions,
-      todayOrders,
-    ] = await Promise.all([
+    const ttlMs = getGuestSessionTtlMs();
+    const cutoffLegacy = new Date(now.getTime() - ttlMs);
+
+    const [totalRooms, availableRooms, occupiedRooms, activeSessions, todayOrders] = await Promise.all([
       Room.countDocuments(),
       Room.countDocuments({ status: "AVAILABLE" }),
       Room.countDocuments({ status: "OCCUPIED" }),
       GuestSession.countDocuments({
         source: "APP",
-        createdAt: { $gte: sessionCutoff },
-        $or: [{ authExpiresAt: { $gt: now } }, { authExpiresAt: { $exists: false } }],
+        createdAt: { $lte: now },
+        expiresAt: { $gt: now },
+        $or: [
+          { authExpiresAt: { $gt: now } },
+          { authExpiresAt: { $exists: false }, createdAt: { $gte: cutoffLegacy } },
+        ],
       }),
       Order.countDocuments({
         createdAt: { $gte: todayStart, $lte: todayEnd },
@@ -72,11 +72,54 @@ export const getAdminDashboardStats = async (req, res) => {
 export const getAllGuests = async (req, res) => {
   try {
     const ttlMs = getGuestSessionTtlMs();
-
     const now = new Date();
+
+    const mode = String(req.query.mode || "").trim().toLowerCase();
     const windowParam = String(req.query.window || "").trim().toLowerCase();
     const fromParam = parseDateParam(req.query.from);
     const toParam = parseDateParam(req.query.to);
+
+    if (mode === "active" || mode === "now") {
+      const cutoffLegacy = new Date(now.getTime() - ttlMs);
+      const active = await GuestSession.find({
+        source: "APP",
+        createdAt: { $lte: now },
+        expiresAt: { $gt: now },
+        $or: [
+          { authExpiresAt: { $gt: now } },
+          { authExpiresAt: { $exists: false }, createdAt: { $gte: cutoffLegacy } },
+        ],
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      const sessions = active
+        .map((s) => {
+          const createdAt = s?.createdAt ? new Date(s.createdAt) : null;
+          const authExpiresAt = s?.authExpiresAt ? new Date(s.authExpiresAt) : null;
+          const createdAtMs = createdAt ? createdAt.getTime() : NaN;
+          const authExpiresAtMs = authExpiresAt ? authExpiresAt.getTime() : NaN;
+          const effectiveAuthExpiry = Number.isFinite(authExpiresAtMs)
+            ? authExpiresAt
+            : Number.isFinite(createdAtMs)
+              ? new Date(createdAtMs + ttlMs)
+              : null;
+
+          return {
+            ...s,
+            activeFrom: createdAt,
+            activeTo: effectiveAuthExpiry,
+          };
+        })
+        .filter((s) => {
+          const start = s?.activeFrom ? new Date(s.activeFrom).getTime() : NaN;
+          const end = s?.activeTo ? new Date(s.activeTo).getTime() : NaN;
+          if (!Number.isFinite(start) || !Number.isFinite(end)) return false;
+          return start <= now.getTime() && end > now.getTime();
+        });
+
+      return res.json({ mode: "active", from: now, to: now, sessions });
+    }
 
     let from = null;
     let to = null;
@@ -135,6 +178,7 @@ export const getAllGuests = async (req, res) => {
       });
 
     res.json({
+      mode: windowParam === "week" || windowParam === "7d" || windowParam === "7days" ? "week" : "range",
       from,
       to,
       sessions: filtered,
