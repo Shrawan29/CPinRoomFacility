@@ -289,13 +289,21 @@ class DataSyncService {
         }
 
         // Cleanup APP sessions when a room has no registered guests.
-        // This ensures that once a room is AVAILABLE, app-created sessions cannot linger.
+        // This ensures that once a room is AVAILABLE, app-created sessions end immediately,
+        // while still keeping the record for reporting/retention.
         const availableRooms = activeRoomNumbers.filter((roomNumber) => {
           const names = activeGuestNamesByRoom.get(roomNumber);
           return !names || names.size === 0;
         });
         if (availableRooms.length > 0) {
-          await GuestSession.deleteMany({ source: "APP", roomNumber: { $in: availableRooms } });
+          await GuestSession.updateMany(
+            {
+              source: "APP",
+              roomNumber: { $in: availableRooms },
+              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+            },
+            { $set: { authExpiresAt: syncedAt } }
+          );
         }
 
         // Helpful dev-only output: show canonical login hints
@@ -413,6 +421,14 @@ class DataSyncService {
             { $set: { status: "INACTIVE" } }
           );
           await GuestSession.deleteMany({ source: SYNC_SOURCE, roomNumber });
+          await GuestSession.updateMany(
+            {
+              source: "APP",
+              roomNumber,
+              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+            },
+            { $set: { authExpiresAt: syncedAt } }
+          );
 
           this.lastRun = {
             ok: true,
@@ -430,9 +446,10 @@ class DataSyncService {
         }
 
         // Keep the target room status in sync
+        const nextRoomStatus = toRoomStatus(hotelRoom);
         await Room.updateOne(
           { roomNumber },
-          { $set: { roomNumber, status: toRoomStatus(hotelRoom) } },
+          { $set: { roomNumber, status: nextRoomStatus } },
           { upsert: true }
         );
 
@@ -557,7 +574,27 @@ class DataSyncService {
           });
         } else {
           await GuestSession.deleteMany({ source: SYNC_SOURCE, roomNumber });
-          await GuestSession.deleteMany({ source: "APP", roomNumber });
+          // Room has no guests => AVAILABLE => end APP sessions now (do not delete)
+          await GuestSession.updateMany(
+            {
+              source: "APP",
+              roomNumber,
+              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+            },
+            { $set: { authExpiresAt: syncedAt } }
+          );
+        }
+
+        // Defensive: if the room is AVAILABLE, ensure APP sessions are ended.
+        if (nextRoomStatus === "AVAILABLE") {
+          await GuestSession.updateMany(
+            {
+              source: "APP",
+              roomNumber,
+              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+            },
+            { $set: { authExpiresAt: syncedAt } }
+          );
         }
 
         this.lastRun = {

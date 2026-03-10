@@ -93,6 +93,24 @@ export const getAllGuests = async (req, res) => {
         .sort({ createdAt: -1 })
         .lean();
 
+      const roomNumbers = Array.from(
+        new Set(
+          active
+            .map((s) => (s?.roomNumber != null ? String(s.roomNumber).trim() : ""))
+            .filter(Boolean)
+        )
+      );
+      const occupiedRooms = roomNumbers.length
+        ? await Room.find({ roomNumber: { $in: roomNumbers }, status: "OCCUPIED" })
+          .select("roomNumber")
+          .lean()
+        : [];
+      const occupiedSet = new Set(
+        occupiedRooms
+          .map((r) => (r?.roomNumber != null ? String(r.roomNumber).trim() : ""))
+          .filter(Boolean)
+      );
+
       const sessions = active
         .map((s) => {
           const createdAt = s?.createdAt ? new Date(s.createdAt) : null;
@@ -110,6 +128,10 @@ export const getAllGuests = async (req, res) => {
             activeFrom: createdAt,
             activeTo: effectiveAuthExpiry,
           };
+        })
+        .filter((s) => {
+          const roomNumber = s?.roomNumber != null ? String(s.roomNumber).trim() : "";
+          return roomNumber && occupiedSet.has(roomNumber);
         })
         .filter((s) => {
           const start = s?.activeFrom ? new Date(s.activeFrom).getTime() : NaN;
