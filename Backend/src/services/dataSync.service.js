@@ -300,9 +300,15 @@ class DataSyncService {
             {
               source: "APP",
               roomNumber: { $in: availableRooms },
-              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+              $or: [
+                { endedAt: { $exists: false } },
+                { endedAt: null },
+                { endedAt: { $gt: syncedAt } },
+                { authExpiresAt: { $exists: false } },
+                { authExpiresAt: { $gt: syncedAt } },
+              ],
             },
-            { $set: { authExpiresAt: syncedAt } }
+            { $set: { authExpiresAt: syncedAt, endedAt: syncedAt } }
           );
         }
 
@@ -425,9 +431,15 @@ class DataSyncService {
             {
               source: "APP",
               roomNumber,
-              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+              $or: [
+                { endedAt: { $exists: false } },
+                { endedAt: null },
+                { endedAt: { $gt: syncedAt } },
+                { authExpiresAt: { $exists: false } },
+                { authExpiresAt: { $gt: syncedAt } },
+              ],
             },
-            { $set: { authExpiresAt: syncedAt } }
+            { $set: { authExpiresAt: syncedAt, endedAt: syncedAt } }
           );
 
           this.lastRun = {
@@ -579,9 +591,15 @@ class DataSyncService {
             {
               source: "APP",
               roomNumber,
-              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+              $or: [
+                { endedAt: { $exists: false } },
+                { endedAt: null },
+                { endedAt: { $gt: syncedAt } },
+                { authExpiresAt: { $exists: false } },
+                { authExpiresAt: { $gt: syncedAt } },
+              ],
             },
-            { $set: { authExpiresAt: syncedAt } }
+            { $set: { authExpiresAt: syncedAt, endedAt: syncedAt } }
           );
         }
 
@@ -591,9 +609,15 @@ class DataSyncService {
             {
               source: "APP",
               roomNumber,
-              $or: [{ authExpiresAt: { $exists: false } }, { authExpiresAt: { $gt: syncedAt } }],
+              $or: [
+                { endedAt: { $exists: false } },
+                { endedAt: null },
+                { endedAt: { $gt: syncedAt } },
+                { authExpiresAt: { $exists: false } },
+                { authExpiresAt: { $gt: syncedAt } },
+              ],
             },
-            { $set: { authExpiresAt: syncedAt } }
+            { $set: { authExpiresAt: syncedAt, endedAt: syncedAt } }
           );
         }
 

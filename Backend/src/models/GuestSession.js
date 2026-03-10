@@ -25,6 +25,10 @@ const guestSessionSchema = new mongoose.Schema(
     authExpiresAt: {
       type: Date
     },
+    // Actual end time (e.g., guest checkout or forced logout)
+    endedAt: {
+      type: Date
+    },
     expiresAt: {
       type: Date,
       required: true

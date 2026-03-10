@@ -115,6 +115,7 @@ export const getAllGuests = async (req, res) => {
         .map((s) => {
           const createdAt = s?.createdAt ? new Date(s.createdAt) : null;
           const authExpiresAt = s?.authExpiresAt ? new Date(s.authExpiresAt) : null;
+          const endedAt = s?.endedAt ? new Date(s.endedAt) : null;
           const createdAtMs = createdAt ? createdAt.getTime() : NaN;
           const authExpiresAtMs = authExpiresAt ? authExpiresAt.getTime() : NaN;
           const effectiveAuthExpiry = Number.isFinite(authExpiresAtMs)
@@ -123,10 +124,22 @@ export const getAllGuests = async (req, res) => {
               ? new Date(createdAtMs + ttlMs)
               : null;
 
+          const endedAtMs = endedAt ? endedAt.getTime() : NaN;
+          const effectiveAuthExpiryMs = effectiveAuthExpiry
+            ? effectiveAuthExpiry.getTime()
+            : NaN;
+          const effectiveEnd = Number.isFinite(endedAtMs)
+            ? (Number.isFinite(effectiveAuthExpiryMs)
+              ? new Date(Math.min(endedAtMs, effectiveAuthExpiryMs))
+              : endedAt)
+            : effectiveAuthExpiry;
+
           return {
             ...s,
             activeFrom: createdAt,
-            activeTo: effectiveAuthExpiry,
+            // For Active Now, show the time "as of now" (not the predicted expiry)
+            activeTo: now,
+            sessionEndAt: effectiveEnd,
           };
         })
         .filter((s) => {
@@ -135,7 +148,7 @@ export const getAllGuests = async (req, res) => {
         })
         .filter((s) => {
           const start = s?.activeFrom ? new Date(s.activeFrom).getTime() : NaN;
-          const end = s?.activeTo ? new Date(s.activeTo).getTime() : NaN;
+          const end = s?.sessionEndAt ? new Date(s.sessionEndAt).getTime() : NaN;
           if (!Number.isFinite(start) || !Number.isFinite(end)) return false;
           return start <= now.getTime() && end > now.getTime();
         });
@@ -180,21 +193,39 @@ export const getAllGuests = async (req, res) => {
       .map((s) => {
         const createdAt = s?.createdAt ? new Date(s.createdAt) : null;
         const authExpiresAt = s?.authExpiresAt ? new Date(s.authExpiresAt) : null;
+        const endedAt = s?.endedAt ? new Date(s.endedAt) : null;
         const createdAtMs = createdAt ? createdAt.getTime() : NaN;
         const authExpiresAtMs = authExpiresAt ? authExpiresAt.getTime() : NaN;
         const effectiveAuthExpiry = Number.isFinite(authExpiresAtMs)
           ? authExpiresAt
           : (Number.isFinite(createdAtMs) ? new Date(createdAtMs + ttlMs) : null);
 
+        const endedAtMs = endedAt ? endedAt.getTime() : NaN;
+        const effectiveAuthExpiryMs = effectiveAuthExpiry
+          ? effectiveAuthExpiry.getTime()
+          : NaN;
+        const effectiveEnd = Number.isFinite(endedAtMs)
+          ? (Number.isFinite(effectiveAuthExpiryMs)
+            ? new Date(Math.min(endedAtMs, effectiveAuthExpiryMs))
+            : endedAt)
+          : effectiveAuthExpiry;
+
+        const windowEnd = to;
+        const effectiveEndForWindow = effectiveEnd
+          ? new Date(Math.min(effectiveEnd.getTime(), windowEnd.getTime()))
+          : null;
+
         return {
           ...s,
           activeFrom: createdAt,
-          activeTo: effectiveAuthExpiry,
+          // For history windows, cap to the selected window end.
+          activeTo: effectiveEndForWindow,
+          sessionEndAt: effectiveEnd,
         };
       })
       .filter((s) => {
         const start = s?.activeFrom ? new Date(s.activeFrom).getTime() : NaN;
-        const end = s?.activeTo ? new Date(s.activeTo).getTime() : NaN;
+        const end = s?.sessionEndAt ? new Date(s.sessionEndAt).getTime() : NaN;
         if (!Number.isFinite(start) || !Number.isFinite(end)) return false;
         return start < to.getTime() && end > from.getTime();
       });
