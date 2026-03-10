@@ -27,18 +27,23 @@ const guestAuth = async (req, res, next) => {
       });
     }
 
-    // Check session expiry
+    // Check retention expiry (document TTL)
     if (session.expiresAt < new Date()) {
       return res.status(401).json({
         message: "Session expired"
       });
     }
 
-    // Enforce TTL from login time (createdAt) so old sessions never exceed the configured hours.
+    // Enforce auth TTL from login time.
+    // New sessions store authExpiresAt; older records fall back to createdAt+TTL.
     const ttlMs = getGuestSessionTtlMs();
     const createdAtMs = session?.createdAt ? new Date(session.createdAt).getTime() : NaN;
-    if (Number.isFinite(createdAtMs) && Date.now() > createdAtMs + ttlMs) {
-      await GuestSession.deleteOne({ _id: session._id });
+    const authExpiresAtMs = session?.authExpiresAt ? new Date(session.authExpiresAt).getTime() : NaN;
+    const effectiveAuthExpiryMs = Number.isFinite(authExpiresAtMs)
+      ? authExpiresAtMs
+      : (Number.isFinite(createdAtMs) ? createdAtMs + ttlMs : NaN);
+
+    if (Number.isFinite(effectiveAuthExpiryMs) && Date.now() > effectiveAuthExpiryMs) {
       return res.status(401).json({
         message: "Session expired"
       });

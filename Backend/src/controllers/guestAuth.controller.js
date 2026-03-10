@@ -12,11 +12,18 @@ import {
 } from "../utils/guestName.util.js";
 
 const DEFAULT_GUEST_SESSION_TTL_HOURS = 8;
+const DEFAULT_GUEST_SESSION_RETENTION_DAYS = 7;
 
-const computeGuestSessionExpiresAt = () => {
+const computeGuestSessionAuthExpiresAt = () => {
   const hours = Number(process.env.GUEST_SESSION_HOURS || DEFAULT_GUEST_SESSION_TTL_HOURS);
   const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : DEFAULT_GUEST_SESSION_TTL_HOURS;
   return new Date(Date.now() + ttlHours * 60 * 60 * 1000);
+};
+
+const computeGuestSessionRetentionExpiresAt = () => {
+  const days = Number(process.env.GUEST_SESSION_RETENTION_DAYS || DEFAULT_GUEST_SESSION_RETENTION_DAYS);
+  const ttlDays = Number.isFinite(days) && days > 0 ? days : DEFAULT_GUEST_SESSION_RETENTION_DAYS;
+  return new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
 };
 
 const shouldAutoSyncOnGuestLogin = () => {
@@ -120,7 +127,8 @@ export const guestLogin = async (req, res) => {
           sessionId,
           guestName: normalizedGuestName,
           roomNumber: normalizedRoomNumber,
-          expiresAt: computeGuestSessionExpiresAt(),
+          authExpiresAt: computeGuestSessionAuthExpiresAt(),
+          expiresAt: computeGuestSessionRetentionExpiresAt(),
         });
 
         return res.json({
@@ -162,7 +170,8 @@ export const guestLogin = async (req, res) => {
       sessionId,
       guestName: normalizedGuestName,
       roomNumber: normalizedRoomNumber,
-      expiresAt: computeGuestSessionExpiresAt(),
+      authExpiresAt: computeGuestSessionAuthExpiresAt(),
+      expiresAt: computeGuestSessionRetentionExpiresAt(),
     });
 
     res.json({
@@ -293,7 +302,8 @@ export const guestLoginByLastName = async (req, res) => {
           sessionId,
           guestName: resolvedGuestName,
           roomNumber: normalizedRoomNumber,
-          expiresAt: computeGuestSessionExpiresAt(),
+          authExpiresAt: computeGuestSessionAuthExpiresAt(),
+          expiresAt: computeGuestSessionRetentionExpiresAt(),
         });
 
         return res.json({
@@ -348,7 +358,8 @@ export const guestLoginByLastName = async (req, res) => {
       sessionId,
       guestName: resolvedGuestName,
       roomNumber: normalizedRoomNumber,
-      expiresAt: computeGuestSessionExpiresAt(),
+      authExpiresAt: computeGuestSessionAuthExpiresAt(),
+      expiresAt: computeGuestSessionRetentionExpiresAt(),
     });
 
     return res.json({

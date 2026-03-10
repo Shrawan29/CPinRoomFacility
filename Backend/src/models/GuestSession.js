@@ -21,6 +21,10 @@ const guestSessionSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    // Authentication expiry (enforced by middleware)
+    authExpiresAt: {
+      type: Date
+    },
     expiresAt: {
       type: Date,
       required: true
