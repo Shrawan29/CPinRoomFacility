@@ -68,12 +68,19 @@ const serviceRequestSchema = new mongoose.Schema(
       default: "pending",
       index: true,
     },
+
+    // When set, MongoDB TTL will delete the request at this time.
+    // This is only populated once a request is finalized (completed).
+    expiresAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
 
 serviceRequestSchema.index({ hotelId: 1, roomNumber: 1, createdAt: 1 });
 serviceRequestSchema.index({ hotelId: 1, status: 1, createdAt: -1 });
+serviceRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const ServiceRequest = mongoose.model("ServiceRequest", serviceRequestSchema);
 export default ServiceRequest;

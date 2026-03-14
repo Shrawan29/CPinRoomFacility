@@ -169,7 +169,7 @@ export const acceptHousekeepingRequest = async (req, res) => {
 
     const updated = await ServiceRequest.findOneAndUpdate(
       { _id: id, hotelId, status: "pending" },
-      { $set: { status: "accepted" } },
+      { $set: { status: "accepted" }, $unset: { expiresAt: 1 } },
       { new: true }
     );
 
@@ -210,7 +210,7 @@ export const completeHousekeepingRequest = async (req, res) => {
 
     const updated = await ServiceRequest.findOneAndUpdate(
       { _id: id, hotelId, status: "accepted" },
-      { $set: { status: "completed" } },
+      { $set: { status: "completed" }, $unset: { expiresAt: 1 } },
       { new: true }
     );
 

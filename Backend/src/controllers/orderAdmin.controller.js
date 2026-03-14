@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import { computeExpiresAtFromEnv } from "../utils/retention.util.js";
 
 export const listOrders = async (req, res) => {
   const orders = await Order.find().sort({ createdAt: -1 });
@@ -7,6 +8,8 @@ export const listOrders = async (req, res) => {
 
 
 const allowedStatuses = ["PLACED", "PREPARING", "DELIVERED"];
+// Default disabled so reports keep history unless explicitly enabled.
+const DEFAULT_ORDER_RETENTION_DAYS = 0;
 
 export const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
@@ -25,6 +28,18 @@ export const updateOrderStatus = async (req, res) => {
   }
 
   order.status = status;
+
+  // Safety: only allow expiresAt when retention is explicitly enabled and status is DELIVERED.
+  if (status === "DELIVERED") {
+    const expiresAt = computeExpiresAtFromEnv(
+      "ORDER_RETENTION_DAYS",
+      DEFAULT_ORDER_RETENTION_DAYS
+    );
+    order.expiresAt = expiresAt || undefined;
+  } else {
+    order.expiresAt = undefined;
+  }
+
   await order.save();
 
   res.json({

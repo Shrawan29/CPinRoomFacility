@@ -211,6 +211,23 @@ DATABASE LAYER (MongoDB)
 ├─ ActiveStay (room bookings)
 ├─ Order (guest orders)
 └─ MenuItem (menu items)
+
+---
+
+## 🧹 Data Retention (Optional)
+
+This codebase uses MongoDB TTL indexes for truly temporary data (e.g., guest sessions and QR tokens).
+
+For **reporting**, historical records like **Orders** and **Housekeeping Requests** should typically be retained.
+By default, the backend will **NOT** auto-delete orders.
+
+- `ORDER_RETENTION_DAYS` (default: disabled)
+   - If set to a positive number, delivered orders will be marked with an `expiresAt` timestamp and MongoDB will auto-delete them after that time.
+   - If unset/0, no `expiresAt` is set and orders are kept for reports.
+
+If you previously enabled retention and want to keep everything for reports, run:
+- `cd Backend`
+- `node scripts/unsetRetentionExpiresAt.js`
 ```
 
 ---

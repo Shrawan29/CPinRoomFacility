@@ -1,13 +1,24 @@
 import Order from "../models/Order.js";
 import MenuItem from "../models/MenuItem.js";
+import { computeExpiresAtFromEnv } from "../utils/retention.util.js";
 
 const AUTO_DELIVER_AFTER_MS = 10 * 60 * 1000;
+// Default is disabled so reporting keeps history unless explicitly enabled.
+const DEFAULT_ORDER_RETENTION_DAYS = 0;
 
 const autoDeliverReadyOrdersForRoom = async (roomNumber) => {
   const cutoff = new Date(Date.now() - AUTO_DELIVER_AFTER_MS);
+
+  const expiresAt = computeExpiresAtFromEnv(
+    "ORDER_RETENTION_DAYS",
+    DEFAULT_ORDER_RETENTION_DAYS
+  );
+
   await Order.updateMany(
     { roomNumber, status: "READY", updatedAt: { $lte: cutoff } },
-    { $set: { status: "DELIVERED" } }
+    expiresAt
+      ? { $set: { status: "DELIVERED", expiresAt } }
+      : { $set: { status: "DELIVERED" }, $unset: { expiresAt: 1 } }
   );
 };
 

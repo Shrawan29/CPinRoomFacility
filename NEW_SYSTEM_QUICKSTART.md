@@ -196,6 +196,30 @@ GET /health
 
 ---
 
+## Environment Variables
+
+- `MONGO_URI` - MongoDB connection string
+- `FRONTEND_URL` - Frontend base URL (used for QR redirects)
+- `PORT` - Backend port (default varies by your environment)
+- `JWT_SECRET` - Admin JWT secret
+
+### Optional: Order Auto-Deletion (Disabled by Default)
+
+For production reporting, it’s recommended to keep historical Orders.
+
+- `ORDER_RETENTION_DAYS`
+   - Default: **disabled** (unset or `0`) → keeps all orders for reports
+   - Set to a positive number to auto-delete only **DELIVERED** orders after N days
+
+If you ever enabled retention and want to guarantee no order deletions, run:
+
+```bash
+cd Backend
+node scripts/unsetRetentionExpiresAt.js
+```
+
+---
+
 ## Common Issues & Solutions
 
 | Issue | Solution |

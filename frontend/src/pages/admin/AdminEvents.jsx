@@ -148,7 +148,7 @@ export default function AdminEvents() {
     const inputValue = e.target.value;
     // Allow both DD/MM/YYYY and numbers
     const cleaned = inputValue.replace(/[^\d/]/g, '');
-    
+
     // Auto-format as user types DD/MM/YYYY
     let formatted = cleaned;
     if (cleaned.length >= 2 && cleaned.length <= 4) {
@@ -156,7 +156,7 @@ export default function AdminEvents() {
     } else if (cleaned.length >= 5) {
       formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + (cleaned.length > 4 ? '/' + cleaned.slice(4, 8) : '');
     }
-    
+
     // If we have a complete date, convert to YYYY-MM-DD format for storage
     if (formatted.length === 10) {
       const converted = convertDDMMYYYYToYYYYMMDD(formatted);
@@ -408,7 +408,7 @@ export default function AdminEvents() {
                   {form.image ? (
                     <div
                       className="mt-3 w-full rounded-lg border border-black/10 overflow-hidden bg-[--bg-secondary]"
-                       style={{ aspectRatio: "16 / 9" }}
+                      style={{ aspectRatio: "16 / 9" }}
                     >
                       <img
                         src={form.image}
@@ -451,22 +451,12 @@ export default function AdminEvents() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={submitEvent}
                   disabled={loading}
-                  className="
-                    w-full
-                    bg-[--brand]
-                    text-white
-                    py-2
-                    rounded-lg
-                    font-semibold
-                    text-sm
-                    hover:opacity-90
-                    disabled:opacity-60
-                    disabled:cursor-not-allowed
-                    transition-all
-                    active:opacity-95
-                  "
+                  className={`w-full bg-[--brand] text-white py-2 rounded-lg font-semibold text-sm 
+  hover:opacity-90 transition-all active:opacity-95 
+  ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   {loading ? "Adding Event..." : "+ Add Event"}
                 </button>
