@@ -454,7 +454,7 @@ export default function AdminEvents() {
                   type="button"
                   onClick={submitEvent}
                   disabled={loading}
-                  className={`w-full bg-[--brand] text-white py-2 rounded-lg font-semibold text-sm 
+                  className={`w-full bg-[var(--brand)] text-white py-2 rounded-lg font-semibold text-sm 
   hover:opacity-90 transition-all active:opacity-95 
   ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
