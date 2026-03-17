@@ -6,8 +6,13 @@ import MenuItem from "../models/MenuItem.js";
 
 const MAX_MESSAGE_CHARS = 2000;
 const MAX_HISTORY_MESSAGES = 10;
-const MAX_TOOL_LIMIT = 20;
+const MAX_MENU_TOOL_LIMIT = 20;
+const MAX_HOTEL_INFO_TOOL_LIMIT = 20;
+const MAX_EVENTS_TOOL_LIMIT = 50;
 const MAX_TOOL_CALL_ROUNDS = 3;
+
+const DEFAULT_EVENTS_LIMIT = 6;
+const DEFAULT_BROAD_EVENTS_LIMIT = 50;
 
 const toTrimmedString = (value) => {
   if (value == null) return "";
@@ -104,13 +109,97 @@ const buildRegex = (query) => {
   return new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
 };
 
+const isBroadEventsQuery = (query) => {
+  const q = toTrimmedString(query).toLowerCase();
+  if (!q) return true;
+
+  const words = q
+    .replace(/[^a-z0-9\s']/g, " ")
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter(Boolean)
+    .slice(0, 24);
+
+  if (words.length === 0) return true;
+
+  const generic = new Set([
+    "event",
+    "events",
+    "upcoming",
+    "activities",
+    "activity",
+    "whats",
+    "what's",
+    "on",
+    "hotel",
+  ]);
+
+  const nonGeneric = words.filter((w) => !generic.has(w));
+  return nonGeneric.length === 0;
+};
+
+const isBroadMenuQuery = (query) => {
+  const q = toTrimmedString(query).toLowerCase();
+  if (!q) return true;
+
+  const words = q
+    .replace(/[^a-z0-9\s']/g, " ")
+    .split(/\s+/)
+    .map((w) => w.trim())
+    .filter(Boolean)
+    .slice(0, 24);
+
+  if (words.length === 0) return true;
+
+  const generic = new Set([
+    "menu",
+    "food",
+    "items",
+    "item",
+    "dishes",
+    "dish",
+    "eat",
+    "breakfast",
+    "lunch",
+    "dinner",
+    "drink",
+    "drinks",
+    "beverage",
+    "beverages",
+  ]);
+
+  const nonGeneric = words.filter((w) => !generic.has(w));
+  return nonGeneric.length === 0;
+};
+
+const queryMentionsExplicitDateRange = (query) => {
+  const q = toTrimmedString(query).toLowerCase();
+  if (!q) return false;
+
+  if (/\b(today|tomorrow|tonight|weekend|this\s+week|next\s+week|this\s+month|next\s+month)\b/.test(q)) {
+    return true;
+  }
+
+  if (/\b(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\b/.test(q)) {
+    return true;
+  }
+
+  // Simple numeric date hints (e.g., 2026-03-17, 17/03, 3/17)
+  if (/\b\d{4}-\d{1,2}-\d{1,2}\b/.test(q)) return true;
+  if (/\b\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?\b/.test(q)) return true;
+
+  return false;
+};
+
 const searchMenu = async (args) => {
-  const query = toTrimmedString(args?.query);
+  const rawQuery = toTrimmedString(args?.query);
+  const broadQuery = isBroadMenuQuery(rawQuery);
+  const query = broadQuery ? "" : rawQuery;
   const category = toTrimmedString(args?.category);
   const availableOnly = args?.availableOnly !== false;
   const isVeg = typeof args?.isVeg === "boolean" ? args.isVeg : null;
   const maxPrice = typeof args?.maxPrice === "number" && args.maxPrice >= 0 ? args.maxPrice : null;
-  const limit = clampInt(args?.limit, 1, MAX_TOOL_LIMIT, 8);
+  const limit = clampInt(args?.limit, 1, MAX_MENU_TOOL_LIMIT, 8);
 
   const filter = {};
   if (availableOnly) filter.isAvailable = true;
@@ -142,14 +231,25 @@ const searchMenu = async (args) => {
 };
 
 const searchEvents = async (args) => {
-  const query = toTrimmedString(args?.query);
+  const rawQuery = toTrimmedString(args?.query);
+  const broadQuery = isBroadEventsQuery(rawQuery);
+  const query = broadQuery ? "" : rawQuery;
+
   const statuses = Array.isArray(args?.statuses)
     ? args.statuses.map((s) => toTrimmedString(s)).filter(Boolean)
     : ["UPCOMING", "ACTIVE"];
 
   const fromDate = parseOptionalISODate(args?.fromDate) || getUtcStartOfToday();
-  const toDate = parseOptionalISODate(args?.toDate);
-  const limit = clampInt(args?.limit, 1, MAX_TOOL_LIMIT, 6);
+  let toDate = parseOptionalISODate(args?.toDate);
+
+  // Models frequently over-constrain broad requests like "upcoming events" by setting a month-end toDate.
+  // Only honor toDate when the user actually asked for a specific range (e.g., "this month", "next week").
+  if (toDate && !queryMentionsExplicitDateRange(rawQuery)) {
+    toDate = null;
+  }
+
+  const limitFallback = broadQuery ? DEFAULT_BROAD_EVENTS_LIMIT : DEFAULT_EVENTS_LIMIT;
+  const limit = clampInt(args?.limit, 1, MAX_EVENTS_TOOL_LIMIT, limitFallback);
 
   const filter = {
     status: { $in: statuses.length > 0 ? statuses : ["UPCOMING", "ACTIVE"] },
@@ -188,7 +288,7 @@ const searchEvents = async (args) => {
 const searchHotelInfo = async (args) => {
   const query = toTrimmedString(args?.query);
   const section = toTrimmedString(args?.section).toLowerCase();
-  const limit = clampInt(args?.limit, 1, MAX_TOOL_LIMIT, 10);
+  const limit = clampInt(args?.limit, 1, MAX_HOTEL_INFO_TOOL_LIMIT, 10);
 
   const info = await HotelInfo.findOne().sort({ updatedAt: -1, createdAt: -1 }).lean();
   if (!info) {
@@ -842,6 +942,7 @@ const buildRestrictedContext = async (userMessage) => {
   const shouldFetchHotelInfo = wantsHotelInfo || (!wantsMenu && !wantsEvents);
 
   const isBroadMenuRequest = /\b(menu|food|dishes|items)\b/i.test(String(userMessage || ""));
+  const isBroadEventsRequest = /\b(upcoming\s+events?|events?|activities?|what'?s\s+on)\b/i.test(String(userMessage || ""));
 
   const [menu, events, hotelInfoContext] = await Promise.all([
     shouldFetchMenu
@@ -853,8 +954,8 @@ const buildRestrictedContext = async (userMessage) => {
       : Promise.resolve({ count: 0, items: [] }),
     shouldFetchEvents
       ? searchEvents({
-          query: userMessage,
-          limit: 6,
+          query: isBroadEventsRequest ? "" : userMessage,
+          limit: isBroadEventsRequest ? 50 : 12,
         })
       : Promise.resolve({ count: 0, events: [] }),
     shouldFetchHotelInfo
@@ -907,6 +1008,52 @@ export const guestChat = async (req, res) => {
     const isBroadHotelInfoRequest = /\b(facilit(?:y|ies)|amenit(?:y|ies)|services?|what (do|does) (you|the hotel) have|available facilities)\b/i.test(
       userMessage
     );
+
+    const isBroadMenuRequest = /\b(menu|food|dishes|items)\b/i.test(String(userMessage || ""));
+    const isBroadEventsRequest = /\b(upcoming\s+events?|events?|activities?|what'?s\s+on)\b/i.test(String(userMessage || ""));
+
+    // Prefetch menu + events for the current question so answers always reflect the latest backend updates,
+    // even if the model decides not to call tools (or relies on earlier chat context).
+    const wantsMenuNow = inferNeedsMenu(userMessage) || isBroadMenuRequest;
+    const wantsEventsNow = inferNeedsEvents(userMessage) || isBroadEventsRequest;
+
+    const [prefetchedMenu, prefetchedEvents] = await Promise.all([
+      wantsMenuNow
+        ? searchMenu({
+            query: isBroadMenuRequest ? "" : userMessage,
+            availableOnly: true,
+            limit: isBroadMenuRequest ? 20 : 12,
+          })
+        : Promise.resolve(null),
+      wantsEventsNow
+        ? searchEvents({
+            query: isBroadEventsRequest ? "" : userMessage,
+            statuses: ["UPCOMING", "ACTIVE"],
+            limit: isBroadEventsRequest ? 50 : 12,
+          })
+        : Promise.resolve(null),
+    ]);
+
+    const prefetchedMenuSystemContext = prefetchedMenu
+      ? {
+          role: "system",
+          content:
+            "Relevant MENU items for this question (from database). Treat as factual. " +
+            "If the relevant item is not present here, call search_menu.\n\n" +
+            JSON.stringify(prefetchedMenu),
+        }
+      : null;
+
+    const prefetchedEventsSystemContext = prefetchedEvents
+      ? {
+          role: "system",
+          content:
+            "Relevant UPCOMING/ACTIVE EVENTS for this question (from database). Treat as factual. " +
+            "If the relevant event is not present here, call search_events. " +
+            "For a broad request like 'upcoming events', include ALL upcoming events, not just this month.\n\n" +
+            JSON.stringify(prefetchedEvents),
+        }
+      : null;
 
     // Pre-fetch hotel info matches for the current question so the model reliably
     // sees the relevant items (e.g., "EV charging") even if it doesn't call tools.
@@ -1006,7 +1153,9 @@ export const guestChat = async (req, res) => {
         function: {
           name: "search_events",
           description:
-            "Search upcoming/active events by text query and optional date/status filters. Returns a short list.",
+            "Search upcoming/active events by text query and optional date/status filters. " +
+            "IMPORTANT: If the guest asks for 'upcoming events' (broad request), return ALL future events; " +
+            "do NOT set toDate unless the guest explicitly asks for a range like 'this month' or 'next week'.",
           parameters: {
             type: "object",
             additionalProperties: false,
@@ -1019,7 +1168,7 @@ export const guestChat = async (req, res) => {
                 items: { type: "string" },
                 description: "Status filters, e.g. UPCOMING, ACTIVE",
               },
-              limit: { type: "integer", description: "Max results (1-20)" },
+              limit: { type: "integer", description: "Max results (1-50)" },
             },
           },
         },
@@ -1031,6 +1180,8 @@ export const guestChat = async (req, res) => {
       const responsesTools = toResponsesTools(tools);
       const input = [
         system,
+        ...(prefetchedEventsSystemContext ? [prefetchedEventsSystemContext] : []),
+        ...(prefetchedMenuSystemContext ? [prefetchedMenuSystemContext] : []),
         ...(hotelInfoSystemContext ? [hotelInfoSystemContext] : []),
         ...(prefetchedHotelInfoSystemContext ? [prefetchedHotelInfoSystemContext] : []),
         ...history,
@@ -1057,6 +1208,8 @@ export const guestChat = async (req, res) => {
 
     const messages = [
       system,
+      ...(prefetchedEventsSystemContext ? [prefetchedEventsSystemContext] : []),
+      ...(prefetchedMenuSystemContext ? [prefetchedMenuSystemContext] : []),
       ...(hotelInfoSystemContext ? [hotelInfoSystemContext] : []),
       ...(prefetchedHotelInfoSystemContext ? [prefetchedHotelInfoSystemContext] : []),
       ...history,
