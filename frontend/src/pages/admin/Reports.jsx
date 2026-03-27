@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../layouts/AdminLayout";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import api from "../../services/api";
@@ -6,8 +6,16 @@ import api from "../../services/api";
 export default function Reports() {
   const { token, loading: authLoading } = useAdminAuth();
   const [report, setReport] = useState(null);
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [monthlyReport, setMonthlyReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [monthlyLoading, setMonthlyLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [monthlyError, setMonthlyError] = useState(null);
+  const [foodSearch, setFoodSearch] = useState("");
+  const [housekeepingSearch, setHousekeepingSearch] = useState("");
 
   useEffect(() => {
     if (authLoading || !token) {
@@ -32,20 +40,190 @@ export default function Reports() {
     fetchReports();
   }, [token, authLoading]);
 
+  useEffect(() => {
+    if (authLoading || !token) {
+      setMonthlyLoading(authLoading);
+      return;
+    }
+
+    const fetchMonthlyReport = async () => {
+      try {
+        setMonthlyLoading(true);
+        const res = await api.get("/admin/reports/monthly", {
+          params: {
+            year: selectedYear,
+            month: selectedMonth,
+          },
+        });
+        setMonthlyReport(res.data);
+        setMonthlyError(null);
+      } catch (err) {
+        setMonthlyError(err.response?.data?.message || "Failed to load monthly item report");
+        setMonthlyReport(null);
+      } finally {
+        setMonthlyLoading(false);
+      }
+    };
+
+    fetchMonthlyReport();
+  }, [token, authLoading, selectedMonth, selectedYear]);
+
   const generatedAt = report?.generatedAt ? new Date(report.generatedAt) : null;
   const occupancyRatePct =
     typeof report?.rooms?.occupancyRate === "number"
       ? `${(report.rooms.occupancyRate * 100).toFixed(1)}%`
       : "—";
 
+  const monthOptions = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const yearOptions = [];
+  for (let y = now.getFullYear(); y >= now.getFullYear() - 5; y -= 1) {
+    yearOptions.push(y);
+  }
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handlePrintSection = (sectionKey) => {
+    const previous = document.body.getAttribute("data-print-report");
+    document.body.setAttribute("data-print-report", sectionKey);
+    window.print();
+
+    if (previous) {
+      document.body.setAttribute("data-print-report", previous);
+    } else {
+      document.body.removeAttribute("data-print-report");
+    }
+  };
+
+  const allFoodRows = useMemo(
+    () => normalizeMonthlyRows(monthlyReport?.dishes),
+    [monthlyReport?.dishes]
+  );
+
+  const allHousekeepingRows = useMemo(
+    () => normalizeMonthlyRows(monthlyReport?.housekeeping),
+    [monthlyReport?.housekeeping]
+  );
+
+  const filteredFoodRows = useMemo(
+    () => filterRowsByQuery(allFoodRows, foodSearch),
+    [allFoodRows, foodSearch]
+  );
+
+  const filteredHousekeepingRows = useMemo(
+    () => filterRowsByQuery(allHousekeepingRows, housekeepingSearch),
+    [allHousekeepingRows, housekeepingSearch]
+  );
+
+  const foodSummary = useMemo(() => buildMonthlySummary(allFoodRows), [allFoodRows]);
+  const housekeepingSummary = useMemo(() => buildMonthlySummary(allHousekeepingRows), [allHousekeepingRows]);
+
+  const downloadCsv = (rows, typeLabel) => {
+    const periodLabel = monthlyReport?.periodLabel || `${monthOptions[selectedMonth - 1]}-${selectedYear}`;
+    const safeType = String(typeLabel || "report").toLowerCase().replace(/\s+/g, "-");
+    const filename = `${safeType}-${periodLabel.replace(/\s+/g, "-").toLowerCase()}.csv`;
+
+    const header = ["Item", "Requested Qty", "No. of Requests"];
+    const dataRows = (Array.isArray(rows) ? rows : []).map((row) => [
+      row.itemName,
+      String(row.timesRequested ?? 0),
+      String(row.requestsCount ?? 0),
+    ]);
+
+    const csv = [header, ...dataRows]
+      .map((cols) => cols.map(csvEscape).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AdminLayout>
 
-      <div className="flex flex-col gap-1 mb-6">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Reports</h1>
-        <p className="text-sm text-[var(--text-muted)]">
-          Full app insights snapshot{generatedAt ? ` • Generated ${generatedAt.toLocaleString()}` : ""}
-        </p>
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Reports</h1>
+          <p className="text-sm text-[var(--text-muted)]">
+            Full app insights snapshot{generatedAt ? ` • Generated ${generatedAt.toLocaleString()}` : ""}
+          </p>
+        </div>
+
+        <div className="report-controls no-print bg-[var(--bg-secondary)] border border-black/10 rounded-xl p-4 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="text-sm text-[var(--text-primary)] font-medium">
+              Month
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="mt-1 w-full rounded-lg border border-black/20 bg-white px-3 py-2 text-sm"
+              >
+                {monthOptions.map((m, idx) => (
+                  <option key={m} value={idx + 1}>{m}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="text-sm text-[var(--text-primary)] font-medium">
+              Year
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="mt-1 w-full rounded-lg border border-black/20 bg-white px-3 py-2 text-sm"
+              >
+                {yearOptions.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handlePrintSection("food")}
+              className="rounded-lg bg-[var(--brand)] text-white px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
+            >
+              Print Food Report
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePrintSection("housekeeping")}
+              className="rounded-lg bg-black text-white px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
+            >
+              Print Housekeeping Report
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="rounded-lg border border-black/25 px-4 py-2 text-sm font-semibold text-[var(--text-primary)] hover:bg-black/5 transition"
+            >
+              Print Full Report
+            </button>
+          </div>
+        </div>
       </div>
 
       {loading && (
@@ -60,7 +238,111 @@ export default function Reports() {
       )}
 
       {!loading && !error && report && (
-        <div className="space-y-10">
+        <div className="space-y-10 printable-report-root">
+          <div className="report-block report-food">
+            <Section title={`Food Orders Report (${monthlyReport?.periodLabel || `${monthOptions[selectedMonth - 1]} ${selectedYear}`})`}>
+              {monthlyLoading && (
+                <div className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-black/10 col-span-full">
+                  <p className="text-[var(--text-muted)] text-sm">Loading food report…</p>
+                </div>
+              )}
+
+              {!monthlyLoading && monthlyError && (
+                <div className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-black/10 col-span-full">
+                  <p className="text-[var(--text-primary)] font-semibold">Failed to load food report</p>
+                  <p className="text-[var(--text-muted)] text-sm mt-1">{monthlyError}</p>
+                </div>
+              )}
+
+              {!monthlyLoading && !monthlyError && monthlyReport && (
+                <div className="col-span-full grid grid-cols-1 gap-6">
+                  <MonthlySummaryCards
+                    totalItems={foodSummary.totalItems}
+                    totalQty={foodSummary.totalQty}
+                    totalRequests={foodSummary.totalRequests}
+                    labelPrefix="Food"
+                  />
+                  <div className="no-print bg-[var(--bg-secondary)] border border-black/10 rounded-xl p-4 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
+                    <label className="text-sm text-[var(--text-primary)] font-medium w-full sm:max-w-sm">
+                      Search Dish
+                      <input
+                        value={foodSearch}
+                        onChange={(e) => setFoodSearch(e.target.value)}
+                        placeholder="Type item name"
+                        className="mt-1 w-full rounded-lg border border-black/20 bg-white px-3 py-2 text-sm"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => downloadCsv(allFoodRows, "food-report")}
+                      className="rounded-lg border border-black/25 px-4 py-2 text-sm font-semibold text-[var(--text-primary)] hover:bg-black/5 transition"
+                    >
+                      Download Food CSV
+                    </button>
+                  </div>
+                  <MonthlyItemTable
+                    title="Dishes"
+                    rows={filteredFoodRows}
+                    emptyLabel="No dish requests in this month"
+                    itemCountLabel={buildItemCountLabel(filteredFoodRows.length, allFoodRows.length)}
+                  />
+                </div>
+              )}
+            </Section>
+          </div>
+
+          <div className="report-block report-housekeeping">
+            <Section title={`Housekeeping Report (${monthlyReport?.periodLabel || `${monthOptions[selectedMonth - 1]} ${selectedYear}`})`}>
+              {monthlyLoading && (
+                <div className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-black/10 col-span-full">
+                  <p className="text-[var(--text-muted)] text-sm">Loading housekeeping report…</p>
+                </div>
+              )}
+
+              {!monthlyLoading && monthlyError && (
+                <div className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-black/10 col-span-full">
+                  <p className="text-[var(--text-primary)] font-semibold">Failed to load housekeeping report</p>
+                  <p className="text-[var(--text-muted)] text-sm mt-1">{monthlyError}</p>
+                </div>
+              )}
+
+              {!monthlyLoading && !monthlyError && monthlyReport && (
+                <div className="col-span-full grid grid-cols-1 gap-6">
+                  <MonthlySummaryCards
+                    totalItems={housekeepingSummary.totalItems}
+                    totalQty={housekeepingSummary.totalQty}
+                    totalRequests={housekeepingSummary.totalRequests}
+                    labelPrefix="Housekeeping"
+                  />
+                  <div className="no-print bg-[var(--bg-secondary)] border border-black/10 rounded-xl p-4 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
+                    <label className="text-sm text-[var(--text-primary)] font-medium w-full sm:max-w-sm">
+                      Search Housekeeping Item
+                      <input
+                        value={housekeepingSearch}
+                        onChange={(e) => setHousekeepingSearch(e.target.value)}
+                        placeholder="Type item name"
+                        className="mt-1 w-full rounded-lg border border-black/20 bg-white px-3 py-2 text-sm"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => downloadCsv(allHousekeepingRows, "housekeeping-report")}
+                      className="rounded-lg border border-black/25 px-4 py-2 text-sm font-semibold text-[var(--text-primary)] hover:bg-black/5 transition"
+                    >
+                      Download Housekeeping CSV
+                    </button>
+                  </div>
+                  <MonthlyItemTable
+                    title="Housekeeping Items"
+                    rows={filteredHousekeepingRows}
+                    emptyLabel="No housekeeping requests in this month"
+                    itemCountLabel={buildItemCountLabel(filteredHousekeepingRows.length, allHousekeepingRows.length)}
+                  />
+                </div>
+              )}
+            </Section>
+          </div>
+
           <Section title="Rooms">
             <Card label="Total Rooms" value={formatNumber(report.rooms?.total)} />
             <Card label="Available" value={formatNumber(report.rooms?.available)} />
@@ -287,6 +569,51 @@ function ListCard({ title, items, emptyLabel }) {
   );
 }
 
+function MonthlySummaryCards({ totalItems, totalQty, totalRequests, labelPrefix }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <Card label={`${labelPrefix} Items`} value={formatNumber(totalItems)} />
+      <Card label={`${labelPrefix} Qty Requested`} value={formatNumber(totalQty)} />
+      <Card label={`${labelPrefix} Requests`} value={formatNumber(totalRequests)} />
+    </div>
+  );
+}
+
+function MonthlyItemTable({ title, rows, emptyLabel, itemCountLabel = "" }) {
+  const safeRows = Array.isArray(rows) ? rows.filter(Boolean) : [];
+
+  return (
+    <div className="bg-[var(--bg-secondary)] rounded-xl p-6 border border-black/10 overflow-x-auto">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <p className="text-sm text-[var(--text-muted)]">{title}</p>
+        {itemCountLabel ? <p className="text-xs text-[var(--text-muted)]">{itemCountLabel}</p> : null}
+      </div>
+      {safeRows.length === 0 ? (
+        <p className="text-sm text-[var(--text-muted)]">{emptyLabel}</p>
+      ) : (
+        <table className="w-full border-collapse min-w-[420px] monthly-item-table">
+          <thead>
+            <tr className="border-b border-black/15">
+              <th className="text-left text-xs text-[var(--text-muted)] font-semibold py-2">Item</th>
+              <th className="text-right text-xs text-[var(--text-muted)] font-semibold py-2">Requested Qty</th>
+              <th className="text-right text-xs text-[var(--text-muted)] font-semibold py-2">No. of Requests</th>
+            </tr>
+          </thead>
+          <tbody>
+            {safeRows.map((row) => (
+              <tr key={`${title}-${row.itemName}`} className="border-b border-black/10 last:border-b-0">
+                <td className="py-2 text-sm text-[var(--text-primary)]">{row.itemName}</td>
+                <td className="py-2 text-sm text-[var(--text-primary)] text-right">{formatNumber(row.timesRequested)}</td>
+                <td className="py-2 text-sm text-[var(--text-primary)] text-right">{formatNumber(row.requestsCount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 function formatNumber(value) {
   if (value == null) return "—";
   const n = Number(value);
@@ -344,4 +671,43 @@ function buildSyncItems(dataSync) {
   ].filter(Boolean);
 
   return items;
+}
+
+function normalizeMonthlyRows(rows) {
+  return (Array.isArray(rows) ? rows : []).map((row) => ({
+    itemName: String(row?.itemName || "(unknown)"),
+    timesRequested: Number(row?.timesRequested) || 0,
+    requestsCount: Number(row?.requestsCount) || 0,
+  }));
+}
+
+function filterRowsByQuery(rows, query) {
+  const q = String(query || "").trim().toLowerCase();
+  if (!q) return rows;
+  return (Array.isArray(rows) ? rows : []).filter((row) =>
+    String(row?.itemName || "").toLowerCase().includes(q)
+  );
+}
+
+function buildMonthlySummary(rows) {
+  const safeRows = Array.isArray(rows) ? rows : [];
+  return {
+    totalItems: safeRows.length,
+    totalQty: safeRows.reduce((sum, row) => sum + (Number(row?.timesRequested) || 0), 0),
+    totalRequests: safeRows.reduce((sum, row) => sum + (Number(row?.requestsCount) || 0), 0),
+  };
+}
+
+function buildItemCountLabel(shownCount, totalCount) {
+  if (!totalCount) return "0 items";
+  if (shownCount === totalCount) return `${formatNumber(totalCount)} items`;
+  return `${formatNumber(shownCount)} of ${formatNumber(totalCount)} items`;
+}
+
+function csvEscape(value) {
+  const s = String(value ?? "");
+  if (s.includes(",") || s.includes("\"") || s.includes("\n")) {
+    return `"${s.replace(/\"/g, '""')}"`;
+  }
+  return s;
 }

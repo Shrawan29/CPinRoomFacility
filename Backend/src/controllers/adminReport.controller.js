@@ -81,28 +81,75 @@ export const getDailyReport = async (req, res) => {
  */
 export const getMonthlyReport = async (req, res) => {
   try {
-    const { year, month } = req.query; // month: 1–12
+    const now = new Date();
+    const yearNum = Number(req.query?.year);
+    const monthNum = Number(req.query?.month);
 
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59);
+    const selectedYear = Number.isInteger(yearNum) && yearNum >= 2000 && yearNum <= 3000
+      ? yearNum
+      : now.getFullYear();
+
+    const selectedMonth = Number.isInteger(monthNum) && monthNum >= 1 && monthNum <= 12
+      ? monthNum
+      : now.getMonth() + 1;
+
+    const start = new Date(selectedYear, selectedMonth - 1, 1);
+    const end = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999);
 
     const [
       monthlyGuestSessions,
-      monthlyOrders
+      monthlyOrders,
+      dishItems,
+      housekeepingItems,
     ] = await Promise.all([
       GuestSession.countDocuments({
         createdAt: { $gte: start, $lte: end }
       }),
       Order.countDocuments({
         createdAt: { $gte: start, $lte: end }
-      })
+      }),
+      Order.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end } } },
+        { $unwind: "$items" },
+        {
+          $group: {
+            _id: "$items.name",
+            timesRequested: { $sum: { $ifNull: ["$items.qty", 0] } },
+            ordersCount: { $sum: 1 },
+          },
+        },
+        { $sort: { timesRequested: -1, ordersCount: -1, _id: 1 } },
+      ]),
+      ServiceRequest.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end } } },
+        { $unwind: "$items" },
+        {
+          $group: {
+            _id: "$items.name",
+            timesRequested: { $sum: { $ifNull: ["$items.quantity", 0] } },
+            requestsCount: { $sum: 1 },
+          },
+        },
+        { $sort: { timesRequested: -1, requestsCount: -1, _id: 1 } },
+      ]),
     ]);
 
     res.json({
-      month,
-      year,
+      month: selectedMonth,
+      year: selectedYear,
+      periodLabel: `${start.toLocaleString("en-US", { month: "long" })} ${selectedYear}`,
       monthlyGuestSessions,
-      monthlyOrders
+      monthlyOrders,
+      dishes: (Array.isArray(dishItems) ? dishItems : []).map((row) => ({
+        itemName: row?._id || "(unknown)",
+        timesRequested: Number(row?.timesRequested) || 0,
+        requestsCount: Number(row?.ordersCount) || 0,
+      })),
+      housekeeping: (Array.isArray(housekeepingItems) ? housekeepingItems : []).map((row) => ({
+        itemName: row?._id || "(unknown)",
+        timesRequested: Number(row?.timesRequested) || 0,
+        requestsCount: Number(row?.requestsCount) || 0,
+      })),
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to load monthly report" });

@@ -86,3 +86,38 @@ body {
 .react-datepicker__input-container {
   position: relative;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body[data-print-report="food"] .printable-report-root > *,
+  body[data-print-report="housekeeping"] .printable-report-root > * {
+    display: none !important;
+  }
+
+  body[data-print-report="food"] .printable-report-root > .report-food,
+  body[data-print-report="housekeeping"] .printable-report-root > .report-housekeeping {
+    display: block !important;
+  }
+
+  .printable-report-root {
+    padding: 0 !important;
+  }
+
+  .printable-report-root .bg-\[var\(--bg-secondary\)\] {
+    background: #fff !important;
+  }
+
+  .printable-report-root .border,
+  .printable-report-root .border-black\/10,
+  .printable-report-root .border-black\/15,
+  .printable-report-root .border-black\/20 {
+    border-color: #b9b9b9 !important;
+  }
+
+  .monthly-item-table {
+    page-break-inside: avoid;
+  }
+}
