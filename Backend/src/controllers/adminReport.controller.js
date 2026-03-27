@@ -99,6 +99,8 @@ export const getMonthlyReport = async (req, res) => {
     const [
       monthlyGuestSessions,
       monthlyOrders,
+      monthlyRevenueAgg,
+      monthlyHousekeepingRequests,
       dishItems,
       housekeepingItems,
     ] = await Promise.all([
@@ -110,15 +112,35 @@ export const getMonthlyReport = async (req, res) => {
       }),
       Order.aggregate([
         { $match: { createdAt: { $gte: start, $lte: end } } },
+        {
+          $group: {
+            _id: null,
+            revenue: { $sum: "$totalAmount" },
+          },
+        },
+      ]),
+      ServiceRequest.countDocuments({
+        createdAt: { $gte: start, $lte: end }
+      }),
+      Order.aggregate([
+        { $match: { createdAt: { $gte: start, $lte: end } } },
         { $unwind: "$items" },
         {
           $group: {
             _id: "$items.name",
             timesRequested: { $sum: { $ifNull: ["$items.qty", 0] } },
             ordersCount: { $sum: 1 },
+            revenue: {
+              $sum: {
+                $multiply: [
+                  { $ifNull: ["$items.qty", 0] },
+                  { $ifNull: ["$items.price", 0] },
+                ],
+              },
+            },
           },
         },
-        { $sort: { timesRequested: -1, ordersCount: -1, _id: 1 } },
+        { $sort: { timesRequested: -1, revenue: -1, ordersCount: -1, _id: 1 } },
       ]),
       ServiceRequest.aggregate([
         { $match: { createdAt: { $gte: start, $lte: end } } },
@@ -140,10 +162,13 @@ export const getMonthlyReport = async (req, res) => {
       periodLabel: `${start.toLocaleString("en-US", { month: "long" })} ${selectedYear}`,
       monthlyGuestSessions,
       monthlyOrders,
+      monthlyRevenue: safeMoney(monthlyRevenueAgg?.[0]?.revenue || 0),
+      monthlyHousekeepingRequests,
       dishes: (Array.isArray(dishItems) ? dishItems : []).map((row) => ({
         itemName: row?._id || "(unknown)",
         timesRequested: Number(row?.timesRequested) || 0,
         requestsCount: Number(row?.ordersCount) || 0,
+        revenue: safeMoney(row?.revenue || 0),
       })),
       housekeeping: (Array.isArray(housekeepingItems) ? housekeepingItems : []).map((row) => ({
         itemName: row?._id || "(unknown)",

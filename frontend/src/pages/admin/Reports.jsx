@@ -138,11 +138,15 @@ export default function Reports() {
     const safeType = String(typeLabel || "report").toLowerCase().replace(/\s+/g, "-");
     const filename = `${safeType}-${periodLabel.replace(/\s+/g, "-").toLowerCase()}.csv`;
 
-    const header = ["Item", "Requested Qty", "No. of Requests"];
+    const includeRevenue = (Array.isArray(rows) ? rows : []).some((row) => Number(row?.revenue) > 0);
+    const header = includeRevenue
+      ? ["Item", "Requested Qty", "No. of Requests", "Generated Revenue"]
+      : ["Item", "Requested Qty", "No. of Requests"];
     const dataRows = (Array.isArray(rows) ? rows : []).map((row) => [
       row.itemName,
       String(row.timesRequested ?? 0),
       String(row.requestsCount ?? 0),
+      ...(includeRevenue ? [String(Number(row.revenue ?? 0).toFixed(2))] : []),
     ]);
 
     const csv = [header, ...dataRows]
@@ -257,10 +261,20 @@ export default function Reports() {
               {!monthlyLoading && !monthlyError && monthlyReport && (
                 <div className="col-span-full grid grid-cols-1 gap-6">
                   <MonthlySummaryCards
-                    totalItems={foodSummary.totalItems}
-                    totalQty={foodSummary.totalQty}
-                    totalRequests={foodSummary.totalRequests}
-                    labelPrefix="Food"
+                    cards={[
+                      {
+                        label: "Total Orders",
+                        value: formatNumber(monthlyReport.monthlyOrders),
+                      },
+                      {
+                        label: "Items Requested",
+                        value: formatNumber(foodSummary.totalQty),
+                      },
+                      {
+                        label: "Revenue Generated",
+                        value: formatMoney(monthlyReport.monthlyRevenue),
+                      },
+                    ]}
                   />
                   <div className="no-print bg-[var(--bg-secondary)] border border-black/10 rounded-xl p-4 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
                     <label className="text-sm text-[var(--text-primary)] font-medium w-full sm:max-w-sm">
@@ -285,6 +299,7 @@ export default function Reports() {
                     rows={filteredFoodRows}
                     emptyLabel="No dish requests in this month"
                     itemCountLabel={buildItemCountLabel(filteredFoodRows.length, allFoodRows.length)}
+                    showRevenue
                   />
                 </div>
               )}
@@ -309,10 +324,20 @@ export default function Reports() {
               {!monthlyLoading && !monthlyError && monthlyReport && (
                 <div className="col-span-full grid grid-cols-1 gap-6">
                   <MonthlySummaryCards
-                    totalItems={housekeepingSummary.totalItems}
-                    totalQty={housekeepingSummary.totalQty}
-                    totalRequests={housekeepingSummary.totalRequests}
-                    labelPrefix="Housekeeping"
+                    cards={[
+                      {
+                        label: "Total Requests",
+                        value: formatNumber(monthlyReport.monthlyHousekeepingRequests),
+                      },
+                      {
+                        label: "Items Requested",
+                        value: formatNumber(housekeepingSummary.totalQty),
+                      },
+                      {
+                        label: "Distinct Items",
+                        value: formatNumber(housekeepingSummary.totalItems),
+                      },
+                    ]}
                   />
                   <div className="no-print bg-[var(--bg-secondary)] border border-black/10 rounded-xl p-4 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
                     <label className="text-sm text-[var(--text-primary)] font-medium w-full sm:max-w-sm">
@@ -569,17 +594,23 @@ function ListCard({ title, items, emptyLabel }) {
   );
 }
 
-function MonthlySummaryCards({ totalItems, totalQty, totalRequests, labelPrefix }) {
+function MonthlySummaryCards({ cards }) {
+  const safeCards = Array.isArray(cards) ? cards : [];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <Card label={`${labelPrefix} Items`} value={formatNumber(totalItems)} />
-      <Card label={`${labelPrefix} Qty Requested`} value={formatNumber(totalQty)} />
-      <Card label={`${labelPrefix} Requests`} value={formatNumber(totalRequests)} />
+      {safeCards.map((card, idx) => (
+        <Card
+          key={`${card?.label || "metric"}-${idx}`}
+          label={card?.label || "Metric"}
+          value={card?.value ?? "-"}
+        />
+      ))}
     </div>
   );
 }
 
-function MonthlyItemTable({ title, rows, emptyLabel, itemCountLabel = "" }) {
+function MonthlyItemTable({ title, rows, emptyLabel, itemCountLabel = "", showRevenue = false }) {
   const safeRows = Array.isArray(rows) ? rows.filter(Boolean) : [];
 
   return (
@@ -597,6 +628,9 @@ function MonthlyItemTable({ title, rows, emptyLabel, itemCountLabel = "" }) {
               <th className="text-left text-xs text-[var(--text-muted)] font-semibold py-2">Item</th>
               <th className="text-right text-xs text-[var(--text-muted)] font-semibold py-2">Requested Qty</th>
               <th className="text-right text-xs text-[var(--text-muted)] font-semibold py-2">No. of Requests</th>
+              {showRevenue ? (
+                <th className="text-right text-xs text-[var(--text-muted)] font-semibold py-2">Generated Revenue</th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -605,6 +639,9 @@ function MonthlyItemTable({ title, rows, emptyLabel, itemCountLabel = "" }) {
                 <td className="py-2 text-sm text-[var(--text-primary)]">{row.itemName}</td>
                 <td className="py-2 text-sm text-[var(--text-primary)] text-right">{formatNumber(row.timesRequested)}</td>
                 <td className="py-2 text-sm text-[var(--text-primary)] text-right">{formatNumber(row.requestsCount)}</td>
+                {showRevenue ? (
+                  <td className="py-2 text-sm text-[var(--text-primary)] text-right">{formatMoney(row.revenue)}</td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -678,6 +715,7 @@ function normalizeMonthlyRows(rows) {
     itemName: String(row?.itemName || "(unknown)"),
     timesRequested: Number(row?.timesRequested) || 0,
     requestsCount: Number(row?.requestsCount) || 0,
+    revenue: Number(row?.revenue) || 0,
   }));
 }
 
@@ -694,7 +732,6 @@ function buildMonthlySummary(rows) {
   return {
     totalItems: safeRows.length,
     totalQty: safeRows.reduce((sum, row) => sum + (Number(row?.timesRequested) || 0), 0),
-    totalRequests: safeRows.reduce((sum, row) => sum + (Number(row?.requestsCount) || 0), 0),
   };
 }
 
