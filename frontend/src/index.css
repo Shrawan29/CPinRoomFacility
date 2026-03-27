@@ -88,6 +88,30 @@ body {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  aside,
+  header {
+    display: none !important;
+  }
+
+  .ml-64 {
+    margin-left: 0 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
   .no-print {
     display: none !important;
   }
@@ -103,7 +127,13 @@ body {
   }
 
   .printable-report-root {
+    width: 100% !important;
+    max-width: none !important;
     padding: 0 !important;
+  }
+
+  .printable-report-root .overflow-x-auto {
+    overflow: visible !important;
   }
 
   .printable-report-root .bg-\[var\(--bg-secondary\)\] {
@@ -118,6 +148,14 @@ body {
   }
 
   .monthly-item-table {
+    width: 100% !important;
+    min-width: 0 !important;
     page-break-inside: avoid;
+  }
+
+  .monthly-item-table th,
+  .monthly-item-table td {
+    white-space: normal !important;
+    font-size: 12px !important;
   }
 }
