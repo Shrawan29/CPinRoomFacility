@@ -9,6 +9,7 @@ import notificationSound from "../../assets/notification.mp3";
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -128,25 +129,35 @@ export default function AdminLogin() {
               "
             />
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="
-                w-full
-                bg-white
-                border border-gray-300
-                rounded-xl
-                px-4 py-2
-                text-[var(--text-primary)]
-                placeholder-[var(--text-muted)]
-                focus:outline-none
-                focus:ring-2
-                focus:ring-[var(--brand)]
-              "
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="
+                  w-full
+                  bg-white
+                  border border-gray-300
+                  rounded-xl
+                  px-4 py-2 pr-16
+                  text-[var(--text-primary)]
+                  placeholder-[var(--text-muted)]
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-[var(--brand)]
+                "
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 px-4 text-sm text-(--brand) font-medium hover:opacity-80"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
 
             <button
               type="submit"
