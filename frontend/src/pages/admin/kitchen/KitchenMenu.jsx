@@ -20,6 +20,7 @@ export default function KitchenMenu() {
 
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   /* ============================
      FETCH MENU
