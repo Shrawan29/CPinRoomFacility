@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import fointsLogo from "../../assets/foints-logo.png"; // the removebg Foints logo
+import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
 const outlets = [
   { name: "Meeting Point",           icon: "☕" },
@@ -15,6 +16,8 @@ const outlets = [
   { name: "Dali The Art Café",       icon: "🎨" },
   { name: "Centre Point Nagpur",     icon: "🏩" },
 ];
+
+const StableNav = memo(GuestBottomNav);
 
 const perks = [
   { value: "10%",    label: "Cashback as Foints",          sub: "on every visit at any outlet",       color: "#A4005D" },
@@ -439,6 +442,7 @@ export default function GuestFointsPage() {
           </div>
 
         </div>
+        <StableNav />
       </div>
     </>
   );
