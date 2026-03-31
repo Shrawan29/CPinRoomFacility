@@ -17,6 +17,22 @@ const menuItemSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    image: {
+      type: String, // URL or path to image
+      trim: true
+    },
+    options: [
+      {
+        label: { type: String, required: true },
+        price: { type: Number, required: true, min: 0 }
+      }
+    ],
+    addons: [
+      {
+        name: { type: String, required: true },
+        price: { type: Number, required: true, min: 0 }
+      }
+    ],
     description: {
       type: String,
       trim: true
