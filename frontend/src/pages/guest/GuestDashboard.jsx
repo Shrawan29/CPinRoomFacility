@@ -21,6 +21,14 @@ const HouseIcon = () => (
     <path d="M9 21V12h6v9" />
   </svg>
 );
+const FointsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 22, height: 22 }}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9 9h4.5a2.5 2.5 0 0 1 0 5H9" />
+    <path d="M9 14h5" />
+    <path d="M12 6v2M12 16v2" />
+  </svg>
+);
 
 function slideReducer(state, action) {
   switch (action.type) {
@@ -30,7 +38,6 @@ function slideReducer(state, action) {
   }
 }
 
-// FIX 1: Bottom nav height = pill(64) + orbHalf(29) + bottomGap(12) ≈ 105px
 const NAV_HEIGHT = 105;
 
 export default function GuestDashboard() {
@@ -117,8 +124,36 @@ export default function GuestDashboard() {
   ];
 
   const actions = [
-    { icon: <FoodIcon />,  label: "Food Order",   sub: "In-room dining",  route: "/guest/menu",         accent: "linear-gradient(135deg,#A4005D,#C44A87)", iconBg: "rgba(164,0,93,0.07)",   iconColor: "#A4005D", orb: "radial-gradient(circle,#A4005D,transparent)" },
-    { icon: <HouseIcon />, label: "Housekeeping", sub: "Room essentials", route: "/guest/housekeeping", accent: "linear-gradient(135deg,#c9a96e,#b8883a)", iconBg: "rgba(160,120,40,0.08)", iconColor: "#a07828", orb: "radial-gradient(circle,#a07828,transparent)" },
+    {
+      icon: <FoodIcon />,
+      label: "Food Order",
+      sub: "In-room dining",
+      route: "/guest/menu",
+      accent: "linear-gradient(135deg,#A4005D,#C44A87)",
+      iconBg: "rgba(164,0,93,0.07)",
+      iconColor: "#A4005D",
+      orb: "radial-gradient(circle,#A4005D,transparent)",
+    },
+    {
+      icon: <HouseIcon />,
+      label: "Housekeeping",
+      sub: "Room essentials",
+      route: "/guest/housekeeping",
+      accent: "linear-gradient(135deg,#c9a96e,#b8883a)",
+      iconBg: "rgba(160,120,40,0.08)",
+      iconColor: "#a07828",
+      orb: "radial-gradient(circle,#a07828,transparent)",
+    },
+    {
+      icon: <FointsIcon />,
+      label: "Foints",
+      sub: "Loyalty rewards",
+      route: "/guest/foints",
+      accent: "linear-gradient(135deg,#7B2D8B,#A855C8)",
+      iconBg: "rgba(123,45,139,0.08)",
+      iconColor: "#7B2D8B",
+      orb: "radial-gradient(circle,#7B2D8B,transparent)",
+    },
   ];
 
   return (
@@ -171,7 +206,7 @@ export default function GuestDashboard() {
         .ac-card:active { transform: scale(.95); }
         .ac-shimmer { position:absolute;inset:0;background:linear-gradient(105deg,transparent 36%,rgba(255,255,255,.42) 50%,transparent 64%);transform:translateX(-130%);pointer-events:none;border-radius:inherit;z-index:1; }
         .ac-card:hover .ac-shimmer { animation:shimmer .55s ease forwards; }
-        .ac-card:hover .ac-arrow   { color:#a07828; transform:translateX(2px); }
+        .ac-card:hover .ac-arrow   { transform:translateX(2px); }
 
         .dot-btn    { height:4px;border-radius:3px;width:4px;background:rgba(120,80,40,.2);border:none;cursor:pointer;padding:0;transition:all .35s cubic-bezier(.22,1,.36,1); }
         .dot-btn.on { width:20px; background:#A4005D; }
@@ -185,7 +220,6 @@ export default function GuestDashboard() {
         opacity: fadeIn ? 1 : 0, transition:"opacity 0.5s ease",
         fontFamily:"'DM Sans',system-ui,sans-serif", overflow:"hidden",
       }}>
-        {/* FIX 1: paddingBottom = NAV_HEIGHT so body content ends above the fixed nav */}
         <div style={{ flex:1, display:"flex", flexDirection:"column", maxWidth:430, width:"100%", margin:"0 auto", overflow:"hidden", minHeight:0, paddingBottom: NAV_HEIGHT }}>
 
           {/* ══ HERO ══ */}
@@ -200,7 +234,6 @@ export default function GuestDashboard() {
             <div style={{ position:"absolute",top:-50,right:-50,width:180,height:180,borderRadius:"50%",background:"radial-gradient(circle,rgba(164,0,93,0.22),transparent 65%)",animation:"blob1 7s ease-in-out infinite",pointerEvents:"none" }} />
             <div style={{ position:"absolute",bottom:20,left:-40,width:150,height:150,borderRadius:"50%",background:"radial-gradient(circle,rgba(196,74,135,0.15),transparent 65%)",animation:"blob2 9s ease-in-out infinite",pointerEvents:"none" }} />
 
-            {/* FIX 2: more paddingTop to push header content down for breathing room */}
             <div style={{ position:"relative",zIndex:2,padding:"42px 20px 46px" }}>
               <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10 }}>
                 <div style={{ display:"flex",flexDirection:"column",gap:6 }}>
@@ -247,70 +280,29 @@ export default function GuestDashboard() {
           </div>
           {/* end hero */}
 
-
-
-          {/* Foints Loyalty Program Card */}
-          <div style={{
-            background: "linear-gradient(120deg,#fffbe6 60%,#f9e6ff 100%)",
-            border: "1.5px solid #f7e2b8",
-            borderRadius: 18,
-            boxShadow: "0 2px 12px rgba(164,0,93,0.07)",
-            padding: "18px 18px 14px 18px",
-            margin: "0 0 18px 0",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            flexWrap: "wrap"
-          }}>
-            <img src={logo} alt="Foints" style={{ width: 48, height: 48, borderRadius: 12, marginRight: 14, background: "#fff" }} />
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <div style={{ fontWeight: 700, fontSize: 16, color: "#A4005D", marginBottom: 2 }}>Foints Loyalty Program</div>
-              <div style={{ fontSize: 13, color: "#6b3e5e", fontWeight: 500 }}>Earn food points as cashback on every visit! 1 Foint = 1 Rupee.</div>
-              <div style={{ fontSize: 11, color: "#a07828", marginTop: 2 }}>Tap below to learn more or check your points</div>
-            </div>
-            <button
-              onClick={() => navigate("/guest/foints")}
-              style={{
-                background: "#A4005D",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: 14,
-                border: "none",
-                borderRadius: 8,
-                padding: "8px 18px",
-                marginLeft: 8,
-                cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(164,0,93,0.08)",
-                transition: "background .18s"
-              }}
-            >
-              Foints
-            </button>
-          </div>
-
           {/* ══ BODY ══ */}
           <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"12px 16px 8px", overflow:"hidden", minHeight:0, gap:0 }}>
 
-            {/* QUICK ACTIONS */}
+            {/* QUICK ACTIONS — 3-column grid */}
             <div style={{ flexShrink:0, marginBottom:10 }}>
               <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:8 }}>
                 <div style={{ width:14,height:1,background:"#A4005D",opacity:.5 }} />
                 <span style={{ fontSize:8,fontWeight:600,letterSpacing:".26em",textTransform:"uppercase",color:"#8a7a70" }}>Quick Actions</span>
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, height:110 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, height:110 }}>
                 {actions.map((a, i) => (
                   <button key={a.label} onClick={() => navigate(a.route)} className="ac-card"
-                    style={{ animation: cardsVisible ? `cardIn .5s cubic-bezier(.22,1,.36,1) ${i*80}ms both` : "none", height:"100%" }}>
+                    style={{ animation: cardsVisible ? `cardIn .5s cubic-bezier(.22,1,.36,1) ${i*80}ms both` : "none", height:"100%", padding:"12px 10px 10px" }}>
                     <div className="ac-shimmer" />
                     <div style={{ position:"absolute",top:-16,right:-16,width:68,height:68,borderRadius:"50%",pointerEvents:"none",opacity:.11,filter:"blur(14px)",background:a.orb,zIndex:1 }} />
                     <div style={{ position:"absolute",top:0,left:0,right:0,height:2.5,borderRadius:"18px 18px 0 0",background:a.accent,zIndex:2 }} />
-                    <div style={{ width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:7,flexShrink:0,background:a.iconBg,color:a.iconColor,border:"1.5px solid rgba(164,0,93,0.10)",position:"relative",overflow:"hidden",zIndex:2 }}>
+                    <div style={{ width:32,height:32,borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:6,flexShrink:0,background:a.iconBg,color:a.iconColor,border:"1.5px solid rgba(164,0,93,0.10)",position:"relative",overflow:"hidden",zIndex:2 }}>
                       <div style={{ position:"absolute",inset:0,background:"linear-gradient(145deg,rgba(255,255,255,.4) 0%,transparent 55%)" }} />
-                      <span style={{ position:"relative",zIndex:1 }}>{a.icon}</span>
+                      <span style={{ position:"relative",zIndex:1,display:"flex",alignItems:"center",justifyContent:"center",transform:"scale(0.85)" }}>{a.icon}</span>
                     </div>
-                    <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:15,fontWeight:600,color:"#1A1410",lineHeight:1.05,marginBottom:2,position:"relative",zIndex:2 }}>{a.label}</p>
-                    <p style={{ fontSize:9,fontWeight:400,color:"#8a7a70",position:"relative",zIndex:2,margin:0 }}>{a.sub}</p>
-                    <div className="ac-arrow" style={{ position:"absolute",bottom:9,right:10,color:"rgba(164,0,93,0.32)",fontSize:14,lineHeight:1,transition:"all .22s",zIndex:2 }}>›</div>
+                    <p style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#1A1410",lineHeight:1.05,marginBottom:2,position:"relative",zIndex:2,margin:0 }}>{a.label}</p>
+                    <p style={{ fontSize:8,fontWeight:400,color:"#8a7a70",position:"relative",zIndex:2,margin:"2px 0 0" }}>{a.sub}</p>
+                    <div className="ac-arrow" style={{ position:"absolute",bottom:8,right:9,color:"rgba(164,0,93,0.32)",fontSize:13,lineHeight:1,transition:"all .22s",zIndex:2 }}>›</div>
                   </button>
                 ))}
               </div>

@@ -1,12 +1,4 @@
-import GuestFointsPage from "./pages/guest/GuestFointsPage";
-      <Route
-        path="/guest/foints"
-        element={
-          <GuestProtectedRoute>
-            <GuestFointsPage />
-          </GuestProtectedRoute>
-        }
-      />
+
 import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
 
@@ -45,6 +37,7 @@ import GuestHotelInfo from "./pages/guest/GuestHotelInfo";
 import GuestHousekeeping from "./pages/guest/GuestHousekeeping";
 import GuestSupport from "./pages/guest/GuestSupport";
 import GuestComplaints from "./pages/guest/GuestComplaints";
+import GuestFointsPage from "./pages/guest/GuestFointsPage";
 
 // Housekeeping admin
 import HousekeepingDashboard from "./pages/admin/housekeeping/HousekeepingDashboard";
@@ -239,6 +232,15 @@ function App() {
         element={
           <GuestProtectedRoute>
             <GuestEventDetails />
+          </GuestProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/guest/Foints"
+        element={
+          <GuestProtectedRoute>
+            <GuestFointsPage />
           </GuestProtectedRoute>
         }
       />
