@@ -247,6 +247,47 @@ export default function GuestDashboard() {
           </div>
           {/* end hero */}
 
+
+
+          {/* Foints Loyalty Program Card */}
+          <div style={{
+            background: "linear-gradient(120deg,#fffbe6 60%,#f9e6ff 100%)",
+            border: "1.5px solid #f7e2b8",
+            borderRadius: 18,
+            boxShadow: "0 2px 12px rgba(164,0,93,0.07)",
+            padding: "18px 18px 14px 18px",
+            margin: "0 0 18px 0",
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap"
+          }}>
+            <img src={logo} alt="Foints" style={{ width: 48, height: 48, borderRadius: 12, marginRight: 14, background: "#fff" }} />
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <div style={{ fontWeight: 700, fontSize: 16, color: "#A4005D", marginBottom: 2 }}>Foints Loyalty Program</div>
+              <div style={{ fontSize: 13, color: "#6b3e5e", fontWeight: 500 }}>Earn food points as cashback on every visit! 1 Foint = 1 Rupee.</div>
+              <div style={{ fontSize: 11, color: "#a07828", marginTop: 2 }}>Tap below to learn more or check your points</div>
+            </div>
+            <button
+              onClick={() => navigate("/guest/foints")}
+              style={{
+                background: "#A4005D",
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: 14,
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 18px",
+                marginLeft: 8,
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(164,0,93,0.08)",
+                transition: "background .18s"
+              }}
+            >
+              Foints
+            </button>
+          </div>
+
           {/* ══ BODY ══ */}
           <div style={{ flex:1, display:"flex", flexDirection:"column", padding:"12px 16px 8px", overflow:"hidden", minHeight:0, gap:0 }}>
 

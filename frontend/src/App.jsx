@@ -1,10 +1,10 @@
-import FointsPage from "./pages/admin/super/FointsPage";
+import GuestFointsPage from "./pages/guest/GuestFointsPage";
       <Route
-        path="/admin/super/foints"
+        path="/guest/foints"
         element={
-          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-            <FointsPage />
-          </ProtectedRoute>
+          <GuestProtectedRoute>
+            <GuestFointsPage />
+          </GuestProtectedRoute>
         }
       />
 import { Routes, Route } from "react-router-dom";
