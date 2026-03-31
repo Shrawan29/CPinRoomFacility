@@ -1,3 +1,12 @@
+import BulkAddMenuPage from "./pages/admin/kitchen/BulkAddMenuPage";
+      <Route
+        path="/admin/kitchen/bulk-add"
+        element={
+          <ProtectedRoute allowedRoles={["DINING_ADMIN"]}>
+            <BulkAddMenuPage />
+          </ProtectedRoute>
+        }
+      />
 
 import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
