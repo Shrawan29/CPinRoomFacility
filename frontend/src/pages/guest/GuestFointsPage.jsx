@@ -124,6 +124,7 @@ export default function GuestFointsPage() {
           margin: 0 auto;
           padding: 0 16px;
           animation: fadeUp 0.55s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+          padding-bottom: 32px;
         }
 
         /* section label */
