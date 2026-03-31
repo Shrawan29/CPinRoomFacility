@@ -1,4 +1,4 @@
-import React from "react";
+import memo from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import fointsLogo from "../../assets/foints-logo.png"; // the removebg Foints logo
