@@ -1,8 +1,8 @@
-import memo from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import fointsLogo from "../../assets/foints-logo.png"; // the removebg Foints logo
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
+import { memo } from "react";
 
 const outlets = [
   { name: "Meeting Point",           icon: "☕" },
