@@ -9,7 +9,6 @@ import {
 import MenuFormModal from "./MenuFormModal";
 import { exportMenuToExcel, importMenuFromExcel } from "../../../services/excelMenu.service";
 import api from "../../../services/api";
-import BulkAddMenuModal from "./BulkAddMenuModal";
 
 export default function KitchenMenu() {
   const { token, loading: authLoading } = useAdminAuth();
@@ -95,22 +94,12 @@ export default function KitchenMenu() {
           Menu Management
         </h1>
         <div className="flex gap-2">
-                    <button
-                      onClick={() => setShowBulkModal(true)}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded-xl"
-                    >
-                      + Bulk Add
-                    </button>
-                {/* Bulk Add Modal */}
-                {showBulkModal && (
-                  <BulkAddMenuModal
-                    onClose={() => setShowBulkModal(false)}
-                    onSaved={items => {
-                      setMenu(prev => [...prev, ...items]);
-                      setShowBulkModal(false);
-                    }}
-                  />
-                )}
+          <button
+            onClick={() => window.location.href = "/admin/kitchen/bulk-add"}
+            className="bg-yellow-500 text-white px-4 py-2 rounded-xl"
+          >
+            + Bulk Add
+          </button>
           <button
             onClick={() => {
               setEditingItem(null);
