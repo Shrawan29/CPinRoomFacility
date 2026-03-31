@@ -117,18 +117,16 @@ export default function AdminList() {
 
     const handleDeleteAdmin = async (adminId) => {
       const confirmDelete = window.confirm(
-        "This will deactivate the admin. Continue?"
+        "This will permanently delete the admin. Continue?"
       );
 
       if (!confirmDelete) return;
 
       try {
-        const deleted = await deleteAdmin(adminId);
+        await deleteAdmin(adminId);
 
         setAdmins((prev) =>
-          prev.map((a) =>
-            a._id === deleted._id ? deleted : a
-          )
+          prev.filter((a) => a._id !== adminId)
         );
       } catch (err) {
         alert(err.response?.data?.message || "Delete failed");

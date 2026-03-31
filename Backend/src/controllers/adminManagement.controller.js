@@ -130,8 +130,7 @@ export const deleteAdmin = async (req, res) => {
     return res.status(400).json({ message: "Cannot delete Super Admin" });
   }
 
-  admin.isActive = false;
-  await admin.save();
+  await Admin.findByIdAndDelete(id);
 
   res.json({
     message: "Admin deleted successfully",

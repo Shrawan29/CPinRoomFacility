@@ -11,6 +11,7 @@ export default function AdminSidebar() {
 
   const superAdminMenu = [
     { label: "Dashboard", path: "/admin/super/dashboard" },
+    { label: "Foints Loyalty", path: "/admin/super/foints" },
     { label: "Guest Sessions", path: "/admin/super/guest-sessions" },
     { label: "Create Admin", path: "/admin/super/create-admin" },
     { label: "Manage Admins", path: "/admin/super/admins" },

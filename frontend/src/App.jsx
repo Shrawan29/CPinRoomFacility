@@ -1,3 +1,12 @@
+import FointsPage from "./pages/admin/super/FointsPage";
+      <Route
+        path="/admin/super/foints"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+            <FointsPage />
+          </ProtectedRoute>
+        }
+      />
 import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
 
