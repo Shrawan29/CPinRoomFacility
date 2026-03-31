@@ -1,12 +1,3 @@
-import BulkAddMenuPage from "./pages/admin/kitchen/BulkAddMenuPage";
-      <Route
-        path="/admin/kitchen/bulk-add"
-        element={
-          <ProtectedRoute allowedRoles={["DINING_ADMIN"]}>
-            <BulkAddMenuPage />
-          </ProtectedRoute>
-        }
-      />
 
 import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
@@ -25,6 +16,8 @@ import AdminEvents from "./pages/admin/AdminEvents";
 // Kitchen
 import KitchenDashboard from "./pages/admin/kitchen/KitchenDashboard";
 import KitchenMenu from "./pages/admin/kitchen/KitchenMenu";
+import BulkAddMenuPage from "./pages/admin/kitchen/BulkAddMenuPage";
+      
 
 // QR
 import QRCodeManager from "./pages/admin/QRCodeManager";
@@ -135,6 +128,15 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["DINING_ADMIN"]}>
             <KitchenMenu />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/kitchen/bulk-add"
+        element={
+          <ProtectedRoute allowedRoles={["DINING_ADMIN"]}>
+            <BulkAddMenuPage />
           </ProtectedRoute>
         }
       />
