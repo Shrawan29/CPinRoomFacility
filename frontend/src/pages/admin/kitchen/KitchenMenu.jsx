@@ -9,6 +9,7 @@ import {
 import MenuFormModal from "./MenuFormModal";
 import { exportMenuToExcel, importMenuFromExcel } from "../../../services/excelMenu.service";
 import api from "../../../services/api";
+import BulkAddMenuModal from "./BulkAddMenuModal";
 
 export default function KitchenMenu() {
   const { token, loading: authLoading } = useAdminAuth();
