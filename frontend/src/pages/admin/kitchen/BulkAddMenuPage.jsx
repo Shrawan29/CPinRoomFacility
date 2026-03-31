@@ -18,16 +18,218 @@ const CATEGORIES = [
   "Desserts", "Beverages", "Sides", "Specials",
 ];
 
-const VegDot = ({ isVeg }) => (
-  <span style={{
+/* ── tiny inline styles ── */
+const css = {
+  page: {
+    minHeight: "100vh",
+    background: "linear-gradient(160deg,#0d0d0d 0%,#1a0a0a 50%,#0d0d0d 100%)",
+    fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+    color: "#f0e6d3",
+  },
+  stickyBar: {
+    position: "sticky", top: 0, zIndex: 20,
+    background: "rgba(10,5,5,0.85)",
+    backdropFilter: "blur(18px)",
+    WebkitBackdropFilter: "blur(18px)",
+    borderBottom: "1px solid rgba(212,163,115,0.18)",
+    padding: "0 32px",
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    height: 64,
+  },
+  titleBlock: { display: "flex", flexDirection: "column", gap: 2 },
+  h1: {
+    margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: "-.02em",
+    background: "linear-gradient(90deg,#e8c98a,#c8883a)",
+    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+    fontFamily: "'Playfair Display', Georgia, serif",
+  },
+  subtitle: { margin: 0, fontSize: 11, color: "rgba(240,230,211,0.4)", letterSpacing: ".04em" },
+  readyBadge: (n) => ({
+    fontSize: 11, fontWeight: 700, letterSpacing: ".04em",
+    color: n > 0 ? "#e8c98a" : "rgba(240,230,211,0.3)",
+  }),
+  btnAdd: {
+    padding: "8px 18px", fontSize: 12, fontWeight: 700,
+    letterSpacing: ".06em", textTransform: "uppercase",
+    borderRadius: 6, border: "1.5px solid rgba(212,163,115,0.5)",
+    background: "transparent", color: "#d4a373", cursor: "pointer",
+    transition: "all .2s",
+  },
+  btnSave: (disabled) => ({
+    padding: "8px 22px", fontSize: 12, fontWeight: 700,
+    letterSpacing: ".06em", textTransform: "uppercase",
+    borderRadius: 6, border: "none",
+    background: disabled
+      ? "rgba(255,255,255,0.06)"
+      : "linear-gradient(135deg,#c8883a,#e8c98a)",
+    color: disabled ? "rgba(255,255,255,0.2)" : "#1a0a0a",
+    cursor: disabled ? "not-allowed" : "pointer",
+    transition: "all .2s",
+    boxShadow: disabled ? "none" : "0 4px 18px rgba(200,136,58,0.35)",
+  }),
+  progressTrack: {
+    height: 2, background: "rgba(212,163,115,0.1)",
+  },
+  progressBar: (pct) => ({
+    height: "100%", width: `${pct}%`,
+    background: "linear-gradient(90deg,#c8883a,#e8c98a)",
+    transition: "width .4s cubic-bezier(.4,0,.2,1)",
+  }),
+  content: {
+    maxWidth: 800, margin: "0 auto", padding: "24px 20px 80px",
+  },
+  hint: {
+    display: "flex", alignItems: "flex-start", gap: 10,
+    padding: "10px 14px", borderRadius: 8, marginBottom: 16,
+    background: "rgba(212,163,115,0.06)",
+    border: "1px dashed rgba(212,163,115,0.2)",
+  },
+  hintText: {
+    margin: 0, fontSize: 12, color: "rgba(240,230,211,0.5)", lineHeight: 1.6,
+  },
+  card: (ready) => ({
+    borderRadius: 12,
+    border: `1px solid ${ready ? "rgba(212,163,115,0.4)" : "rgba(255,255,255,0.07)"}`,
+    background: ready
+      ? "linear-gradient(145deg,rgba(200,136,58,0.06),rgba(20,10,5,0.9))"
+      : "rgba(255,255,255,0.03)",
+    backdropFilter: "blur(8px)",
+    overflow: "hidden",
+    transition: "border-color .25s, box-shadow .25s",
+    boxShadow: ready ? "0 0 0 1px rgba(212,163,115,0.1), 0 8px 32px rgba(0,0,0,0.4)" : "0 2px 12px rgba(0,0,0,0.3)",
+    marginBottom: 12,
+  }),
+  cardHeader: (ready) => ({
+    display: "flex", alignItems: "center", gap: 10,
+    padding: "10px 16px",
+    background: ready ? "rgba(200,136,58,0.08)" : "rgba(255,255,255,0.02)",
+    borderBottom: `1px solid ${ready ? "rgba(212,163,115,0.15)" : "rgba(255,255,255,0.05)"}`,
+  }),
+  indexBadge: (ready) => ({
+    width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+    background: ready ? "linear-gradient(135deg,#c8883a,#e8c98a)" : "rgba(255,255,255,0.08)",
+    color: ready ? "#1a0a0a" : "rgba(240,230,211,0.3)",
+    fontSize: 10, fontWeight: 800, letterSpacing: ".02em",
+    display: "flex", alignItems: "center", justifyContent: "center",
+  }),
+  itemName: (has) => ({
+    flex: 1, fontSize: 13, fontWeight: 600, letterSpacing: "-.01em",
+    color: has ? "#f0e6d3" : "rgba(240,230,211,0.2)",
+  }),
+  catChip: {
+    fontSize: 9, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase",
+    padding: "3px 8px", borderRadius: 20,
+    background: "rgba(212,163,115,0.12)", color: "#d4a373",
+    border: "1px solid rgba(212,163,115,0.2)",
+  },
+  priceTag: {
+    fontSize: 12, fontWeight: 700, color: "#e8c98a",
+  },
+  actionBtn: (danger) => ({
+    padding: "4px 8px", fontSize: 11, borderRadius: 5,
+    border: `1px solid ${danger ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.1)"}`,
+    background: "transparent",
+    color: danger ? "#f87171" : "rgba(240,230,211,0.35)",
+    cursor: "pointer", transition: "all .15s",
+  }),
+  cardBody: {
+    padding: "14px 16px 12px",
+    display: "flex", flexDirection: "column", gap: 12,
+  },
+  grid3: {
+    display: "grid", gridTemplateColumns: "1fr 170px 90px", gap: 10,
+  },
+  grid2: {
+    display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "start",
+  },
+  gridHalf: {
+    display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10,
+  },
+  label: {
+    display: "block", fontSize: 9, fontWeight: 800, letterSpacing: ".1em",
+    textTransform: "uppercase", color: "rgba(212,163,115,0.6)", marginBottom: 4,
+  },
+  inp: (filled) => ({
+    width: "100%", boxSizing: "border-box",
+    padding: "8px 11px", fontSize: 13, borderRadius: 7,
+    border: `1.5px solid ${filled ? "rgba(212,163,115,0.45)" : "rgba(255,255,255,0.09)"}`,
+    background: filled ? "rgba(212,163,115,0.05)" : "rgba(255,255,255,0.03)",
+    color: "#f0e6d3", outline: "none",
+    fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
+    transition: "border-color .15s, background .15s",
+  }),
+  vegBtn: (active, isVeg) => ({
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+    padding: "7px 12px", borderRadius: 7, cursor: "pointer",
+    border: active
+      ? `1.5px solid ${isVeg ? "#22c55e" : "#ef4444"}`
+      : "1.5px solid rgba(255,255,255,0.09)",
+    background: active
+      ? isVeg ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)"
+      : "rgba(255,255,255,0.02)",
+    transition: "all .15s",
+  }),
+  vegDot: (isVeg) => ({
     display: "inline-flex", alignItems: "center", justifyContent: "center",
-    width: 16, height: 16, border: `1.5px solid ${isVeg ? "#16a34a" : "#dc2626"}`,
-    borderRadius: 3, flexShrink: 0,
-  }}>
-    <span style={{
-      width: 7, height: 7, borderRadius: "50%",
-      background: isVeg ? "#16a34a" : "#dc2626",
-    }} />
+    width: 16, height: 16,
+    border: `1.5px solid ${isVeg ? "#22c55e" : "#ef4444"}`,
+    borderRadius: 3,
+  }),
+  dotInner: (isVeg) => ({
+    width: 7, height: 7, borderRadius: "50%",
+    background: isVeg ? "#22c55e" : "#ef4444",
+  }),
+  vegLabel: (isVeg) => ({
+    fontSize: 9, fontWeight: 800, letterSpacing: ".06em",
+    color: isVeg ? "#22c55e" : "#ef4444", textTransform: "uppercase",
+  }),
+  addAnotherBtn: {
+    marginTop: 4, width: "100%", padding: "12px",
+    borderRadius: 9, border: "1.5px dashed rgba(212,163,115,0.2)",
+    background: "transparent", color: "rgba(212,163,115,0.35)",
+    fontSize: 12, fontWeight: 700, cursor: "pointer", letterSpacing: ".06em",
+    textTransform: "uppercase", fontFamily: "'DM Sans','Segoe UI',sans-serif",
+    transition: "all .2s",
+  },
+  sectionBtn: (active) => ({
+    width: "100%", display: "flex", alignItems: "center", gap: 7,
+    padding: "7px 11px", borderRadius: 7,
+    border: `1.5px solid ${active ? "rgba(212,163,115,0.4)" : "rgba(255,255,255,0.08)"}`,
+    background: active ? "rgba(212,163,115,0.07)" : "transparent",
+    color: active ? "#d4a373" : "rgba(240,230,211,0.3)",
+    fontSize: 11, fontWeight: 700, cursor: "pointer",
+    fontFamily: "'DM Sans','Segoe UI',sans-serif", textAlign: "left",
+    letterSpacing: ".04em", textTransform: "uppercase",
+    transition: "all .15s",
+  }),
+  sectionPanel: {
+    marginTop: 7, padding: "10px 12px 8px",
+    background: "rgba(0,0,0,0.3)", borderRadius: 8,
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+  subInp: {
+    flex: 1, boxSizing: "border-box", padding: "6px 9px",
+    fontSize: 12, borderRadius: 6,
+    border: "1.5px solid rgba(255,255,255,0.08)",
+    background: "rgba(255,255,255,0.03)", color: "#f0e6d3", outline: "none",
+    fontFamily: "'DM Sans','Segoe UI',sans-serif",
+  },
+  subRemove: {
+    padding: "3px 7px", fontSize: 10, borderRadius: 5,
+    border: "1px solid rgba(239,68,68,0.25)", background: "transparent",
+    color: "#f87171", cursor: "pointer", flexShrink: 0,
+  },
+  addInline: {
+    fontSize: 11, fontWeight: 700, color: "#d4a373",
+    background: "transparent", border: "none", cursor: "pointer",
+    padding: "2px 0", fontFamily: "'DM Sans','Segoe UI',sans-serif",
+    textTransform: "uppercase", letterSpacing: ".06em",
+  },
+};
+
+const VegDot = ({ isVeg }) => (
+  <span style={css.vegDot(isVeg)}>
+    <span style={css.dotInner(isVeg)} />
   </span>
 );
 
@@ -35,47 +237,38 @@ function CollapsibleSection({ label, icon, items, onAdd, onRemove, onChange, nam
   const [open, setOpen] = useState(false);
   return (
     <div>
-      <button type="button" onClick={() => setOpen(o => !o)} style={{
-        width: "100%", display: "flex", alignItems: "center", gap: 6,
-        padding: "6px 10px", borderRadius: 7,
-        border: `1.5px solid ${items.length ? "var(--brand)" : "#ddd0c4"}`,
-        background: items.length ? "rgba(164,0,93,.04)" : "transparent",
-        color: items.length ? "var(--brand)" : "var(--text-muted)",
-        fontSize: 12, fontWeight: 600, cursor: "pointer",
-        fontFamily: "var(--font-sans)", textAlign: "left",
-      }}>
-        <span>{icon} {label}</span>
-        <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 5 }}>
-          {items.length > 0 && (
-            <span style={{
-              fontSize: 10, background: "var(--brand)", color: "#fff",
-              borderRadius: 10, padding: "1px 6px", fontWeight: 700,
-            }}>{items.length}</span>
-          )}
-          <span style={{ fontSize: 10, opacity: .5 }}>{open ? "▲" : "▼"}</span>
-        </span>
+      <button type="button" onClick={() => setOpen(o => !o)} style={css.sectionBtn(items.length > 0)}>
+        <span>{icon}</span>
+        <span style={{ flex: 1 }}>{label}</span>
+        {items.length > 0 && (
+          <span style={{
+            fontSize: 9, background: "#c8883a", color: "#1a0a0a",
+            borderRadius: 10, padding: "1px 6px", fontWeight: 800,
+          }}>{items.length}</span>
+        )}
+        <span style={{ fontSize: 9, opacity: .4 }}>{open ? "▲" : "▼"}</span>
       </button>
       {open && (
-        <div style={{ marginTop: 6, padding: "10px 10px 6px", background: "#f9f3ec", borderRadius: 8, border: "1px solid #e5d5c8" }}>
+        <div style={css.sectionPanel}>
           {items.map((item, i) => (
             <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6, alignItems: "center" }}>
               <input
                 value={item[nameField]}
                 onChange={e => onChange(i, nameField, e.target.value)}
                 placeholder={nameField === "label" ? "e.g. Half, Full" : "e.g. Extra Cheese"}
-                style={subInp}
+                style={css.subInp}
               />
-              <span style={{ color: "var(--text-muted)", fontSize: 12, flexShrink: 0 }}>₹</span>
+              <span style={{ color: "rgba(212,163,115,0.5)", fontSize: 12, flexShrink: 0 }}>₹</span>
               <input
                 type="number" value={item.price}
                 onChange={e => onChange(i, "price", e.target.value)}
                 placeholder="0"
-                style={{ ...subInp, width: 64 }}
+                style={{ ...css.subInp, width: 64 }}
               />
-              <button type="button" onClick={() => onRemove(i)} style={removeBtn}>✕</button>
+              <button type="button" onClick={() => onRemove(i)} style={css.subRemove}>✕</button>
             </div>
           ))}
-          <button type="button" onClick={onAdd} style={addInlineBtn}>+ Add</button>
+          <button type="button" onClick={onAdd} style={css.addInline}>+ Add</button>
         </div>
       )}
     </div>
@@ -84,121 +277,81 @@ function CollapsibleSection({ label, icon, items, onAdd, onRemove, onChange, nam
 
 function ItemCard({ item, idx, onChange, onRemove, onDuplicate, isOnly }) {
   const isReady = item.name && item.category && item.price;
-
   const mutateOptions = fn => onChange(idx, "options", fn(item.options));
   const mutateAddons = fn => onChange(idx, "addons", fn(item.addons));
 
   return (
-    <div style={{
-      background: "#fff",
-      border: `1.5px solid ${isReady ? "rgba(164,0,93,.3)" : "#e5d5c8"}`,
-      borderRadius: 12,
-      overflow: "hidden",
-      boxShadow: isReady ? "0 2px 10px rgba(164,0,93,.06)" : "0 1px 3px rgba(0,0,0,.04)",
-      transition: "border-color .2s, box-shadow .2s",
-    }}>
-
-      {/* Header row */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "9px 12px",
-        background: isReady ? "rgba(164,0,93,.03)" : "var(--bg-secondary)",
-        borderBottom: `1px solid ${isReady ? "rgba(164,0,93,.1)" : "#ede0d4"}`,
-      }}>
-        <span style={{
-          width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-          background: isReady ? "var(--brand)" : "#c4afa2",
-          color: "#fff", fontSize: 10, fontWeight: 700,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>{idx + 1}</span>
-
-        <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: item.name ? "var(--text-primary)" : "#bbaaa0" }}>
-          {item.name || "Unnamed item"}
-        </span>
-
-        {item.category && (
-          <span style={{
-            fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 20,
-            background: "rgba(164,0,93,.08)", color: "var(--brand)",
-          }}>{item.category}</span>
-        )}
-
-        {item.price && (
-          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)" }}>₹{item.price}</span>
-        )}
-
+    <div style={css.card(isReady)}>
+      {/* Header */}
+      <div style={css.cardHeader(isReady)}>
+        <span style={css.indexBadge(isReady)}>{idx + 1}</span>
+        <span style={css.itemName(!!item.name)}>{item.name || "Unnamed item"}</span>
+        {item.category && <span style={css.catChip}>{item.category}</span>}
+        {item.price && <span style={css.priceTag}>₹{item.price}</span>}
         <VegDot isVeg={item.isVeg} />
-
         <button type="button" onClick={() => onDuplicate(idx)} title="Duplicate"
-          style={{ ...actionBtn, color: "var(--text-muted)", borderColor: "#ddd0c4" }}>⧉</button>
+          style={css.actionBtn(false)}>⧉</button>
         {!isOnly && (
           <button type="button" onClick={() => onRemove(idx)} title="Remove"
-            style={{ ...actionBtn, color: "#dc2626", borderColor: "#fca5a5" }}>✕</button>
+            style={css.actionBtn(true)}>✕</button>
         )}
       </div>
 
-      {/* Fields */}
-      <div style={{ padding: "12px 14px 10px", display: "flex", flexDirection: "column", gap: 10 }}>
-
-        {/* Name + Category + Price */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 170px 90px", gap: 8 }}>
-          <Field label="Item Name *">
+      {/* Body */}
+      <div style={css.cardBody}>
+        {/* Row 1: Name / Category / Price */}
+        <div style={css.grid3}>
+          <div>
+            <label style={css.label}>Item Name *</label>
             <input placeholder="e.g. Paneer Tikka" value={item.name}
-              onChange={e => onChange(idx, "name", e.target.value)} style={inp(!!item.name)} />
-          </Field>
-          <Field label="Category *">
+              onChange={e => onChange(idx, "name", e.target.value)} style={css.inp(!!item.name)} />
+          </div>
+          <div>
+            <label style={css.label}>Category *</label>
             <select value={item.category} onChange={e => onChange(idx, "category", e.target.value)}
-              style={{ ...inp(!!item.category), cursor: "pointer" }}>
+              style={{ ...css.inp(!!item.category), cursor: "pointer" }}>
               <option value="">Select…</option>
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-          </Field>
-          <Field label="Price (₹) *">
+          </div>
+          <div>
+            <label style={css.label}>Price (₹) *</label>
             <input type="number" placeholder="0" value={item.price}
-              onChange={e => onChange(idx, "price", e.target.value)} style={inp(!!item.price)} />
-          </Field>
+              onChange={e => onChange(idx, "price", e.target.value)} style={css.inp(!!item.price)} />
+          </div>
         </div>
 
-        {/* Description + Veg/Non-Veg */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 8, alignItems: "start" }}>
-          <Field label="Description">
+        {/* Row 2: Description + Veg toggle */}
+        <div style={css.grid2}>
+          <div>
+            <label style={css.label}>Description</label>
             <textarea placeholder="Short description…" value={item.description}
               onChange={e => onChange(idx, "description", e.target.value)}
-              rows={2} style={{ ...inp(!!item.description), resize: "none" }} />
-          </Field>
-          <Field label="Type">
-            <div style={{ display: "flex", gap: 5 }}>
+              rows={2} style={{ ...css.inp(!!item.description), resize: "none" }} />
+          </div>
+          <div>
+            <label style={css.label}>Type</label>
+            <div style={{ display: "flex", gap: 6 }}>
               {[true, false].map(v => (
                 <button key={String(v)} type="button" onClick={() => onChange(idx, "isVeg", v)}
-                  style={{
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    padding: "6px 10px", borderRadius: 7,
-                    border: item.isVeg === v
-                      ? `2px solid ${v ? "#16a34a" : "#dc2626"}`
-                      : "2px solid #e5d5c8",
-                    background: item.isVeg === v
-                      ? v ? "rgba(22,163,74,.07)" : "rgba(220,38,38,.07)"
-                      : "transparent",
-                    cursor: "pointer",
-                  }}>
+                  style={css.vegBtn(item.isVeg === v, v)}>
                   <VegDot isVeg={v} />
-                  <span style={{ fontSize: 9, fontWeight: 700, color: v ? "#16a34a" : "#dc2626" }}>
-                    {v ? "Veg" : "Non-Veg"}
-                  </span>
+                  <span style={css.vegLabel(v)}>{v ? "Veg" : "Non"}</span>
                 </button>
               ))}
             </div>
-          </Field>
+          </div>
         </div>
 
-        {/* Image URL */}
-        <Field label="Image URL">
+        {/* Row 3: Image URL */}
+        <div>
+          <label style={css.label}>Image URL</label>
           <input placeholder="https://…" value={item.image}
-            onChange={e => onChange(idx, "image", e.target.value)} style={inp(!!item.image)} />
-        </Field>
+            onChange={e => onChange(idx, "image", e.target.value)} style={css.inp(!!item.image)} />
+        </div>
 
-        {/* Options + Addons */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {/* Row 4: Options + Addons */}
+        <div style={css.gridHalf}>
           <CollapsibleSection
             label="Portion Options" icon="⚙"
             items={item.options}
@@ -220,49 +373,6 @@ function ItemCard({ item, idx, onChange, onRemove, onDuplicate, isOnly }) {
     </div>
   );
 }
-
-const Field = ({ label, children }) => (
-  <div>
-    <label style={{
-      display: "block", fontSize: 10, fontWeight: 700, color: "var(--text-muted)",
-      marginBottom: 3, textTransform: "uppercase", letterSpacing: ".06em",
-    }}>{label}</label>
-    {children}
-  </div>
-);
-
-const inp = filled => ({
-  width: "100%", boxSizing: "border-box",
-  padding: "7px 9px", fontSize: 13, borderRadius: 7,
-  border: `1.5px solid ${filled ? "rgba(164,0,93,.4)" : "#ddd0c4"}`,
-  background: filled ? "rgba(164,0,93,.02)" : "#fff",
-  color: "var(--text-primary)", outline: "none",
-  fontFamily: "var(--font-sans)", transition: "border-color .15s",
-});
-
-const subInp = {
-  flex: 1, boxSizing: "border-box", padding: "5px 8px",
-  fontSize: 12, borderRadius: 6, border: "1.5px solid #ddd0c4",
-  background: "#fff", color: "var(--text-primary)", outline: "none",
-  fontFamily: "var(--font-sans)",
-};
-
-const actionBtn = {
-  padding: "3px 7px", fontSize: 11, borderRadius: 5,
-  border: "1px solid", background: "transparent", cursor: "pointer",
-};
-
-const removeBtn = {
-  padding: "3px 6px", fontSize: 10, borderRadius: 5,
-  border: "1px solid #fca5a5", background: "transparent",
-  color: "#dc2626", cursor: "pointer", flexShrink: 0,
-};
-
-const addInlineBtn = {
-  fontSize: 11, fontWeight: 600, color: "var(--brand)",
-  background: "transparent", border: "none", cursor: "pointer",
-  padding: "2px 0", fontFamily: "var(--font-sans)",
-};
 
 export default function BulkAddMenuPage() {
   const [items, setItems] = useState([EMPTY_ITEM()]);
@@ -296,92 +406,70 @@ export default function BulkAddMenuPage() {
     }
   };
 
+  const pct = items.length ? (readyCount / items.length) * 100 : 0;
+
   return (
     <AdminLayout>
-      <div style={{ minHeight: "100vh", background: "var(--bg-primary)", fontFamily: "var(--font-sans)" }}>
+      <div style={css.page}>
 
         {/* Sticky header */}
-        <div style={{
-          background: "#fff", borderBottom: "1px solid #e5d5c8",
-          padding: "0 28px", display: "flex", alignItems: "center",
-          justifyContent: "space-between", height: 58,
-          position: "sticky", top: 0, zIndex: 10,
-        }}>
-          <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0, fontFamily: "var(--font-serif)" }}>
-              Bulk Add Menu Items
-            </h1>
-            <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0 }}>
+        <div style={css.stickyBar}>
+          <div style={css.titleBlock}>
+            <h1 style={css.h1}>Bulk Add Menu Items</h1>
+            <p style={css.subtitle}>
               {items.length} item{items.length !== 1 ? "s" : ""}
-              <span style={{ margin: "0 5px", opacity: .4 }}>·</span>
-              <span style={{ color: readyCount > 0 ? "var(--brand)" : "var(--text-muted)", fontWeight: 600 }}>
+              <span style={{ margin: "0 6px", opacity: .3 }}>·</span>
+              <span style={css.readyBadge(readyCount)}>
                 {readyCount} ready to save
               </span>
             </p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={addRow} style={{
-              padding: "7px 14px", fontSize: 13, fontWeight: 600, borderRadius: 7,
-              border: "1.5px solid var(--brand)", background: "transparent",
-              color: "var(--brand)", cursor: "pointer",
-            }}>+ Add Item</button>
-            <button onClick={handleSave} disabled={saving || readyCount === 0} style={{
-              padding: "7px 18px", fontSize: 13, fontWeight: 700, borderRadius: 7,
-              border: "none",
-              background: readyCount === 0 ? "#cfc0b4" : "var(--brand)",
-              color: "#fff",
-              cursor: readyCount === 0 ? "not-allowed" : "pointer",
-            }}>
+            <button onClick={addRow} style={css.btnAdd}>+ Add Item</button>
+            <button onClick={handleSave} disabled={saving || readyCount === 0}
+              style={css.btnSave(saving || readyCount === 0)}>
               {saving ? "Saving…" : `Save ${readyCount > 0 ? readyCount + " " : ""}Item${readyCount !== 1 ? "s" : ""}`}
             </button>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div style={{ height: 2, background: "#ead9c9" }}>
-          <div style={{
-            height: "100%",
-            width: `${items.length ? (readyCount / items.length) * 100 : 0}%`,
-            background: "var(--brand)", transition: "width .3s",
-          }} />
+        <div style={css.progressTrack}>
+          <div style={css.progressBar(pct)} />
         </div>
 
         {/* Content */}
-        <div style={{ maxWidth: 740, margin: "0 auto", padding: "18px 20px 60px" }}>
+        <div style={css.content}>
 
           {items.length === 1 && !items[0].name && (
-            <div style={{
-              display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 12,
-              padding: "8px 12px", borderRadius: 8,
-              background: "rgba(164,0,93,.04)", border: "1px dashed rgba(164,0,93,.25)",
-            }}>
-              <span style={{ fontSize: 14 }}>💡</span>
-              <p style={{ margin: 0, fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                Fill <strong>Name</strong>, <strong>Category</strong> and <strong>Price</strong> to mark an item ready.
-                Use <strong>⧉</strong> to duplicate an item quickly.
+            <div style={css.hint}>
+              <span style={{ fontSize: 14 }}>✦</span>
+              <p style={css.hintText}>
+                Fill <strong style={{ color: "#d4a373" }}>Name</strong>,{" "}
+                <strong style={{ color: "#d4a373" }}>Category</strong> and{" "}
+                <strong style={{ color: "#d4a373" }}>Price</strong> to mark an item ready.
+                Use <strong style={{ color: "#d4a373" }}>⧉</strong> to duplicate quickly.
               </p>
             </div>
           )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {items.map((item, idx) => (
-              <ItemCard key={idx} item={item} idx={idx}
-                onChange={handleChange} onRemove={removeRow}
-                onDuplicate={duplicateRow} isOnly={items.length === 1} />
-            ))}
-          </div>
+          {items.map((item, idx) => (
+            <ItemCard key={idx} item={item} idx={idx}
+              onChange={handleChange} onRemove={removeRow}
+              onDuplicate={duplicateRow} isOnly={items.length === 1} />
+          ))}
 
           <button
             onClick={addRow}
-            style={{
-              marginTop: 12, width: "100%", padding: "10px",
-              borderRadius: 9, border: "1.5px dashed #c9b0a0",
-              background: "transparent", color: "var(--text-muted)",
-              fontSize: 13, fontWeight: 600, cursor: "pointer",
-              fontFamily: "var(--font-sans)",
+            style={css.addAnotherBtn}
+            onMouseOver={e => {
+              e.currentTarget.style.borderColor = "rgba(212,163,115,0.5)";
+              e.currentTarget.style.color = "#d4a373";
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "var(--brand)"; e.currentTarget.style.color = "var(--brand)"; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "#c9b0a0"; e.currentTarget.style.color = "var(--text-muted)"; }}
+            onMouseOut={e => {
+              e.currentTarget.style.borderColor = "rgba(212,163,115,0.2)";
+              e.currentTarget.style.color = "rgba(212,163,115,0.35)";
+            }}
           >
             + Add Another Item
           </button>
