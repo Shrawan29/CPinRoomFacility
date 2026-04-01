@@ -595,7 +595,7 @@ export default function MenuBrowse() {
                           cursor: "pointer",
                         }}
                       >
-                        <div style={{ padding: "16px 16px 14px" }}>
+                        <div style={{ padding: showImagePanel ? "16px 16px 14px" : "14px 16px" }}>
                           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
@@ -630,18 +630,6 @@ export default function MenuBrowse() {
                                 margin: 0, fontFamily: "'Cormorant Garamond', serif",
                               }}>
                                 {options.length > 0 ? `From ₹${fromPrice}` : `₹${fromPrice}`}
-                              </p>
-
-                              <p style={{
-                                margin: "6px 0 0 0",
-                                fontSize: 10,
-                                fontWeight: 700,
-                                letterSpacing: "0.11em",
-                                textTransform: "uppercase",
-                                color: "#8a7a70",
-                              }}>
-                                Tap to choose {options.length > 0 ? "portion" : "details"}
-                                {addons.length > 0 ? " & add-ons" : ""}
                               </p>
                             </div>
 
