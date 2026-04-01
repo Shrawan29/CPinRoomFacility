@@ -42,13 +42,26 @@ const perks = [
 
 const StableNav = memo(GuestBottomNav);
 
-const REELO_PAGE_URLS = {
-  check: "https://app.reelo.io/l/DQbBj",
-  register: "https://app.reelo.io/l/xQTqO",
-};
-
 const sanitizePhone = (value) => String(value || "").replace(/\D/g, "").slice(0, 15);
 const sanitizeName = (value) => String(value || "").trim();
+
+const toFiniteNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const formatDateShort = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 const getGuestName = (guest) =>
   sanitizeName(guest?.guestName || guest?.name || guest?.fullName || "");
@@ -112,11 +125,70 @@ const getLeadErrorMessage = (flow, submission) => {
   return "";
 };
 
-const redirectToReeloPage = (flow) => {
-  const url = REELO_PAGE_URLS[flow];
-  if (!url) return;
+const getOfferTitle = (offer) => {
+  const directTitle = sanitizeName(offer?.title || offer?.name || "");
+  if (directTitle) return directTitle;
 
-  window.location.assign(url);
+  const fallback = String(offer?.type || "special offer")
+    .replace(/_/g, " ")
+    .trim();
+
+  return fallback.charAt(0).toUpperCase() + fallback.slice(1);
+};
+
+const getOfferBadgeText = (offer, currencySymbol) => {
+  const type = String(offer?.type || "").toLowerCase();
+
+  if (type === "percentage_off") {
+    const value = toFiniteNumber(offer?.percentage_off, null);
+    if (value !== null) return `${value}% OFF`;
+  }
+
+  if (type === "amount_off") {
+    const value = toFiniteNumber(offer?.amount_off ?? offer?.discount_off, null);
+    if (value !== null) return `${currencySymbol}${value} OFF`;
+  }
+
+  if (type === "free_item" || type === "free_item_service") return "FREE ITEM";
+  if (type === "loyalty") return "LOYALTY";
+
+  return "SPECIAL OFFER";
+};
+
+const getOfferStoreText = (offer) => {
+  const rawStores = Array.isArray(offer?.applicable_stores)
+    ? offer.applicable_stores
+    : [];
+
+  const names = rawStores
+    .map((entry) => (typeof entry === "string" ? entry : sanitizeName(entry?.name || "")))
+    .filter(Boolean);
+
+  if (names.length === 0) return "Selected outlets";
+  if (names.length <= 2) return names.join(" • ");
+
+  return `${names.slice(0, 2).join(" • ")} +${names.length - 2} more`;
+};
+
+const buildReeloSnapshot = (response) => {
+  const payload = response?.submission?.payload || {};
+  const offers = Array.isArray(payload?.customer_rewards)
+    ? payload.customer_rewards
+    : [];
+
+  const currency = sanitizeName(response?.shortlink?.payload?.currency || "") || "Rs ";
+
+  return {
+    customerName: sanitizeName(payload?.customer?.name || ""),
+    points: toFiniteNumber(payload?.customer_points?.current_points, 0),
+    offers: offers.map((offer) => ({
+      title: getOfferTitle(offer),
+      badge: getOfferBadgeText(offer, currency),
+      expiry: formatDateShort(offer?.expires_at),
+      stores: getOfferStoreText(offer),
+      terms: sanitizeName(offer?.terms || ""),
+    })),
+  };
 };
 
 export default function GuestFointsPage() {
@@ -127,11 +199,14 @@ export default function GuestFointsPage() {
   const [leadName, setLeadName] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
   const [leadError, setLeadError] = useState("");
+  const [leadSuccessMessage, setLeadSuccessMessage] = useState("");
   const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [reeloSnapshot, setReeloSnapshot] = useState(null);
 
   const openLeadFlow = (flow) => {
     setActiveLeadFlow(flow);
     setLeadError("");
+    setLeadSuccessMessage("");
     setLeadPhone(getGuestPhone(guest));
     setLeadName(flow === "register" ? getGuestName(guest) : "");
   };
@@ -168,6 +243,7 @@ export default function GuestFointsPage() {
 
     setLeadSubmitting(true);
     setLeadError("");
+    setLeadSuccessMessage("");
 
     try {
       const response = await submitFointsLead({
@@ -182,9 +258,21 @@ export default function GuestFointsPage() {
         return;
       }
 
+      if (currentFlow === "check") {
+        const snapshot = buildReeloSnapshot(response);
+        setReeloSnapshot(snapshot);
+        setLeadSuccessMessage(
+          snapshot.offers.length > 0
+            ? "Offers fetched from Reelo successfully."
+            : "Points fetched successfully. No active offers right now."
+        );
+      } else {
+        const message = sanitizeName(response?.submission?.message || "");
+        setLeadSuccessMessage(message || "Registration submitted successfully.");
+      }
+
       setActiveLeadFlow("");
       setLeadError("");
-      redirectToReeloPage(currentFlow);
     } catch (error) {
       setLeadError(error?.message || "Unable to continue. Please try again.");
     } finally {
@@ -539,6 +627,108 @@ export default function GuestFointsPage() {
           margin-bottom: 20px;
         }
 
+        .fp-success-note {
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-size: 12px;
+          line-height: 1.45;
+          margin: -6px 0 16px;
+          border: 1px solid rgba(15,95,89,0.24);
+          color: #0f5f59;
+          background: rgba(15,95,89,0.09);
+        }
+
+        .fp-reelo-wrap {
+          margin-bottom: 20px;
+        }
+
+        .fp-reelo-points {
+          background: linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,247,202,0.9));
+          border: 1.2px solid rgba(255,255,255,0.7);
+          border-radius: 14px;
+          box-shadow: 0 4px 16px rgba(26,20,16,0.08), inset 0 1px 0 rgba(255,255,255,0.74);
+          padding: 12px 14px;
+          margin-bottom: 10px;
+        }
+
+        .fp-reelo-points-title {
+          margin: 0 0 4px;
+          font-size: 11px;
+          color: #4b5641;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .fp-reelo-points-value {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          color: #0b5f59;
+          line-height: 1;
+        }
+
+        .fp-reelo-offers {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .fp-reelo-offer {
+          background: linear-gradient(to bottom, rgba(255,255,255,0.96), rgba(255,247,202,0.88));
+          border: 1.2px solid rgba(255,255,255,0.7);
+          border-radius: 12px;
+          box-shadow: 0 3px 12px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
+          padding: 12px;
+        }
+
+        .fp-reelo-chip {
+          display: inline-flex;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: #0f5f59;
+          background: rgba(15,95,89,0.12);
+          border: 1px solid rgba(15,95,89,0.22);
+          border-radius: 999px;
+          padding: 4px 8px;
+          margin-bottom: 8px;
+        }
+
+        .fp-reelo-name {
+          margin: 0 0 6px;
+          font-size: 13px;
+          font-weight: 700;
+          color: #1f1f1f;
+          line-height: 1.4;
+        }
+
+        .fp-reelo-line {
+          margin: 0;
+          font-size: 11px;
+          color: #4f564b;
+          line-height: 1.45;
+        }
+
+        .fp-reelo-terms {
+          margin: 6px 0 0;
+          padding-top: 6px;
+          border-top: 1px dashed rgba(10,144,137,0.18);
+          font-size: 10px;
+          color: #66644f;
+          line-height: 1.4;
+          white-space: pre-line;
+        }
+
+        .fp-reelo-empty {
+          background: linear-gradient(to bottom, rgba(255,255,255,0.96), rgba(255,247,202,0.88));
+          border: 1.2px solid rgba(255,255,255,0.7);
+          border-radius: 12px;
+          box-shadow: 0 3px 12px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
+          padding: 12px;
+          font-size: 11px;
+          color: #4f564b;
+        }
+
         .fp-cta {
           position: relative;
           overflow: hidden;
@@ -792,6 +982,41 @@ export default function GuestFointsPage() {
             </button>
           </div>
 
+          {leadSuccessMessage && <div className="fp-success-note">{leadSuccessMessage}</div>}
+
+          {reeloSnapshot && (
+            <>
+              <div className="fp-section-label"><span>Your Reelo Offers</span></div>
+
+              <div className="fp-reelo-wrap">
+                <div className="fp-reelo-points">
+                  <p className="fp-reelo-points-title">
+                    {reeloSnapshot.customerName
+                      ? `${reeloSnapshot.customerName}'s Foints`
+                      : "Current Foints"}
+                  </p>
+                  <p className="fp-reelo-points-value">{reeloSnapshot.points}</p>
+                </div>
+
+                {reeloSnapshot.offers.length > 0 ? (
+                  <div className="fp-reelo-offers">
+                    {reeloSnapshot.offers.map((offer, index) => (
+                      <article className="fp-reelo-offer" key={`${offer.title}-${index}`}>
+                        <span className="fp-reelo-chip">{offer.badge}</span>
+                        <p className="fp-reelo-name">{offer.title}</p>
+                        {offer.expiry && <p className="fp-reelo-line">Expires: {offer.expiry}</p>}
+                        <p className="fp-reelo-line">{offer.stores}</p>
+                        {offer.terms && <p className="fp-reelo-terms">{offer.terms}</p>}
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="fp-reelo-empty">No active offers at the moment.</div>
+                )}
+              </div>
+            </>
+          )}
+
           <div className="fp-contact">
             <div className="fp-contact-row">
               <a href="https://centrepointnagpur.com/foints/" target="_blank" rel="noopener noreferrer">Official Foints Page</a>
@@ -818,7 +1043,7 @@ export default function GuestFointsPage() {
 
               <p className="fp-modal-sub">
                 {activeLeadFlow === "check"
-                  ? "Enter your mobile number and we will fetch your Foints balance."
+                  ? "Enter your mobile number and we will fetch your Foints balance and offers."
                   : "Enter your name and mobile number to submit your registration."}
               </p>
 
