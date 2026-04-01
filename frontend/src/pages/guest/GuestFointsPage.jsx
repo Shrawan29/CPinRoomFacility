@@ -43,8 +43,7 @@ export default function GuestFointsPage() {
 
         .fp-root {
           min-height: 100dvh;
-          background:
-            linear-gradient(180deg, #ffec59 0%, #ffe43d 42%, #ffdd1f 100%);
+          background: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
           font-family: 'DM Sans', system-ui, sans-serif;
           padding-bottom: 32px;
           position: relative;
@@ -56,12 +55,9 @@ export default function GuestFointsPage() {
           inset: 0;
           pointer-events: none;
           background:
-            repeating-linear-gradient(
-              102deg,
-              rgba(255,255,255,0.22) 0 120px,
-              rgba(255,255,255,0.07) 120px 220px
-            );
-          opacity: 0.36;
+            radial-gradient(circle at 10% 10%, rgba(255,255,255,0.24), transparent 34%),
+            radial-gradient(circle at 86% 18%, rgba(255,255,255,0.18), transparent 30%);
+          opacity: 1;
         }
 
         /* ── HERO ── */
@@ -376,7 +372,7 @@ export default function GuestFointsPage() {
           {/* Wave */}
           <div className="fp-hero-wave">
             <svg viewBox="0 0 430 60" fill="none" preserveAspectRatio="none" style={{ width: "100%", height: 60, display: "block" }}>
-              <path d="M0 20 C60 56,130 60,200 36 C250 18,300 6,360 30 C390 44,415 46,430 34 L430 60 L0 60 Z" fill="#ffea63" />
+              <path d="M0 20 C60 56,130 60,200 36 C250 18,300 6,360 30 C390 44,415 46,430 34 L430 60 L0 60 Z" fill="var(--bg-primary)" />
             </svg>
           </div>
         </div>
