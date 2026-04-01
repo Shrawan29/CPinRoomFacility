@@ -10,7 +10,18 @@ const IMAGE_FIELD_KEYS = [
   "photoUrl",
 ];
 
+export const MENU_IMAGE_MAX_SIZE_MB = 2;
+export const MENU_IMAGE_MAX_SIZE_BYTES = MENU_IMAGE_MAX_SIZE_MB * 1024 * 1024;
+
 const normalizeText = (value) => String(value || "").trim();
+
+const readFileAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Failed to read selected image file."));
+    reader.readAsDataURL(file);
+  });
 
 const extractGoogleDriveFileId = (raw) => {
   const filePathMatch = raw.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
@@ -102,4 +113,22 @@ export const resolveMenuImageSrc = (value) => {
   } catch {
     return raw;
   }
+};
+
+export const readMenuImageFileAsDataUrl = async (file) => {
+  if (!file) {
+    throw new Error("No image file selected.");
+  }
+
+  if (!String(file.type || "").toLowerCase().startsWith("image/")) {
+    throw new Error("Please select a valid image file.");
+  }
+
+  if (file.size > MENU_IMAGE_MAX_SIZE_BYTES) {
+    throw new Error(
+      `Image is too large. Maximum allowed size is ${MENU_IMAGE_MAX_SIZE_MB}MB.`
+    );
+  }
+
+  return readFileAsDataUrl(file);
 };

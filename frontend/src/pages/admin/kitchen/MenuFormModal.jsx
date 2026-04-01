@@ -4,6 +4,10 @@ import {
   createMenuItem,
   updateMenuItem,
 } from "../../../services/menu.service";
+import {
+  MENU_IMAGE_MAX_SIZE_MB,
+  readMenuImageFileAsDataUrl,
+} from "../../../services/menuImage.service";
 
 export default function MenuFormModal({ item, onClose, onSaved }) {
   const { token } = useAdminAuth();
@@ -22,6 +26,22 @@ export default function MenuFormModal({ item, onClose, onSaved }) {
   // For new option/addon fields
   const [newOption, setNewOption] = useState({ label: "", price: "" });
   const [newAddon, setNewAddon] = useState({ name: "", price: "" });
+  const [imageUploadError, setImageUploadError] = useState("");
+
+  const handleImagePick = async (file) => {
+    if (!file) return;
+
+    try {
+      const imageData = await readMenuImageFileAsDataUrl(file);
+      setForm((prev) => ({ ...prev, image: imageData }));
+      setImageUploadError("");
+    } catch (err) {
+      setImageUploadError(
+        err?.message ||
+        `Unable to read image file. Please select an image up to ${MENU_IMAGE_MAX_SIZE_MB}MB.`
+      );
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -50,9 +70,41 @@ export default function MenuFormModal({ item, onClose, onSaved }) {
                     <input
                       placeholder="Image URL (optional)"
                       value={form.image}
-                      onChange={e => setForm({ ...form, image: e.target.value })}
+                      onChange={e => {
+                        setForm({ ...form, image: e.target.value });
+                        setImageUploadError("");
+                      }}
                       className="w-full border rounded px-3 py-2"
                     />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <label className="inline-flex items-center gap-2 px-3 py-2 border rounded text-sm cursor-pointer bg-gray-50">
+                        Upload from Desktop
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={e => {
+                            handleImagePick(e.target.files?.[0]);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                      {form.image && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForm((prev) => ({ ...prev, image: "" }));
+                            setImageUploadError("");
+                          }}
+                          className="px-3 py-2 border rounded text-sm text-red-600 border-red-300"
+                        >
+                          Remove Image
+                        </button>
+                      )}
+                    </div>
+                    {imageUploadError && (
+                      <p className="text-xs text-red-600">{imageUploadError}</p>
+                    )}
                     {/* Options (Half/Full) */}
                     <div className="border rounded px-3 py-2">
                       <div className="font-semibold text-sm mb-1">Options (Half/Full etc)</div>

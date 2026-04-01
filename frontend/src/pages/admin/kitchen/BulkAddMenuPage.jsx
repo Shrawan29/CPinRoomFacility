@@ -1,6 +1,10 @@
 import { useState } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { bulkUpsertMenuItems } from "../../../services/menu.service";
+import {
+  MENU_IMAGE_MAX_SIZE_MB,
+  readMenuImageFileAsDataUrl,
+} from "../../../services/menuImage.service";
 
 const EMPTY_ITEM = () => ({
   name: "", category: "", price: "", description: "",
@@ -141,7 +145,7 @@ function CollapsibleSection({ label, icon, items, onAdd, onRemove, onChange, nam
   );
 }
 
-function ItemCard({ item, idx, onChange, onRemove, onDuplicate, isOnly }) {
+function ItemCard({ item, idx, onChange, onRemove, onDuplicate, onPickImage, isOnly }) {
   const isReady = item.name && item.category && item.price;
   const mutateOptions = fn => onChange(idx, "options", fn(item.options));
   const mutateAddons  = fn => onChange(idx, "addons",  fn(item.addons));
@@ -262,9 +266,55 @@ function ItemCard({ item, idx, onChange, onRemove, onDuplicate, isOnly }) {
 
         {/* Row 3 — Image */}
         <div>
-          <div style={labelStyle}>Image URL (Optional)</div>
-          <input placeholder="https://…" value={item.image}
+          <div style={labelStyle}>Image (Optional)</div>
+          <input placeholder="Paste image URL (https://...)" value={item.image}
             onChange={e => onChange(idx, "image", e.target.value)} style={inp} />
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 6 }}>
+            <label style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 10px",
+              borderRadius: 6,
+              border: "1px solid #ddd0c4",
+              background: "#faf5f0",
+              color: "var(--text-primary)",
+              fontSize: 12,
+              cursor: "pointer",
+              fontWeight: 600,
+            }}>
+              Upload from Desktop
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={e => {
+                  onPickImage(idx, e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+
+            {item.image && (
+              <button
+                type="button"
+                onClick={() => onChange(idx, "image", "")}
+                style={{
+                  padding: "6px 10px",
+                  fontSize: 12,
+                  borderRadius: 6,
+                  border: "1px solid #fca5a5",
+                  background: "transparent",
+                  color: "#dc2626",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Remove Image
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Row 4 — Options / Addons */}
@@ -325,6 +375,21 @@ export default function BulkAddMenuPage() {
   const handleChange = (idx, field, value) => {
     setItems(p => p.map((item, i) => i === idx ? { ...item, [field]: value } : item));
     setFieldErrors(e => e.map((err, i) => i === idx ? { ...err, [field]: undefined } : err));
+  };
+
+  const handleImagePick = async (idx, file) => {
+    if (!file) return;
+
+    try {
+      const imageData = await readMenuImageFileAsDataUrl(file);
+      handleChange(idx, "image", imageData);
+      setError("");
+    } catch (e) {
+      setError(
+        e?.message ||
+        `Unable to read image file. Please select an image up to ${MENU_IMAGE_MAX_SIZE_MB}MB.`
+      );
+    }
   };
 
   const readyCount = items.filter(i => i.name && i.category && i.price).length;
@@ -470,6 +535,7 @@ export default function BulkAddMenuPage() {
                   onChange={handleChange}
                   onRemove={removeRow}
                   onDuplicate={duplicateRow}
+                  onPickImage={handleImagePick}
                   isOnly={items.length === 1}
                 />
                 {/* Field errors */}
