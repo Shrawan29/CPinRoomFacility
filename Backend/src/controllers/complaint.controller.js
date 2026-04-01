@@ -1,4 +1,5 @@
 import Complaint from "../models/Complaint.js";
+import { submitComplaintToRannkly } from "../services/rannkly.service.js";
 
 const normalize = (value) => String(value ?? "").trim();
 
@@ -24,6 +25,21 @@ export const createComplaint = async (req, res) => {
       guestName: req.guest.guestName,
       roomNumber: req.guest.roomNumber,
     });
+
+    const rannklySync = await submitComplaintToRannkly({
+      complaintId: String(doc._id),
+      type,
+      category,
+      subject,
+      message,
+      guestName: req.guest.guestName,
+      roomNumber: req.guest.roomNumber,
+    });
+
+    if (!rannklySync.synced && !["disabled", "type_not_enabled"].includes(rannklySync.reason)) {
+      const syncError = rannklySync.message || rannklySync.reason;
+      console.warn(`[Rannkly] Complaint ${doc._id} sync failed: ${syncError}`);
+    }
 
     return res.status(201).json({
       message: "Submitted successfully",
