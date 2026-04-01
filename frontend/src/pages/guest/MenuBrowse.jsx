@@ -11,8 +11,61 @@ const NAV_HEIGHT = 76;
 // `GuestBottomNav` uses zIndex: 9999
 const OVERLAY_Z = 10050;
 
+const asFiniteNumber = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const normalizeText = (value) => String(value || "").trim();
+
+const normalizeItemOptions = (item) => {
+  if (!Array.isArray(item?.options)) return [];
+
+  return item.options
+    .map((option) => ({
+      label: normalizeText(option?.label),
+      price: asFiniteNumber(option?.price, NaN),
+    }))
+    .filter((option) => option.label && Number.isFinite(option.price) && option.price >= 0);
+};
+
+const normalizeItemAddons = (item) => {
+  if (!Array.isArray(item?.addons)) return [];
+
+  return item.addons
+    .map((addon) => ({
+      name: normalizeText(addon?.name),
+      price: asFiniteNumber(addon?.price, NaN),
+    }))
+    .filter((addon) => addon.name && Number.isFinite(addon.price) && addon.price >= 0);
+};
+
+const resolveMenuImageSrc = (value) => {
+  const raw = normalizeText(value);
+  if (!raw) return "";
+  if (/^data:image\//i.test(raw)) return raw;
+
+  try {
+    return new URL(raw).toString();
+  } catch {
+    // Relative URL handling below.
+  }
+
+  const baseUrl =
+    import.meta.env.VITE_API_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "");
+
+  if (!baseUrl) return raw;
+
+  try {
+    return new URL(raw, baseUrl).toString();
+  } catch {
+    return raw;
+  }
+};
+
 export default function MenuBrowse() {
-  const { token, guest } = useGuestAuth();
+  const { guest } = useGuestAuth();
   const navigate = useNavigate();
 
   const [menuItems, setMenuItems] = useState([]);
@@ -27,6 +80,10 @@ export default function MenuBrowse() {
   const [fadeIn, setFadeIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
+  const [activeItem, setActiveItem] = useState(null);
+  const [selectedOptionLabel, setSelectedOptionLabel] = useState("");
+  const [selectedAddonNames, setSelectedAddonNames] = useState([]);
+  const [imageErrors, setImageErrors] = useState({});
   const categoryScrollRef = useRef(null);
 
   useEffect(() => {
@@ -59,39 +116,130 @@ export default function MenuBrowse() {
     return matchesCategory && matchesSearch;
   });
 
-  const addToCart = (item) => {
-    const existing = cart.find((c) => c._id === item._id);
-    if (existing) {
-      setCart(cart.map((c) => c._id === item._id ? { ...c, quantity: c.quantity + 1 } : c));
-    } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
+  const getComputedPrice = (item, optionLabel, addonNames) => {
+    const options = normalizeItemOptions(item);
+    const addons = normalizeItemAddons(item);
+
+    const selectedOption = options.find((option) => option.label === optionLabel);
+    const basePrice = selectedOption
+      ? selectedOption.price
+      : asFiniteNumber(item?.price, 0);
+
+    const addonTotal = addons
+      .filter((addon) => addonNames.includes(addon.name))
+      .reduce((sum, addon) => sum + addon.price, 0);
+
+    return basePrice + addonTotal;
+  };
+
+  const getItemImageSrc = (item) => {
+    if (imageErrors[item._id]) return "";
+    return resolveMenuImageSrc(item?.image || item?.imageUrl || "");
+  };
+
+  const openItemDetails = (item) => {
+    const options = normalizeItemOptions(item);
+    setActiveItem(item);
+    setSelectedOptionLabel(options[0]?.label || "");
+    setSelectedAddonNames([]);
+  };
+
+  const closeItemDetails = () => {
+    setActiveItem(null);
+    setSelectedOptionLabel("");
+    setSelectedAddonNames([]);
+  };
+
+  const toggleAddonSelection = (addonName) => {
+    setSelectedAddonNames((prev) =>
+      prev.includes(addonName)
+        ? prev.filter((name) => name !== addonName)
+        : [...prev, addonName]
+    );
+  };
+
+  const addActiveItemToCart = () => {
+    if (!activeItem) return;
+
+    const options = normalizeItemOptions(activeItem);
+    const addons = normalizeItemAddons(activeItem);
+    const selectedOption = options.find((option) => option.label === selectedOptionLabel);
+    const chosenAddonNames = addons
+      .filter((addon) => selectedAddonNames.includes(addon.name))
+      .map((addon) => addon.name)
+      .sort();
+
+    const lineParts = [];
+    if (selectedOption?.label) lineParts.push(selectedOption.label);
+    if (chosenAddonNames.length > 0) {
+      lineParts.push(`+ ${chosenAddonNames.join(", ")}`);
     }
+
+    const displayName =
+      lineParts.length > 0
+        ? `${activeItem.name} (${lineParts.join(" | ")})`
+        : activeItem.name;
+
+    const cartKey = [
+      activeItem._id,
+      selectedOption?.label || "base",
+      chosenAddonNames.join("|") || "no-addons",
+    ].join("::");
+
+    const unitPrice = getComputedPrice(
+      activeItem,
+      selectedOption?.label || "",
+      chosenAddonNames
+    );
+
+    setCart((prev) => {
+      const existing = prev.find((entry) => entry.cartKey === cartKey);
+      if (existing) {
+        return prev.map((entry) =>
+          entry.cartKey === cartKey
+            ? { ...entry, quantity: entry.quantity + 1 }
+            : entry
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          cartKey,
+          _id: activeItem._id,
+          name: displayName,
+          menuItemName: activeItem.name,
+          quantity: 1,
+          price: unitPrice,
+          selectedOptionLabel: selectedOption?.label || "",
+          selectedAddonNames: chosenAddonNames,
+        },
+      ];
+    });
+
+    closeItemDetails();
   };
 
-  const updateQuantity = (id, qty) => {
-    if (qty <= 0) setCart(cart.filter((c) => c._id !== id));
-    else setCart(cart.map((c) => (c._id === id ? { ...c, quantity: qty } : c)));
+  const updateQuantity = (cartKey, qty) => {
+    setCart((prev) => {
+      if (qty <= 0) return prev.filter((entry) => entry.cartKey !== cartKey);
+      return prev.map((entry) =>
+        entry.cartKey === cartKey ? { ...entry, quantity: qty } : entry
+      );
+    });
   };
 
-  const getItemQty = (id) => cart.find((c) => c._id === id)?.quantity || 0;
+  const getItemQty = (id) =>
+    cart
+      .filter((entry) => entry._id === id)
+      .reduce((sum, entry) => sum + entry.quantity, 0);
 
-  const summarizeChoices = (entries, key) => {
-    if (!Array.isArray(entries)) return [];
-
-    return entries
-      .map((entry) => {
-        const label = String(entry?.[key] || "").trim();
-        if (!label) return "";
-
-        const choicePrice = Number(entry?.price);
-        if (Number.isFinite(choicePrice)) {
-          return `${label} (₹${choicePrice})`;
-        }
-
-        return label;
-      })
-      .filter(Boolean);
-  };
+  const activeOptions = activeItem ? normalizeItemOptions(activeItem) : [];
+  const activeAddons = activeItem ? normalizeItemAddons(activeItem) : [];
+  const activeImageSrc = activeItem ? getItemImageSrc(activeItem) : "";
+  const activePrice = activeItem
+    ? getComputedPrice(activeItem, selectedOptionLabel, selectedAddonNames)
+    : 0;
 
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const cartItemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
@@ -109,6 +257,10 @@ export default function MenuBrowse() {
         items: cart.map((item) => ({
           menuItemId: item._id,
           qty: item.quantity,
+          selectedOptionLabel: item.selectedOptionLabel || "",
+          selectedAddonNames: Array.isArray(item.selectedAddonNames)
+            ? item.selectedAddonNames
+            : [],
         })),
         notes: String(orderNotes || "").trim(),
       });
@@ -436,13 +588,31 @@ export default function MenuBrowse() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {filteredItems.map((item, i) => {
                     const qty = getItemQty(item._id);
-                    const options = summarizeChoices(item.options, "label");
-                    const addons = summarizeChoices(item.addons, "name");
+                    const options = normalizeItemOptions(item);
+                    const addons = normalizeItemAddons(item);
+                    const imageSrc = getItemImageSrc(item);
+                    const fromPrice =
+                      options.length > 0
+                        ? Math.min(...options.map((option) => option.price))
+                        : asFiniteNumber(item.price, 0);
+
                     return (
                       <div
                         key={item._id}
                         className="card-item"
-                        style={{ animation: `fadeUp 0.45s ease ${Math.min(i, 6) * 55}ms both` }}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openItemDetails(item)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openItemDetails(item);
+                          }
+                        }}
+                        style={{
+                          animation: `fadeUp 0.45s ease ${Math.min(i, 6) * 55}ms both`,
+                          cursor: "pointer",
+                        }}
                       >
                         <div style={{ padding: "16px 16px 14px" }}>
                           <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
@@ -477,81 +647,21 @@ export default function MenuBrowse() {
                               <p style={{
                                 fontSize: 15, fontWeight: 700, color: "#A4005D",
                                 margin: 0, fontFamily: "'Cormorant Garamond', serif",
-                              }}>₹{item.price}</p>
+                              }}>
+                                {options.length > 0 ? `From ₹${fromPrice}` : `₹${fromPrice}`}
+                              </p>
 
-                              {options.length > 0 && (
-                                <div style={{ marginTop: 8 }}>
-                                  <p style={{
-                                    margin: "0 0 4px 0",
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    letterSpacing: "0.12em",
-                                    textTransform: "uppercase",
-                                    color: "#8a7a70",
-                                  }}>
-                                    Portions
-                                  </p>
-                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                    {options.slice(0, 3).map((option, idx) => (
-                                      <span
-                                        key={`${item._id}-option-${idx}`}
-                                        style={{
-                                          fontSize: 10,
-                                          color: "#7a6a60",
-                                          background: "rgba(164,0,93,0.06)",
-                                          border: "1px solid rgba(164,0,93,0.12)",
-                                          borderRadius: 999,
-                                          padding: "2px 8px",
-                                        }}
-                                      >
-                                        {option}
-                                      </span>
-                                    ))}
-                                    {options.length > 3 && (
-                                      <span style={{ fontSize: 10, color: "#8a7a70", alignSelf: "center" }}>
-                                        +{options.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {addons.length > 0 && (
-                                <div style={{ marginTop: 8 }}>
-                                  <p style={{
-                                    margin: "0 0 4px 0",
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    letterSpacing: "0.12em",
-                                    textTransform: "uppercase",
-                                    color: "#8a7a70",
-                                  }}>
-                                    Add-ons
-                                  </p>
-                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                    {addons.slice(0, 3).map((addon, idx) => (
-                                      <span
-                                        key={`${item._id}-addon-${idx}`}
-                                        style={{
-                                          fontSize: 10,
-                                          color: "#7a6a60",
-                                          background: "rgba(26,20,16,0.05)",
-                                          border: "1px solid rgba(26,20,16,0.1)",
-                                          borderRadius: 999,
-                                          padding: "2px 8px",
-                                        }}
-                                      >
-                                        {addon}
-                                      </span>
-                                    ))}
-                                    {addons.length > 3 && (
-                                      <span style={{ fontSize: 10, color: "#8a7a70", alignSelf: "center" }}>
-                                        +{addons.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
+                              <p style={{
+                                margin: "6px 0 0 0",
+                                fontSize: 10,
+                                fontWeight: 700,
+                                letterSpacing: "0.11em",
+                                textTransform: "uppercase",
+                                color: "#8a7a70",
+                              }}>
+                                Tap to choose {options.length > 0 ? "portion" : "details"}
+                                {addons.length > 0 ? " & add-ons" : ""}
+                              </p>
                             </div>
 
                             <div style={{
@@ -562,74 +672,52 @@ export default function MenuBrowse() {
                               gap: 8,
                               paddingTop: 2,
                             }}>
-                              {item.image && (
+                              {imageSrc ? (
                                 <img
-                                  src={item.image}
+                                  src={imageSrc}
                                   alt={item.name}
-                                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                                  onError={() => {
+                                    setImageErrors((prev) => ({ ...prev, [item._id]: true }));
+                                  }}
                                   style={{
-                                    width: 72,
-                                    height: 72,
+                                    width: 76,
+                                    height: 76,
                                     objectFit: "cover",
                                     borderRadius: 12,
                                     border: "1px solid rgba(164,0,93,0.12)",
                                     background: "#fff",
                                   }}
                                 />
-                              )}
-
-                              {qty === 0 ? (
-                                <button
-                                  onClick={() => addToCart(item)}
-                                  style={{
-                                    background: "linear-gradient(90deg,#A4005D,#C44A87)",
-                                    color: "#fff", border: "none", borderRadius: 12,
-                                    padding: "9px 16px", fontSize: 13, fontWeight: 700,
-                                    cursor: "pointer", letterSpacing: "0.04em",
-                                    boxShadow: "0 3px 10px rgba(164,0,93,0.25)",
-                                    animation: "scaleIn 0.3s ease",
-                                  }}
-                                  onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.94)"; }}
-                                  onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-                                >Add +</button>
                               ) : (
                                 <div style={{
-                                  display: "flex", alignItems: "center", gap: 8,
-                                  background: "rgba(164,0,93,0.07)", borderRadius: 12,
-                                  padding: "4px 6px", border: "1px solid rgba(164,0,93,0.14)",
-                                  animation: "scaleIn 0.25s ease",
+                                  width: 76,
+                                  height: 76,
+                                  borderRadius: 12,
+                                  border: "1px solid rgba(164,0,93,0.12)",
+                                  background: "linear-gradient(135deg, rgba(164,0,93,0.12), rgba(196,74,135,0.08))",
+                                  color: "#A4005D",
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  letterSpacing: "0.04em",
                                 }}>
-                                  <button
-                                    className="qty-btn"
-                                    onClick={() => updateQuantity(item._id, qty - 1)}
-                                    style={{
-                                      width: 28, height: 28, borderRadius: 8,
-                                      background: "rgba(164,0,93,0.12)", border: "none",
-                                      color: "#A4005D", cursor: "pointer",
-                                      display: "flex", alignItems: "center", justifyContent: "center",
-                                    }}
-                                  >
-                                    {qty === 1 ? (
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="#A4005D" strokeWidth="2.5" style={{ width: 12, height: 12 }}>
-                                        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-                                      </svg>
-                                    ) : <span style={{ fontSize: 16, fontWeight: 700 }}>−</span>}
-                                  </button>
-                                  <span style={{
-                                    fontSize: 14, fontWeight: 700, color: "#A4005D",
-                                    minWidth: 16, textAlign: "center",
-                                  }}>{qty}</span>
-                                  <button
-                                    className="qty-btn"
-                                    onClick={() => updateQuantity(item._id, qty + 1)}
-                                    style={{
-                                      width: 28, height: 28, borderRadius: 8,
-                                      background: "linear-gradient(90deg,#A4005D,#C44A87)",
-                                      border: "none", color: "#fff", fontSize: 18, fontWeight: 700,
-                                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                                      boxShadow: "0 2px 6px rgba(164,0,93,0.2)",
-                                    }}
-                                  >+</button>
+                                  Dish
+                                </div>
+                              )}
+
+                              {qty > 0 && (
+                                <div style={{
+                                  background: "rgba(164,0,93,0.09)",
+                                  border: "1px solid rgba(164,0,93,0.16)",
+                                  borderRadius: 999,
+                                  padding: "4px 10px",
+                                  fontSize: 11,
+                                  color: "#A4005D",
+                                  fontWeight: 700,
+                                }}>
+                                  In cart: {qty}
                                 </div>
                               )}
                             </div>
@@ -696,6 +784,298 @@ export default function MenuBrowse() {
 
         <GuestBottomNav />
 
+        {/* ══ ITEM DETAILS SHEET ══ */}
+        {activeItem && (
+          <>
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.45)",
+                zIndex: OVERLAY_Z,
+                animation: "fadeIn 0.25s ease",
+              }}
+              onClick={closeItemDetails}
+            />
+
+            <div
+              className="cart-sheet"
+              style={{
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                maxWidth: 430,
+                margin: "0 auto",
+                background: "#EFE1CF",
+                borderRadius: "24px 24px 0 0",
+                maxHeight: "86vh",
+                overflowY: "auto",
+                zIndex: OVERLAY_Z + 1,
+                animation: "slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both",
+                paddingBottom: "env(safe-area-inset-bottom, 0px)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 0" }}>
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(164,0,93,0.2)" }} />
+              </div>
+
+              <div style={{ padding: "10px 20px 20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div>
+                    <p style={{
+                      margin: 0,
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "#6B6B6B",
+                    }}>
+                      Customize Dish
+                    </p>
+                    <h3 style={{
+                      margin: "2px 0 0 0",
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 24,
+                      fontStyle: "italic",
+                      color: "#1F1F1F",
+                    }}>
+                      {activeItem.name}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={closeItemDetails}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      background: "rgba(164,0,93,0.08)",
+                      border: "none",
+                      color: "#A4005D",
+                      fontSize: 16,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div style={{
+                  background: "#fff",
+                  borderRadius: 16,
+                  border: "1px solid rgba(164,0,93,0.1)",
+                  padding: 12,
+                  display: "flex",
+                  gap: 12,
+                  marginBottom: 14,
+                }}>
+                  {activeImageSrc ? (
+                    <img
+                      src={activeImageSrc}
+                      alt={activeItem.name}
+                      onError={() => {
+                        setImageErrors((prev) => ({ ...prev, [activeItem._id]: true }));
+                      }}
+                      style={{
+                        width: 84,
+                        height: 84,
+                        objectFit: "cover",
+                        borderRadius: 12,
+                        border: "1px solid rgba(164,0,93,0.12)",
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 84,
+                      height: 84,
+                      borderRadius: 12,
+                      border: "1px solid rgba(164,0,93,0.12)",
+                      background: "linear-gradient(135deg, rgba(164,0,93,0.12), rgba(196,74,135,0.08))",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#A4005D",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}>
+                      Dish
+                    </div>
+                  )}
+
+                  <div style={{ minWidth: 0 }}>
+                    {activeItem.description ? (
+                      <p style={{ margin: "0 0 8px 0", fontSize: 12, color: "#7a6a60", lineHeight: 1.5 }}>
+                        {activeItem.description}
+                      </p>
+                    ) : (
+                      <p style={{ margin: "0 0 8px 0", fontSize: 12, color: "#8a7a70" }}>
+                        Select portion and add-ons before adding.
+                      </p>
+                    )}
+                    <p style={{
+                      margin: 0,
+                      fontSize: 16,
+                      color: "#A4005D",
+                      fontWeight: 700,
+                      fontFamily: "'Cormorant Garamond', serif",
+                    }}>
+                      Base ₹{asFiniteNumber(activeItem.price, 0)}
+                    </p>
+                  </div>
+                </div>
+
+                {activeOptions.length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <p style={{
+                      margin: "0 0 8px 0",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "#6B6B6B",
+                    }}>
+                      Portions
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {activeOptions.map((option) => (
+                        <label
+                          key={`${activeItem._id}-opt-${option.label}`}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            background:
+                              selectedOptionLabel === option.label
+                                ? "rgba(164,0,93,0.08)"
+                                : "#fff",
+                            border:
+                              selectedOptionLabel === option.label
+                                ? "1px solid rgba(164,0,93,0.22)"
+                                : "1px solid rgba(164,0,93,0.12)",
+                            borderRadius: 12,
+                            padding: "10px 12px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                            <input
+                              type="radio"
+                              name="item-portion"
+                              checked={selectedOptionLabel === option.label}
+                              onChange={() => setSelectedOptionLabel(option.label)}
+                            />
+                            <span style={{ fontSize: 13, color: "#1F1F1F", fontWeight: 600 }}>
+                              {option.label}
+                            </span>
+                          </span>
+                          <span style={{ fontSize: 13, color: "#A4005D", fontWeight: 700 }}>
+                            ₹{option.price}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeAddons.length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <p style={{
+                      margin: "0 0 8px 0",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "#6B6B6B",
+                    }}>
+                      Add-ons
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {activeAddons.map((addon) => (
+                        <label
+                          key={`${activeItem._id}-addon-${addon.name}`}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            background: selectedAddonNames.includes(addon.name)
+                              ? "rgba(164,0,93,0.08)"
+                              : "#fff",
+                            border: selectedAddonNames.includes(addon.name)
+                              ? "1px solid rgba(164,0,93,0.22)"
+                              : "1px solid rgba(164,0,93,0.12)",
+                            borderRadius: 12,
+                            padding: "10px 12px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                            <input
+                              type="checkbox"
+                              checked={selectedAddonNames.includes(addon.name)}
+                              onChange={() => toggleAddonSelection(addon.name)}
+                            />
+                            <span style={{ fontSize: 13, color: "#1F1F1F", fontWeight: 600 }}>
+                              {addon.name}
+                            </span>
+                          </span>
+                          <span style={{ fontSize: 13, color: "#A4005D", fontWeight: 700 }}>
+                            +₹{addon.price}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{
+                  background: "#fff",
+                  border: "1px solid rgba(164,0,93,0.12)",
+                  borderRadius: 14,
+                  padding: "12px 14px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}>
+                  <span style={{ fontSize: 12, color: "#6B6B6B", letterSpacing: "0.08em", fontWeight: 700 }}>
+                    ITEM PRICE
+                  </span>
+                  <span style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 24,
+                    fontWeight: 700,
+                    color: "#A4005D",
+                    lineHeight: 1,
+                  }}>
+                    ₹{activePrice}
+                  </span>
+                </div>
+
+                <button
+                  onClick={addActiveItemToCart}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    border: "none",
+                    borderRadius: 14,
+                    background: "linear-gradient(90deg,#A4005D,#C44A87)",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 15,
+                    letterSpacing: "0.03em",
+                    cursor: "pointer",
+                    boxShadow: "0 5px 18px rgba(164,0,93,0.3)",
+                  }}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* ══ CART SHEET ══ */}
         {showCart && (
           <>
@@ -748,7 +1128,7 @@ export default function MenuBrowse() {
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
                   {cart.map((item) => (
-                    <div key={item._id} style={{
+                    <div key={item.cartKey || item._id} style={{
                       background: "#fff", borderRadius: 16, padding: "12px 14px",
                       border: "1px solid rgba(164,0,93,0.07)",
                       display: "flex", alignItems: "center", gap: 12,
@@ -763,7 +1143,7 @@ export default function MenuBrowse() {
                         </p>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <button className="qty-btn" onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                        <button className="qty-btn" onClick={() => updateQuantity(item.cartKey || item._id, item.quantity - 1)}
                           style={{
                             width: 28, height: 28, borderRadius: 8,
                             background: "rgba(164,0,93,0.1)", border: "none",
@@ -779,7 +1159,7 @@ export default function MenuBrowse() {
                         <span style={{ fontSize: 14, fontWeight: 700, color: "#1F1F1F", minWidth: 16, textAlign: "center" }}>
                           {item.quantity}
                         </span>
-                        <button className="qty-btn" onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                        <button className="qty-btn" onClick={() => updateQuantity(item.cartKey || item._id, item.quantity + 1)}
                           style={{
                             width: 28, height: 28, borderRadius: 8,
                             background: "linear-gradient(90deg,#A4005D,#C44A87)",
@@ -890,7 +1270,7 @@ export default function MenuBrowse() {
                 border: "1px solid rgba(164,0,93,0.08)",
               }}>
                 {cart.map((item) => (
-                  <div key={item._id} style={{
+                  <div key={item.cartKey || item._id} style={{
                     display: "flex", justifyContent: "space-between",
                     padding: "6px 0", fontSize: 13, color: "#1F1F1F",
                     borderBottom: "1px solid rgba(164,0,93,0.05)",

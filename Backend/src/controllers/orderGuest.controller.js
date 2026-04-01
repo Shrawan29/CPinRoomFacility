@@ -6,6 +6,20 @@ const AUTO_DELIVER_AFTER_MS = 10 * 60 * 1000;
 // Default is disabled so reporting keeps history unless explicitly enabled.
 const DEFAULT_ORDER_RETENTION_DAYS = 0;
 
+const normalizeLabel = (value) => String(value || "").trim();
+
+const normalizeRequestedAddons = (value) => {
+  if (!Array.isArray(value)) return [];
+
+  const unique = new Set();
+  value.forEach((entry) => {
+    const label = normalizeLabel(entry);
+    if (label) unique.add(label.toLowerCase());
+  });
+
+  return Array.from(unique);
+};
+
 const autoDeliverReadyOrdersForRoom = async (roomNumber) => {
   const cutoff = new Date(Date.now() - AUTO_DELIVER_AFTER_MS);
 
@@ -49,15 +63,75 @@ export const placeOrder = async (req, res) => {
           .json({ message: "One or more items are unavailable" });
       }
 
-      const qty = item.qty || 1;
-      const price = menuItem.price;
+      const parsedQty = Number(item?.qty);
+      const qty = Number.isFinite(parsedQty) && parsedQty > 0
+        ? Math.floor(parsedQty)
+        : 1;
 
-      totalAmount += price * qty;
+      const optionLabel = normalizeLabel(item?.selectedOptionLabel).toLowerCase();
+      const addonNames = normalizeRequestedAddons(item?.selectedAddonNames);
+
+      const availableOptions = Array.isArray(menuItem.options)
+        ? menuItem.options
+        : [];
+      const availableAddons = Array.isArray(menuItem.addons)
+        ? menuItem.addons
+        : [];
+
+      let unitPrice = Number(menuItem.price) || 0;
+      let selectedOptionName = "";
+
+      if (optionLabel) {
+        const matchedOption = availableOptions.find(
+          (option) => normalizeLabel(option?.label).toLowerCase() === optionLabel
+        );
+
+        if (matchedOption) {
+          unitPrice = Number(matchedOption.price) || unitPrice;
+          selectedOptionName = normalizeLabel(matchedOption.label);
+        }
+      }
+
+      const selectedAddonEntries = addonNames
+        .map((addonName) =>
+          availableAddons.find(
+            (addon) => normalizeLabel(addon?.name).toLowerCase() === addonName
+          )
+        )
+        .filter(Boolean);
+
+      const addonPrice = selectedAddonEntries.reduce(
+        (sum, addon) => sum + (Number(addon.price) || 0),
+        0
+      );
+
+      const selectedAddonLabels = [
+        ...new Set(
+          selectedAddonEntries
+            .map((addon) => normalizeLabel(addon.name))
+            .filter(Boolean)
+        ),
+      ];
+
+      unitPrice = Math.max(0, unitPrice + addonPrice);
+
+      const lineDetails = [];
+      if (selectedOptionName) lineDetails.push(selectedOptionName);
+      if (selectedAddonLabels.length > 0) {
+        lineDetails.push(`+ ${selectedAddonLabels.join(", ")}`);
+      }
+
+      const lineName =
+        lineDetails.length > 0
+          ? `${menuItem.name} (${lineDetails.join(" | ")})`
+          : menuItem.name;
+
+      totalAmount += unitPrice * qty;
 
       orderItems.push({
-        name: menuItem.name,
+        name: lineName,
         qty,
-        price,
+        price: unitPrice,
       });
     }
 
