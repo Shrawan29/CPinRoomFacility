@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useGuestAuth } from "../../context/GuestAuthContext";
 import { getGuestMenu, placeOrder } from "../../services/guest.service";
+import {
+  extractMenuImageValue,
+  resolveMenuImageSrc,
+} from "../../services/menuImage.service";
 import { useNavigate } from "react-router-dom";
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
 
@@ -38,30 +42,6 @@ const normalizeItemAddons = (item) => {
       price: asFiniteNumber(addon?.price, NaN),
     }))
     .filter((addon) => addon.name && Number.isFinite(addon.price) && addon.price >= 0);
-};
-
-const resolveMenuImageSrc = (value) => {
-  const raw = normalizeText(value);
-  if (!raw) return "";
-  if (/^data:image\//i.test(raw)) return raw;
-
-  try {
-    return new URL(raw).toString();
-  } catch {
-    // Relative URL handling below.
-  }
-
-  const baseUrl =
-    import.meta.env.VITE_API_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "");
-
-  if (!baseUrl) return raw;
-
-  try {
-    return new URL(raw, baseUrl).toString();
-  } catch {
-    return raw;
-  }
 };
 
 export default function MenuBrowse() {
@@ -134,7 +114,7 @@ export default function MenuBrowse() {
 
   const getItemImageSrc = (item) => {
     if (imageErrors[item._id]) return "";
-    return resolveMenuImageSrc(item?.image || item?.imageUrl || "");
+    return resolveMenuImageSrc(extractMenuImageValue(item));
   };
 
   const openItemDetails = (item) => {
@@ -591,6 +571,7 @@ export default function MenuBrowse() {
                     const options = normalizeItemOptions(item);
                     const addons = normalizeItemAddons(item);
                     const imageSrc = getItemImageSrc(item);
+                    const showImagePanel = Boolean(imageSrc) || qty > 0;
                     const fromPrice =
                       options.length > 0
                         ? Math.min(...options.map((option) => option.price))
@@ -664,63 +645,48 @@ export default function MenuBrowse() {
                               </p>
                             </div>
 
-                            <div style={{
-                              flexShrink: 0,
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "flex-end",
-                              gap: 8,
-                              paddingTop: 2,
-                            }}>
-                              {imageSrc ? (
-                                <img
-                                  src={imageSrc}
-                                  alt={item.name}
-                                  onError={() => {
-                                    setImageErrors((prev) => ({ ...prev, [item._id]: true }));
-                                  }}
-                                  style={{
-                                    width: 76,
-                                    height: 76,
-                                    objectFit: "cover",
-                                    borderRadius: 12,
-                                    border: "1px solid rgba(164,0,93,0.12)",
-                                    background: "#fff",
-                                  }}
-                                />
-                              ) : (
-                                <div style={{
-                                  width: 76,
-                                  height: 76,
-                                  borderRadius: 12,
-                                  border: "1px solid rgba(164,0,93,0.12)",
-                                  background: "linear-gradient(135deg, rgba(164,0,93,0.12), rgba(196,74,135,0.08))",
-                                  color: "#A4005D",
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  letterSpacing: "0.04em",
-                                }}>
-                                  Dish
-                                </div>
-                              )}
+                            {showImagePanel && (
+                              <div style={{
+                                flexShrink: 0,
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "flex-end",
+                                gap: 8,
+                                paddingTop: 2,
+                              }}>
+                                {imageSrc && (
+                                  <img
+                                    src={imageSrc}
+                                    alt={item.name}
+                                    onError={() => {
+                                      setImageErrors((prev) => ({ ...prev, [item._id]: true }));
+                                    }}
+                                    style={{
+                                      width: 76,
+                                      height: 76,
+                                      objectFit: "cover",
+                                      borderRadius: 12,
+                                      border: "1px solid rgba(164,0,93,0.12)",
+                                      background: "#fff",
+                                    }}
+                                  />
+                                )}
 
-                              {qty > 0 && (
-                                <div style={{
-                                  background: "rgba(164,0,93,0.09)",
-                                  border: "1px solid rgba(164,0,93,0.16)",
-                                  borderRadius: 999,
-                                  padding: "4px 10px",
-                                  fontSize: 11,
-                                  color: "#A4005D",
-                                  fontWeight: 700,
-                                }}>
-                                  In cart: {qty}
-                                </div>
-                              )}
-                            </div>
+                                {qty > 0 && (
+                                  <div style={{
+                                    background: "rgba(164,0,93,0.09)",
+                                    border: "1px solid rgba(164,0,93,0.16)",
+                                    borderRadius: 999,
+                                    padding: "4px 10px",
+                                    fontSize: 11,
+                                    color: "#A4005D",
+                                    fontWeight: 700,
+                                  }}>
+                                    In cart: {qty}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                         {qty > 0 && (
@@ -869,7 +835,7 @@ export default function MenuBrowse() {
                   gap: 12,
                   marginBottom: 14,
                 }}>
-                  {activeImageSrc ? (
+                  {activeImageSrc && (
                     <img
                       src={activeImageSrc}
                       alt={activeItem.name}
@@ -885,26 +851,9 @@ export default function MenuBrowse() {
                         flexShrink: 0,
                       }}
                     />
-                  ) : (
-                    <div style={{
-                      width: 84,
-                      height: 84,
-                      borderRadius: 12,
-                      border: "1px solid rgba(164,0,93,0.12)",
-                      background: "linear-gradient(135deg, rgba(164,0,93,0.12), rgba(196,74,135,0.08))",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#A4005D",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}>
-                      Dish
-                    </div>
                   )}
 
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
                     {activeItem.description ? (
                       <p style={{ margin: "0 0 8px 0", fontSize: 12, color: "#7a6a60", lineHeight: 1.5 }}>
                         {activeItem.description}

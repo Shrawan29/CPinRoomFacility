@@ -6,6 +6,10 @@ import {
   deleteMenuItem,
   updateMenuItem,
 } from "../../../services/menu.service.js";
+import {
+  extractMenuImageValue,
+  resolveMenuImageSrc,
+} from "../../../services/menuImage.service";
 import MenuFormModal from "./MenuFormModal";
 import { exportMenuToExcel, importMenuFromExcel } from "../../../services/excelMenu.service";
 import api from "../../../services/api";
@@ -28,6 +32,7 @@ export default function KitchenMenu() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState({});
 
   const [editingItem, setEditingItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -74,6 +79,11 @@ export default function KitchenMenu() {
     selectedCategory === "All" || !selectedCategory
       ? menu
       : menu.filter((item) => item.category === selectedCategory);
+
+  const getItemImageSrc = (item) => {
+    if (imageErrors[item._id]) return "";
+    return resolveMenuImageSrc(extractMenuImageValue(item));
+  };
 
   /* ============================
      ACTIONS
@@ -200,18 +210,23 @@ export default function KitchenMenu() {
             </thead>
 
             <tbody>
-              {filteredMenu.map((item) => (
+              {filteredMenu.map((item) => {
+                const imageSrc = getItemImageSrc(item);
+
+                return (
                 <tr
                   key={item._id}
                   className="border-t border-black/10 hover:bg-black/5"
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-start gap-3">
-                      {item.image ? (
+                      {imageSrc ? (
                         <img
-                          src={item.image}
+                          src={imageSrc}
                           alt={item.name}
-                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          onError={() => {
+                            setImageErrors((prev) => ({ ...prev, [item._id]: true }));
+                          }}
                           className="h-12 w-12 rounded-lg object-cover border border-black/10 bg-white"
                         />
                       ) : (
@@ -290,7 +305,8 @@ export default function KitchenMenu() {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
 
               {filteredMenu.length === 0 && (
                 <tr>
