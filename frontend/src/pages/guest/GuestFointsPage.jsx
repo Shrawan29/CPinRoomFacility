@@ -729,6 +729,29 @@ export default function GuestFointsPage() {
           color: #4f564b;
         }
 
+        .fp-reelo-redeem {
+          margin-top: 10px;
+          border-radius: 12px;
+          background: #ececec;
+          border: 1px solid #e2e2e2;
+          padding: 12px;
+        }
+
+        .fp-reelo-redeem-title {
+          margin: 0 0 6px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #1f1f1f;
+          line-height: 1.3;
+        }
+
+        .fp-reelo-redeem-text {
+          margin: 0;
+          font-size: 12px;
+          color: #2f2f2f;
+          line-height: 1.45;
+        }
+
         .fp-cta {
           position: relative;
           overflow: hidden;
@@ -1013,6 +1036,13 @@ export default function GuestFointsPage() {
                 ) : (
                   <div className="fp-reelo-empty">No active offers at the moment.</div>
                 )}
+
+                <div className="fp-reelo-redeem">
+                  <p className="fp-reelo-redeem-title">How to Redeem?</p>
+                  <p className="fp-reelo-redeem-text">
+                    Give your mobile number to our team member on your next purchase and ask them to redeem.
+                  </p>
+                </div>
               </div>
             </>
           )}
