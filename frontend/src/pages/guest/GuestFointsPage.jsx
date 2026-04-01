@@ -21,33 +21,39 @@ const outlets = [
 const StableNav = memo(GuestBottomNav);
 
 const REELO_LINKS = {
-  check: "https://l.reelo.io/DQbBj",
-  register: "https://l.reelo.io/xQTqO",
+  check: "https://app.reelo.io/l/DQbBj",
+  register: "https://app.reelo.io/l/xQTqO",
 };
 
-const PHONE_FIELD_KEYS = ["contact", "number", "phone", "mobile", "whatsapp"];
-const NAME_FIELD_KEYS = ["name", "full_name", "first_name", "firstName"];
+const PHONE_FIELD_KEYS = [
+  "contact",
+  "contact_number",
+  "number",
+  "phone",
+  "phone_number",
+  "mobile",
+  "mobile_numbers",
+  "whatsapp",
+];
+const NAME_FIELD_KEYS = [
+  "name",
+  "full_name",
+  "first_name",
+  "firstName",
+  "user_firstname",
+];
 
 const sanitizePhone = (value) => String(value || "").replace(/\D/g, "").slice(0, 15);
 
 const submitReeloPrefilledForm = ({ flow, name, phone }) => {
-  if (typeof document === "undefined") return;
+  if (typeof window === "undefined") return;
 
   const targetUrl = REELO_LINKS[flow];
   if (!targetUrl) return;
 
-  const form = document.createElement("form");
-  form.method = "GET";
-  form.action = targetUrl;
-  form.target = "_blank";
-  form.style.display = "none";
-
+  const params = new URLSearchParams();
   const appendField = (key, value) => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = key;
-    input.value = String(value || "");
-    form.appendChild(input);
+    params.set(key, String(value || ""));
   };
 
   const normalizedPhone = sanitizePhone(phone);
@@ -61,9 +67,12 @@ const submitReeloPrefilledForm = ({ flow, name, phone }) => {
   appendField("utm_source", "cp-inroom");
   appendField("source", "cp-inroom");
 
-  document.body.appendChild(form);
-  form.submit();
-  form.remove();
+  const finalUrl = `${targetUrl}?${params.toString()}`;
+
+  const popup = window.open(finalUrl, "_blank", "noopener,noreferrer");
+  if (!popup) {
+    window.location.assign(finalUrl);
+  }
 };
 
 const perks = [
