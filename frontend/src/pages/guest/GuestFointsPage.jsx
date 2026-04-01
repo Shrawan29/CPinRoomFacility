@@ -42,13 +42,13 @@ const perks = [
 
 const StableNav = memo(GuestBottomNav);
 
+const REELO_PAGE_URLS = {
+  check: "https://app.reelo.io/l/DQbBj",
+  register: "https://app.reelo.io/l/xQTqO",
+};
+
 const sanitizePhone = (value) => String(value || "").replace(/\D/g, "").slice(0, 15);
 const sanitizeName = (value) => String(value || "").trim();
-
-const getNumericValue = (value) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
 
 const getGuestName = (guest) =>
   sanitizeName(guest?.guestName || guest?.name || guest?.fullName || "");
@@ -88,51 +88,35 @@ const getGuestPhone = (guest) => {
   return "";
 };
 
-const buildLeadNotice = (flow, submission) => {
+const getLeadErrorMessage = (flow, submission) => {
   const message = String(submission?.message || "").trim();
 
   if (flow === "check") {
     if (/customer not found/i.test(message)) {
-      return {
-        tone: "error",
-        text: "No Foints account was found for this mobile number.",
-      };
+      return "No Foints account was found for this mobile number.";
     }
 
-    const points = getNumericValue(submission?.payload?.customer_points?.current_points);
-    if (points !== null) {
-      return {
-        tone: "success",
-        text: `Points fetched successfully. Current balance: ${points} Foints.`,
-      };
-    }
-
-    return {
-      tone: "success",
-      text: message || "Points details fetched successfully.",
-    };
+    return "";
   }
 
   if (flow === "register") {
     const resultType = String(submission?.payload?.res_type || "").toLowerCase();
 
     if (resultType === "for_new_customer_only" || resultType === "inactive_qr_code") {
-      return {
-        tone: "error",
-        text: message || "Registration could not be completed for this number.",
-      };
+      return message || "Registration could not be completed for this number.";
     }
 
-    return {
-      tone: "success",
-      text: message || "Registration completed successfully.",
-    };
+    return "";
   }
 
-  return {
-    tone: "success",
-    text: "Submitted successfully.",
-  };
+  return "";
+};
+
+const redirectToReeloPage = (flow) => {
+  const url = REELO_PAGE_URLS[flow];
+  if (!url) return;
+
+  window.location.assign(url);
 };
 
 export default function GuestFointsPage() {
@@ -144,12 +128,10 @@ export default function GuestFointsPage() {
   const [leadPhone, setLeadPhone] = useState("");
   const [leadError, setLeadError] = useState("");
   const [leadSubmitting, setLeadSubmitting] = useState(false);
-  const [leadNotice, setLeadNotice] = useState(null);
 
   const openLeadFlow = (flow) => {
     setActiveLeadFlow(flow);
     setLeadError("");
-    setLeadNotice(null);
     setLeadPhone(getGuestPhone(guest));
     setLeadName(flow === "register" ? getGuestName(guest) : "");
   };
@@ -194,9 +176,15 @@ export default function GuestFointsPage() {
         phone: normalizedPhone,
       });
 
-      setLeadNotice(buildLeadNotice(currentFlow, response?.submission));
+      const submissionError = getLeadErrorMessage(currentFlow, response?.submission);
+      if (submissionError) {
+        setLeadError(submissionError);
+        return;
+      }
+
       setActiveLeadFlow("");
       setLeadError("");
+      redirectToReeloPage(currentFlow);
     } catch (error) {
       setLeadError(error?.message || "Unable to continue. Please try again.");
     } finally {
@@ -551,27 +539,6 @@ export default function GuestFointsPage() {
           margin-bottom: 20px;
         }
 
-        .fp-lead-notice {
-          border-radius: 12px;
-          padding: 10px 12px;
-          font-size: 12px;
-          line-height: 1.45;
-          margin: -8px 0 16px;
-          border: 1px solid;
-        }
-
-        .fp-lead-notice.success {
-          color: #0f5f59;
-          border-color: rgba(15,95,89,0.26);
-          background: rgba(15,95,89,0.08);
-        }
-
-        .fp-lead-notice.error {
-          color: #8a1e1e;
-          border-color: rgba(138,30,30,0.24);
-          background: rgba(138,30,30,0.08);
-        }
-
         .fp-cta {
           position: relative;
           overflow: hidden;
@@ -824,12 +791,6 @@ export default function GuestFointsPage() {
               <span className="fp-cta-sub">Join for free</span>
             </button>
           </div>
-
-          {leadNotice && (
-            <div className={`fp-lead-notice ${leadNotice.tone}`}>
-              {leadNotice.text}
-            </div>
-          )}
 
           <div className="fp-contact">
             <div className="fp-contact-row">
