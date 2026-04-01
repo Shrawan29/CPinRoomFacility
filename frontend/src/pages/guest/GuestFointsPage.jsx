@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import fointsLogo from "../../assets/foints-logo.png"; // the removebg Foints logo
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { useGuestAuth } from "../../context/GuestAuthContext";
 
 const outlets = [
   { name: "Meeting Point",           icon: "☕" },
@@ -19,6 +20,52 @@ const outlets = [
 
 const StableNav = memo(GuestBottomNav);
 
+const REELO_LINKS = {
+  check: "https://l.reelo.io/DQbBj",
+  register: "https://l.reelo.io/xQTqO",
+};
+
+const PHONE_FIELD_KEYS = ["contact", "number", "phone", "mobile", "whatsapp"];
+const NAME_FIELD_KEYS = ["name", "full_name", "first_name", "firstName"];
+
+const sanitizePhone = (value) => String(value || "").replace(/\D/g, "").slice(0, 15);
+
+const submitReeloPrefilledForm = ({ flow, name, phone }) => {
+  if (typeof document === "undefined") return;
+
+  const targetUrl = REELO_LINKS[flow];
+  if (!targetUrl) return;
+
+  const form = document.createElement("form");
+  form.method = "GET";
+  form.action = targetUrl;
+  form.target = "_blank";
+  form.style.display = "none";
+
+  const appendField = (key, value) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = key;
+    input.value = String(value || "");
+    form.appendChild(input);
+  };
+
+  const normalizedPhone = sanitizePhone(phone);
+  PHONE_FIELD_KEYS.forEach((key) => appendField(key, normalizedPhone));
+
+  if (flow === "register") {
+    const normalizedName = String(name || "").trim();
+    NAME_FIELD_KEYS.forEach((key) => appendField(key, normalizedName));
+  }
+
+  appendField("utm_source", "cp-inroom");
+  appendField("source", "cp-inroom");
+
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+};
+
 const perks = [
   { value: "10%",    label: "Cashback as Foints",          sub: "on every visit at any outlet",       color: "#0b918a" },
   { value: "2×",     label: "Doubled Cashback",             sub: "on your 5th visit at any outlet",    color: "#0f6b65" },
@@ -27,6 +74,48 @@ const perks = [
 
 export default function GuestFointsPage() {
   const navigate = useNavigate();
+  const { guest } = useGuestAuth();
+
+  const [activeLeadFlow, setActiveLeadFlow] = useState("");
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadError, setLeadError] = useState("");
+
+  const openLeadFlow = (flow) => {
+    setActiveLeadFlow(flow);
+    setLeadError("");
+    setLeadPhone("");
+    setLeadName(flow === "register" ? String(guest?.name || "").trim() : "");
+  };
+
+  const closeLeadFlow = () => {
+    setActiveLeadFlow("");
+    setLeadError("");
+  };
+
+  const handleLeadSubmit = (e) => {
+    e.preventDefault();
+
+    const normalizedPhone = sanitizePhone(leadPhone);
+    const normalizedName = String(leadName || "").trim();
+
+    if (normalizedPhone.length < 10) {
+      setLeadError("Please enter a valid mobile number.");
+      return;
+    }
+
+    if (activeLeadFlow === "register" && normalizedName.length < 2) {
+      setLeadError("Please enter your name.");
+      return;
+    }
+
+    submitReeloPrefilledForm({
+      flow: activeLeadFlow,
+      name: normalizedName,
+      phone: normalizedPhone,
+    });
+    closeLeadFlow();
+  };
 
   return (
     <>
@@ -337,6 +426,100 @@ export default function GuestFointsPage() {
         .fp-contact-row { font-size: 11px; color: #6B6B6B; margin-bottom: 5px; line-height: 1.6; }
         .fp-contact-row:last-child { margin-bottom: 0; }
 
+        /* modal */
+        .fp-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 10040;
+          background: rgba(20, 16, 8, 0.46);
+          backdrop-filter: blur(3px);
+        }
+        .fp-modal-card {
+          position: fixed;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 10041;
+          width: min(92vw, 360px);
+          border-radius: 16px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0.98), rgba(255,247,202,0.90));
+          border: 1.2px solid rgba(255,255,255,0.75);
+          box-shadow: 0 16px 42px rgba(26,20,16,0.28);
+          padding: 16px;
+        }
+        .fp-modal-kicker {
+          margin: 0 0 4px 0;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #7a6a48;
+        }
+        .fp-modal-title {
+          margin: 0 0 4px 0;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 25px;
+          font-style: italic;
+          color: #1f1f1f;
+          line-height: 1;
+        }
+        .fp-modal-sub {
+          margin: 0 0 10px 0;
+          font-size: 12px;
+          line-height: 1.45;
+          color: #5f5541;
+        }
+        .fp-modal-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 600;
+          color: #5f5541;
+          margin-bottom: 4px;
+        }
+        .fp-modal-input {
+          width: 100%;
+          border-radius: 10px;
+          border: 1px solid rgba(121, 92, 0, 0.24);
+          background: rgba(255,255,255,0.96);
+          color: #1f1f1f;
+          padding: 10px 12px;
+          font-size: 14px;
+          outline: none;
+          margin-bottom: 10px;
+        }
+        .fp-modal-input:focus {
+          border-color: rgba(245,158,11,0.7);
+          box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+        }
+        .fp-modal-error {
+          margin: 0 0 10px 0;
+          font-size: 12px;
+          color: #b91c1c;
+        }
+        .fp-modal-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        .fp-modal-btn {
+          border-radius: 10px;
+          border: none;
+          padding: 10px 8px;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .fp-modal-btn-cancel {
+          background: transparent;
+          color: #735e39;
+          border: 1px solid rgba(121, 92, 0, 0.26);
+        }
+        .fp-modal-btn-submit {
+          color: #fff;
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+          box-shadow: 0 6px 18px rgba(217,119,6,0.32);
+        }
+
         /* divider */
         .fp-divider {
           display: flex; align-items: center; gap: 12px;
@@ -439,18 +622,18 @@ export default function GuestFointsPage() {
           {/* CTAs */}
           <div className="fp-divider"><div className="fp-divider-line"/><div className="fp-divider-diamond"/><div className="fp-divider-line"/></div>
           <div className="fp-ctas">
-            <a href="https://l.reelo.io/DQbBj" target="_blank" rel="noopener noreferrer" className="fp-cta fp-cta-check">
+            <button type="button" onClick={() => openLeadFlow("check")} className="fp-cta fp-cta-check">
               <div className="fp-cta-shimmer" />
               <span className="fp-cta-icon">💰</span>
               <span className="fp-cta-label">Check Points</span>
               <span className="fp-cta-sub">See your balance</span>
-            </a>
-            <a href="https://l.reelo.io/xQTqO" target="_blank" rel="noopener noreferrer" className="fp-cta fp-cta-reg">
+            </button>
+            <button type="button" onClick={() => openLeadFlow("register")} className="fp-cta fp-cta-reg">
               <div className="fp-cta-shimmer" />
               <span className="fp-cta-icon">✨</span>
               <span className="fp-cta-label">Register</span>
               <span className="fp-cta-sub">Join for free</span>
-            </a>
+            </button>
           </div>
 
           {/* Contact */}
@@ -469,6 +652,69 @@ export default function GuestFointsPage() {
           </div>
 
         </div>
+
+        {activeLeadFlow && (
+          <>
+            <div className="fp-modal-backdrop" onClick={closeLeadFlow} />
+            <div className="fp-modal-card" role="dialog" aria-modal="true" aria-labelledby="fp-lead-title">
+              <p className="fp-modal-kicker">Foints</p>
+              <h3 id="fp-lead-title" className="fp-modal-title">
+                {activeLeadFlow === "check" ? "Check Points" : "Register"}
+              </h3>
+              <p className="fp-modal-sub">
+                {activeLeadFlow === "check"
+                  ? "Enter your mobile number and we will open your points page."
+                  : "Enter your name and mobile number to continue registration."}
+              </p>
+
+              <form onSubmit={handleLeadSubmit}>
+                {activeLeadFlow === "register" && (
+                  <>
+                    <label className="fp-modal-label" htmlFor="fp-lead-name">Name</label>
+                    <input
+                      id="fp-lead-name"
+                      className="fp-modal-input"
+                      type="text"
+                      value={leadName}
+                      onChange={(e) => {
+                        setLeadName(e.target.value);
+                        if (leadError) setLeadError("");
+                      }}
+                      placeholder="Your full name"
+                      autoComplete="name"
+                    />
+                  </>
+                )}
+
+                <label className="fp-modal-label" htmlFor="fp-lead-phone">Mobile Number</label>
+                <input
+                  id="fp-lead-phone"
+                  className="fp-modal-input"
+                  type="tel"
+                  value={leadPhone}
+                  onChange={(e) => {
+                    setLeadPhone(e.target.value);
+                    if (leadError) setLeadError("");
+                  }}
+                  placeholder="10-digit mobile number"
+                  autoComplete="tel"
+                />
+
+                {leadError && <p className="fp-modal-error">{leadError}</p>}
+
+                <div className="fp-modal-actions">
+                  <button type="button" className="fp-modal-btn fp-modal-btn-cancel" onClick={closeLeadFlow}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="fp-modal-btn fp-modal-btn-submit">
+                    Continue
+                  </button>
+                </div>
+              </form>
+            </div>
+          </>
+        )}
+
         <StableNav />
       </div>
     </>
