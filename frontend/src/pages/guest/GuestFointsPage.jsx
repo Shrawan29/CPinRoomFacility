@@ -4,6 +4,7 @@ import logo from "../../assets/logo.png";
 import fointsLogo from "../../assets/foints-logo.png";
 import GuestBottomNav from "../../components/guest/GuestBottomNav";
 import { useGuestAuth } from "../../context/GuestAuthContext";
+import { submitFointsLead } from "../../services/reelo.service.js";
 
 const outlets = [
   { name: "Meeting Point", icon: "☕" },
@@ -41,16 +42,13 @@ const perks = [
 
 const StableNav = memo(GuestBottomNav);
 
-const REELO_LINKS = {
-  check: "https://app.reelo.io/l/DQbBj",
-  register: "https://app.reelo.io/l/xQTqO",
-};
-
-const PHONE_FIELD_KEYS = ["contact", "number", "phone", "mobile", "whatsapp"];
-const NAME_FIELD_KEYS = ["name", "full_name", "first_name", "firstName"];
-
 const sanitizePhone = (value) => String(value || "").replace(/\D/g, "").slice(0, 15);
 const sanitizeName = (value) => String(value || "").trim();
+
+const getNumericValue = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 const getGuestName = (guest) =>
   sanitizeName(guest?.guestName || guest?.name || guest?.fullName || "");
@@ -90,28 +88,51 @@ const getGuestPhone = (guest) => {
   return "";
 };
 
-const buildReeloUrl = ({ flow, name, phone }) => {
-  const base = REELO_LINKS[flow];
-  if (!base) return "";
+const buildLeadNotice = (flow, submission) => {
+  const message = String(submission?.message || "").trim();
 
-  const url = new URL(base);
-  const normalizedPhone = sanitizePhone(phone);
-  const normalizedName = sanitizeName(name);
+  if (flow === "check") {
+    if (/customer not found/i.test(message)) {
+      return {
+        tone: "error",
+        text: "No Foints account was found for this mobile number.",
+      };
+    }
 
-  PHONE_FIELD_KEYS.forEach((key) => {
-    if (normalizedPhone) url.searchParams.set(key, normalizedPhone);
-  });
+    const points = getNumericValue(submission?.payload?.customer_points?.current_points);
+    if (points !== null) {
+      return {
+        tone: "success",
+        text: `Points fetched successfully. Current balance: ${points} Foints.`,
+      };
+    }
 
-  if (flow === "register") {
-    NAME_FIELD_KEYS.forEach((key) => {
-      if (normalizedName) url.searchParams.set(key, normalizedName);
-    });
+    return {
+      tone: "success",
+      text: message || "Points details fetched successfully.",
+    };
   }
 
-  url.searchParams.set("source", "cp-inroom");
-  url.searchParams.set("utm_source", "cp-inroom");
+  if (flow === "register") {
+    const resultType = String(submission?.payload?.res_type || "").toLowerCase();
 
-  return url.toString();
+    if (resultType === "for_new_customer_only" || resultType === "inactive_qr_code") {
+      return {
+        tone: "error",
+        text: message || "Registration could not be completed for this number.",
+      };
+    }
+
+    return {
+      tone: "success",
+      text: message || "Registration completed successfully.",
+    };
+  }
+
+  return {
+    tone: "success",
+    text: "Submitted successfully.",
+  };
 };
 
 export default function GuestFointsPage() {
@@ -122,52 +143,65 @@ export default function GuestFointsPage() {
   const [leadName, setLeadName] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
   const [leadError, setLeadError] = useState("");
+  const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [leadNotice, setLeadNotice] = useState(null);
 
   const openLeadFlow = (flow) => {
     setActiveLeadFlow(flow);
     setLeadError("");
+    setLeadNotice(null);
     setLeadPhone(getGuestPhone(guest));
     setLeadName(flow === "register" ? getGuestName(guest) : "");
   };
 
   const closeLeadFlow = () => {
+    if (leadSubmitting) return;
     setActiveLeadFlow("");
     setLeadError("");
   };
 
-  const handleLeadSubmit = (e) => {
+  const handleLeadSubmit = async (e) => {
     e.preventDefault();
+
+    if (leadSubmitting) return;
 
     const normalizedPhone = sanitizePhone(leadPhone);
     const normalizedName = sanitizeName(leadName);
+    const currentFlow = activeLeadFlow;
+
+    if (!currentFlow) {
+      setLeadError("Unable to continue. Please try again.");
+      return;
+    }
 
     if (normalizedPhone.length < 10) {
       setLeadError("Please enter a valid mobile number.");
       return;
     }
 
-    if (activeLeadFlow === "register" && normalizedName.length < 2) {
+    if (currentFlow === "register" && normalizedName.length < 2) {
       setLeadError("Please enter your name.");
       return;
     }
 
-    const url = buildReeloUrl({
-      flow: activeLeadFlow,
-      name: normalizedName,
-      phone: normalizedPhone,
-    });
+    setLeadSubmitting(true);
+    setLeadError("");
 
-    if (!url) {
-      setLeadError("Unable to continue. Please try again.");
-      return;
+    try {
+      const response = await submitFointsLead({
+        flow: currentFlow,
+        name: normalizedName,
+        phone: normalizedPhone,
+      });
+
+      setLeadNotice(buildLeadNotice(currentFlow, response?.submission));
+      setActiveLeadFlow("");
+      setLeadError("");
+    } catch (error) {
+      setLeadError(error?.message || "Unable to continue. Please try again.");
+    } finally {
+      setLeadSubmitting(false);
     }
-
-    const tab = window.open(url, "_blank", "noopener,noreferrer");
-    if (!tab) {
-      window.location.assign(url);
-    }
-
-    closeLeadFlow();
   };
 
   return (
@@ -517,6 +551,27 @@ export default function GuestFointsPage() {
           margin-bottom: 20px;
         }
 
+        .fp-lead-notice {
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-size: 12px;
+          line-height: 1.45;
+          margin: -8px 0 16px;
+          border: 1px solid;
+        }
+
+        .fp-lead-notice.success {
+          color: #0f5f59;
+          border-color: rgba(15,95,89,0.26);
+          background: rgba(15,95,89,0.08);
+        }
+
+        .fp-lead-notice.error {
+          color: #8a1e1e;
+          border-color: rgba(138,30,30,0.24);
+          background: rgba(138,30,30,0.08);
+        }
+
         .fp-cta {
           position: relative;
           overflow: hidden;
@@ -770,6 +825,12 @@ export default function GuestFointsPage() {
             </button>
           </div>
 
+          {leadNotice && (
+            <div className={`fp-lead-notice ${leadNotice.tone}`}>
+              {leadNotice.text}
+            </div>
+          )}
+
           <div className="fp-contact">
             <div className="fp-contact-row">
               <a href="https://centrepointnagpur.com/foints/" target="_blank" rel="noopener noreferrer">Official Foints Page</a>
@@ -796,8 +857,8 @@ export default function GuestFointsPage() {
 
               <p className="fp-modal-sub">
                 {activeLeadFlow === "check"
-                  ? "Enter your mobile number and we will open your points page."
-                  : "Enter your name and mobile number to continue registration."}
+                  ? "Enter your mobile number and we will fetch your Foints balance."
+                  : "Enter your name and mobile number to submit your registration."}
               </p>
 
               <form onSubmit={handleLeadSubmit}>
@@ -809,6 +870,7 @@ export default function GuestFointsPage() {
                       className="fp-modal-input"
                       type="text"
                       value={leadName}
+                      disabled={leadSubmitting}
                       onChange={(e) => {
                         setLeadName(e.target.value);
                         if (leadError) setLeadError("");
@@ -825,6 +887,7 @@ export default function GuestFointsPage() {
                   className="fp-modal-input"
                   type="tel"
                   value={leadPhone}
+                  disabled={leadSubmitting}
                   onChange={(e) => {
                     setLeadPhone(e.target.value);
                     if (leadError) setLeadError("");
@@ -836,11 +899,11 @@ export default function GuestFointsPage() {
                 {leadError && <p className="fp-modal-error">{leadError}</p>}
 
                 <div className="fp-modal-actions">
-                  <button type="button" className="fp-modal-btn fp-modal-btn-cancel" onClick={closeLeadFlow}>
+                  <button type="button" className="fp-modal-btn fp-modal-btn-cancel" onClick={closeLeadFlow} disabled={leadSubmitting}>
                     Cancel
                   </button>
-                  <button type="submit" className="fp-modal-btn fp-modal-btn-submit">
-                    Continue
+                  <button type="submit" className="fp-modal-btn fp-modal-btn-submit" disabled={leadSubmitting}>
+                    {leadSubmitting ? "Submitting..." : "Continue"}
                   </button>
                 </div>
               </form>
