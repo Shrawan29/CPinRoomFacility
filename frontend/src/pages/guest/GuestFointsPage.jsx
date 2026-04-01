@@ -36,7 +36,7 @@ export default function GuestFointsPage() {
 
         @keyframes fadeUp   { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shimmer  { 0% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
-        @keyframes pulseDot { 0%,100% { box-shadow: 0 0 0 0 rgba(9,140,133,0.45); } 50% { box-shadow: 0 0 0 7px rgba(9,140,133,0); } }
+        @keyframes pulseDot { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.45); } 50% { box-shadow: 0 0 0 7px rgba(245,158,11,0); } }
         @keyframes floatCoin{ 0%,100% { transform: translateY(0px) rotate(-4deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
         @keyframes blob1    { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(14px,-12px) scale(1.09); } }
         @keyframes blob2    { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-12px,14px) scale(1.07); } }
@@ -85,14 +85,14 @@ export default function GuestFointsPage() {
         .fp-hero-blob1 {
           position: absolute; top: -40px; right: -40px;
           width: 200px; height: 200px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(12,139,132,0.35), transparent 66%);
+          background: radial-gradient(circle, rgba(255,255,255,0.34), transparent 66%);
           animation: blob1 8s ease-in-out infinite;
           pointer-events: none;
         }
         .fp-hero-blob2 {
           position: absolute; bottom: 0; left: -30px;
           width: 160px; height: 160px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(10,82,78,0.25), transparent 66%);
+          background: radial-gradient(circle, rgba(255,214,10,0.26), transparent 66%);
           animation: blob2 10s ease-in-out infinite;
           pointer-events: none;
         }
@@ -102,7 +102,7 @@ export default function GuestFointsPage() {
         }
         .fp-back-btn {
           position: absolute; top: 16px; left: 16px; z-index: 5;
-          background: rgba(7, 112, 106, 0.88);
+          background: rgba(63, 53, 0, 0.60);
           border: 1px solid rgba(255,255,255,0.42);
           border-radius: 50%;
           width: 38px; height: 38px;
@@ -111,12 +111,12 @@ export default function GuestFointsPage() {
           backdrop-filter: blur(12px);
           transition: background 0.2s;
         }
-        .fp-back-btn:hover { background: rgba(6, 95, 90, 0.96); }
+        .fp-back-btn:hover { background: rgba(63, 53, 0, 0.78); }
 
         .fp-hotel-logo {
           position: absolute; top: 14px; right: 16px; z-index: 5;
           width: 42px; height: 42px; border-radius: 50%;
-          background: rgba(7, 112, 106, 0.88);
+          background: rgba(63, 53, 0, 0.60);
           border: 1px solid rgba(255,255,255,0.42);
           display: flex; align-items: center; justify-content: center;
           backdrop-filter: blur(12px);
@@ -133,7 +133,7 @@ export default function GuestFointsPage() {
 
         .fp-hero-badge {
           display: inline-flex; align-items: center; gap: 7px;
-          border: 1px solid rgba(7, 112, 106, 0.20);
+          border: 1px solid rgba(121, 92, 0, 0.30);
           background: rgba(255,255,255,0.62);
           backdrop-filter: blur(12px);
           border-radius: 20px;
@@ -141,8 +141,8 @@ export default function GuestFointsPage() {
           position: relative; z-index: 3;
           margin-bottom: 0;
         }
-        .fp-hero-badge span { font-size: 9px; font-weight: 700; color: #0b5f59; letter-spacing: .18em; text-transform: uppercase; }
-        .fp-pulse { width: 7px; height: 7px; border-radius: 50%; background: #86efac; animation: pulseDot 2s ease-in-out infinite; flex-shrink: 0; }
+        .fp-hero-badge span { font-size: 9px; font-weight: 700; color: #6b5500; letter-spacing: .18em; text-transform: uppercase; }
+        .fp-pulse { width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; animation: pulseDot 2s ease-in-out infinite; flex-shrink: 0; }
 
         /* ── BODY ── */
         .fp-body {
