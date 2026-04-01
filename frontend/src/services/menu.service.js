@@ -10,6 +10,11 @@ export const createMenuItem = async (data) => {
   return res.data;
 };
 
+export const bulkUpsertMenuItems = async (items) => {
+  const res = await api.post("/menu/kitchen/bulk", { items });
+  return res.data;
+};
+
 export const updateMenuItem = async (id, data) => {
   const res = await api.put(`/menu/kitchen/${id}`, data);
   return res.data;

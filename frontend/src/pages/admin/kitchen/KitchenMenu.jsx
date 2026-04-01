@@ -10,6 +10,17 @@ import MenuFormModal from "./MenuFormModal";
 import { exportMenuToExcel, importMenuFromExcel } from "../../../services/excelMenu.service";
 import api from "../../../services/api";
 
+const summarizeList = (list, field) => {
+  if (!Array.isArray(list) || list.length === 0) return "";
+  const values = list
+    .map((entry) => (entry?.[field] ? String(entry[field]).trim() : ""))
+    .filter(Boolean);
+
+  if (values.length === 0) return "";
+  if (values.length <= 3) return values.join(", ");
+  return `${values.slice(0, 3).join(", ")} +${values.length - 3} more`;
+};
+
 export default function KitchenMenu() {
   const { token, loading: authLoading } = useAdminAuth();
 
@@ -181,6 +192,7 @@ export default function KitchenMenu() {
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3 text-left">Customizations</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -193,9 +205,46 @@ export default function KitchenMenu() {
                   key={item._id}
                   className="border-t border-black/10 hover:bg-black/5"
                 >
-                  <td className="px-4 py-3">{item.name}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-start gap-3">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          className="h-12 w-12 rounded-lg object-cover border border-black/10 bg-white"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-lg border border-dashed border-black/15 bg-black/5 flex items-center justify-center text-[10px] text-[var(--text-muted)]">
+                          No Img
+                        </div>
+                      )}
+
+                      <div className="min-w-0">
+                        <div className="font-medium text-[var(--text-primary)]">
+                          {item.name}
+                        </div>
+                        {item.description && (
+                          <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                            {item.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-center">{item.category}</td>
                   <td className="px-4 py-3 text-center">₹{item.price}</td>
+
+                  <td className="px-4 py-3 text-left">
+                    <div className="text-xs text-[var(--text-muted)] leading-5">
+                      <div>
+                        Portions: {summarizeList(item.options, "label") || "None"}
+                      </div>
+                      <div>
+                        Add-ons: {summarizeList(item.addons, "name") || "None"}
+                      </div>
+                    </div>
+                  </td>
 
                   <td className="px-4 py-3 text-center">
                     <span
@@ -246,7 +295,7 @@ export default function KitchenMenu() {
               {filteredMenu.length === 0 && (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="px-4 py-6 text-center text-[var(--text-muted)]"
                   >
                     No items in this category

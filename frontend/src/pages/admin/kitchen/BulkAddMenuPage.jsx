@@ -1,11 +1,62 @@
 import { useState } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
-import { createMenuItem } from "../../../services/menu.service";
+import { bulkUpsertMenuItems } from "../../../services/menu.service";
 
 const EMPTY_ITEM = () => ({
   name: "", category: "", price: "", description: "",
   isVeg: true, image: "", options: [], addons: [],
 });
+
+const toValidNumber = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  return parsed;
+};
+
+const sanitizeOptions = (options) => {
+  if (!Array.isArray(options)) return [];
+  return options
+    .map((opt) => ({
+      label: String(opt?.label || "").trim(),
+      price: toValidNumber(opt?.price),
+    }))
+    .filter((opt) => opt.label && opt.price != null && opt.price >= 0);
+};
+
+const sanitizeAddons = (addons) => {
+  if (!Array.isArray(addons)) return [];
+  return addons
+    .map((addon) => ({
+      name: String(addon?.name || "").trim(),
+      price: toValidNumber(addon?.price),
+    }))
+    .filter((addon) => addon.name && addon.price != null && addon.price >= 0);
+};
+
+const buildPayload = (item) => {
+  const name = String(item?.name || "").trim();
+  const category = String(item?.category || "").trim();
+  const price = toValidNumber(item?.price);
+
+  if (!name || !category || price == null || price <= 0) {
+    return null;
+  }
+
+  const payload = {
+    name,
+    category,
+    price,
+    description: String(item?.description || "").trim(),
+    isVeg: Boolean(item?.isVeg),
+    options: sanitizeOptions(item?.options),
+    addons: sanitizeAddons(item?.addons),
+  };
+
+  const image = String(item?.image || "").trim();
+  if (image) payload.image = image;
+
+  return payload;
+};
 
 const CATEGORIES = [
   "Starters", "Main Course", "Breads", "Rice & Biryani",
@@ -211,7 +262,7 @@ function ItemCard({ item, idx, onChange, onRemove, onDuplicate, isOnly }) {
 
         {/* Row 3 — Image */}
         <div>
-          <div style={labelStyle}>Image URL</div>
+          <div style={labelStyle}>Image URL (Optional)</div>
           <input placeholder="https://…" value={item.image}
             onChange={e => onChange(idx, "image", e.target.value)} style={inp} />
         </div>
@@ -248,30 +299,88 @@ const labelStyle = {
 export default function BulkAddMenuPage() {
   const [items, setItems] = useState([EMPTY_ITEM()]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState([]);
 
-  const addRow       = () => setItems(p => [...p, EMPTY_ITEM()]);
-  const duplicateRow = idx => setItems(p => [
-    ...p.slice(0, idx + 1),
-    { ...p[idx], options: [...p[idx].options], addons: [...p[idx].addons] },
-    ...p.slice(idx + 1),
-  ]);
-  const removeRow    = idx => setItems(p => p.filter((_, i) => i !== idx));
-  const handleChange = (idx, field, value) =>
+  const addRow       = () => {
+    setItems(p => [...p, EMPTY_ITEM()]);
+    setFieldErrors(e => [...e, {}]);
+  };
+  const duplicateRow = idx => {
+    setItems(p => [
+      ...p.slice(0, idx + 1),
+      { ...p[idx], options: [...p[idx].options], addons: [...p[idx].addons] },
+      ...p.slice(idx + 1),
+    ]);
+    setFieldErrors(e => [
+      ...e.slice(0, idx + 1),
+      { ...e[idx] },
+      ...e.slice(idx + 1),
+    ]);
+  };
+  const removeRow    = idx => {
+    setItems(p => p.filter((_, i) => i !== idx));
+    setFieldErrors(e => e.filter((_, i) => i !== idx));
+  };
+  const handleChange = (idx, field, value) => {
     setItems(p => p.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+    setFieldErrors(e => e.map((err, i) => i === idx ? { ...err, [field]: undefined } : err));
+  };
 
   const readyCount = items.filter(i => i.name && i.category && i.price).length;
 
+  // Validate fields for each item
+  const validateItems = () => {
+    let valid = true;
+    const errors = items.map(item => {
+      const err = {};
+      if (!item.name) { err.name = "Name required"; valid = false; }
+      if (!item.category) { err.category = "Category required"; valid = false; }
+      if (!item.price || isNaN(item.price) || Number(item.price) <= 0) { err.price = "Valid price required"; valid = false; }
+      return err;
+    });
+    setFieldErrors(errors);
+    return valid;
+  };
+
   const handleSave = async () => {
+    setError("");
+    if (!validateItems()) {
+      setError("Please fix errors before saving.");
+      return;
+    }
     setSaving(true);
     try {
-      const created = [];
-      for (const item of items) {
-        if (!item.name || !item.category || !item.price) continue;
-        const res = await createMenuItem(item);
-        created.push(res.item);
+      const payloadItems = items.map(buildPayload).filter(Boolean);
+
+      if (payloadItems.length === 0) {
+        setError("No valid items to save.");
+        return;
       }
-      alert(`${created.length} item${created.length !== 1 ? "s" : ""} added!`);
+
+      const result = await bulkUpsertMenuItems(payloadItems);
+      const savedCount = Number(result?.count) || 0;
+      const skippedCount = Number(result?.skipped) || 0;
+
+      if (savedCount === 0) {
+        setError("No items were saved. Please verify the item details and try again.");
+        return;
+      }
+
+      const successMessage = `${savedCount} item${savedCount !== 1 ? "s" : ""} added!${
+        skippedCount > 0
+          ? ` ${skippedCount} row${skippedCount !== 1 ? "s" : ""} skipped due to invalid data.`
+          : ""
+      }`;
+
+      alert(successMessage);
       setItems([EMPTY_ITEM()]);
+      setFieldErrors([{}]);
+    } catch (e) {
+      setError(
+        e?.response?.data?.message ||
+        "Failed to save items. Please check your connection or try again."
+      );
     } finally {
       setSaving(false);
     }
@@ -329,6 +438,14 @@ export default function BulkAddMenuPage() {
 
         {/* ── Content ── */}
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px 60px" }}>
+          {error && (
+            <div style={{
+              background: "#fee2e2", color: "#b91c1c", border: "1px solid #fca5a5",
+              padding: "8px 12px", borderRadius: 7, marginBottom: 12, fontSize: 13
+            }} role="alert">
+              {error}
+            </div>
+          )}
 
           {items.length === 1 && !items[0].name && (
             <div style={{
@@ -346,9 +463,27 @@ export default function BulkAddMenuPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {items.map((item, idx) => (
-              <ItemCard key={idx} item={item} idx={idx}
-                onChange={handleChange} onRemove={removeRow}
-                onDuplicate={duplicateRow} isOnly={items.length === 1} />
+              <div key={idx} style={{ position: "relative" }}>
+                <ItemCard
+                  item={item}
+                  idx={idx}
+                  onChange={handleChange}
+                  onRemove={removeRow}
+                  onDuplicate={duplicateRow}
+                  isOnly={items.length === 1}
+                />
+                {/* Field errors */}
+                {(fieldErrors[idx] && (fieldErrors[idx].name || fieldErrors[idx].category || fieldErrors[idx].price)) && (
+                  <div style={{
+                    color: "#b91c1c", fontSize: 12, marginTop: 2, marginLeft: 8,
+                    display: "flex", gap: 16
+                  }}>
+                    {fieldErrors[idx].name && <span aria-live="polite">{fieldErrors[idx].name}</span>}
+                    {fieldErrors[idx].category && <span aria-live="polite">{fieldErrors[idx].category}</span>}
+                    {fieldErrors[idx].price && <span aria-live="polite">{fieldErrors[idx].price}</span>}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 

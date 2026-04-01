@@ -75,6 +75,24 @@ export default function MenuBrowse() {
 
   const getItemQty = (id) => cart.find((c) => c._id === id)?.quantity || 0;
 
+  const summarizeChoices = (entries, key) => {
+    if (!Array.isArray(entries)) return [];
+
+    return entries
+      .map((entry) => {
+        const label = String(entry?.[key] || "").trim();
+        if (!label) return "";
+
+        const choicePrice = Number(entry?.price);
+        if (Number.isFinite(choicePrice)) {
+          return `${label} (₹${choicePrice})`;
+        }
+
+        return label;
+      })
+      .filter(Boolean);
+  };
+
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const cartItemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -418,6 +436,8 @@ export default function MenuBrowse() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {filteredItems.map((item, i) => {
                     const qty = getItemQty(item._id);
+                    const options = summarizeChoices(item.options, "label");
+                    const addons = summarizeChoices(item.addons, "name");
                     return (
                       <div
                         key={item._id}
@@ -458,9 +478,106 @@ export default function MenuBrowse() {
                                 fontSize: 15, fontWeight: 700, color: "#A4005D",
                                 margin: 0, fontFamily: "'Cormorant Garamond', serif",
                               }}>₹{item.price}</p>
+
+                              {options.length > 0 && (
+                                <div style={{ marginTop: 8 }}>
+                                  <p style={{
+                                    margin: "0 0 4px 0",
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    letterSpacing: "0.12em",
+                                    textTransform: "uppercase",
+                                    color: "#8a7a70",
+                                  }}>
+                                    Portions
+                                  </p>
+                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                    {options.slice(0, 3).map((option, idx) => (
+                                      <span
+                                        key={`${item._id}-option-${idx}`}
+                                        style={{
+                                          fontSize: 10,
+                                          color: "#7a6a60",
+                                          background: "rgba(164,0,93,0.06)",
+                                          border: "1px solid rgba(164,0,93,0.12)",
+                                          borderRadius: 999,
+                                          padding: "2px 8px",
+                                        }}
+                                      >
+                                        {option}
+                                      </span>
+                                    ))}
+                                    {options.length > 3 && (
+                                      <span style={{ fontSize: 10, color: "#8a7a70", alignSelf: "center" }}>
+                                        +{options.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {addons.length > 0 && (
+                                <div style={{ marginTop: 8 }}>
+                                  <p style={{
+                                    margin: "0 0 4px 0",
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    letterSpacing: "0.12em",
+                                    textTransform: "uppercase",
+                                    color: "#8a7a70",
+                                  }}>
+                                    Add-ons
+                                  </p>
+                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                    {addons.slice(0, 3).map((addon, idx) => (
+                                      <span
+                                        key={`${item._id}-addon-${idx}`}
+                                        style={{
+                                          fontSize: 10,
+                                          color: "#7a6a60",
+                                          background: "rgba(26,20,16,0.05)",
+                                          border: "1px solid rgba(26,20,16,0.1)",
+                                          borderRadius: 999,
+                                          padding: "2px 8px",
+                                        }}
+                                      >
+                                        {addon}
+                                      </span>
+                                    ))}
+                                    {addons.length > 3 && (
+                                      <span style={{ fontSize: 10, color: "#8a7a70", alignSelf: "center" }}>
+                                        +{addons.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
-                            <div style={{ flexShrink: 0, display: "flex", alignItems: "flex-end", paddingTop: 2 }}>
+                            <div style={{
+                              flexShrink: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "flex-end",
+                              gap: 8,
+                              paddingTop: 2,
+                            }}>
+                              {item.image && (
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  onError={(e) => { e.currentTarget.style.display = "none"; }}
+                                  style={{
+                                    width: 72,
+                                    height: 72,
+                                    objectFit: "cover",
+                                    borderRadius: 12,
+                                    border: "1px solid rgba(164,0,93,0.12)",
+                                    background: "#fff",
+                                  }}
+                                />
+                              )}
+
                               {qty === 0 ? (
                                 <button
                                   onClick={() => addToCart(item)}
