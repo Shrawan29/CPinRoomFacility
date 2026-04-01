@@ -64,10 +64,10 @@ export default function GuestFointsPage() {
         .fp-hero {
           position: relative;
           overflow: hidden;
-          background: linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+          background: linear-gradient(165deg, #ffed2b 0%, #ffe500 44%, #ffdd00 100%);
           padding: 48px 20px 72px;
           text-align: center;
-          border-bottom: 1px solid rgba(31, 31, 31, 0.08);
+          border-bottom: 1px solid rgba(149, 128, 0, 0.18);
         }
         .fp-hero::before {
           content: '';
@@ -77,8 +77,8 @@ export default function GuestFointsPage() {
           background:
             repeating-linear-gradient(
               100deg,
-              rgba(255,255,255,0.24) 0 90px,
-              rgba(255,255,255,0.06) 90px 170px
+              rgba(255,255,255,0.30) 0 90px,
+              rgba(255, 235, 60, 0.05) 90px 170px
             );
           z-index: 1;
         }
