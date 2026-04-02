@@ -1406,5 +1406,6 @@ export default function MenuBrowse() {
 
       </div>
     </>
+    
   );
 }
