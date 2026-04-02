@@ -683,18 +683,29 @@ export default function MenuBrowse() {
                             flex: 1, padding: "12px 14px",
                             display: "flex", flexDirection: "column",
                             justifyContent: "space-between", minWidth: 0,
+                            position: "relative",
                           }}>
-                            <div>
-                              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6, marginBottom: 4 }}>
-                                <p style={{
-                                  fontFamily: "'Cormorant Garamond', serif",
-                                  fontSize: 17, fontWeight: 600, color: "#1A1008",
-                                  margin: 0, lineHeight: 1.2, flex: 1,
-                                }}>{item.name}</p>
+                            {/* qty badge — top-right corner, independent of veg badge */}
+                            {qty > 0 && (
+                              <div style={{
+                                position: "absolute", top: 10, right: 10,
+                                width: 20, height: 20, borderRadius: "50%",
+                                background: "#A4005D",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 10, fontWeight: 800, color: "#fff",
+                                boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
+                                animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
+                                fontFamily: "'DM Sans', sans-serif",
+                                zIndex: 1,
+                              }}>{qty}</div>
+                            )}
 
+                            <div>
+                              <div style={{ display: "flex", alignItems: "flex-start", gap: 7, marginBottom: 4 }}>
+                                {/* veg/nonveg badge always on the left before the name */}
                                 {item.isVeg !== undefined && (
                                   <div style={{
-                                    flexShrink: 0, marginTop: 2,
+                                    flexShrink: 0, marginTop: 3,
                                     width: 16, height: 16, borderRadius: 3,
                                     border: `1.5px solid ${item.isVeg ? "#22c55e" : "#ef4444"}`,
                                     display: "flex", alignItems: "center", justifyContent: "center",
@@ -705,6 +716,13 @@ export default function MenuBrowse() {
                                     }} />
                                   </div>
                                 )}
+
+                                <p style={{
+                                  fontFamily: "'DM Sans', sans-serif",
+                                  fontSize: 15, fontWeight: 600, color: "#1A1008",
+                                  margin: 0, lineHeight: 1.25, flex: 1,
+                                  paddingRight: qty > 0 ? 26 : 0,
+                                }}>{item.name}</p>
                               </div>
 
                               {item.description && (
@@ -721,36 +739,20 @@ export default function MenuBrowse() {
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <div>
-                                  {options.length > 0 && (
-                                    <p style={{
-                                      fontSize: 9, color: "#aaa", margin: "0 0 1px 0",
-                                      fontFamily: "'DM Sans', sans-serif",
-                                      fontWeight: 500, letterSpacing: "0.08em",
-                                      textTransform: "uppercase",
-                                    }}>from</p>
-                                  )}
+                              <div>
+                                {options.length > 0 && (
                                   <p style={{
-                                    fontFamily: "'Cormorant Garamond', serif",
-                                    fontSize: 18, fontWeight: 700, color: "#A4005D",
-                                    margin: 0, lineHeight: 1,
-                                  }}>₹{fromPrice}</p>
-                                </div>
-                                {/* qty badge — shown inline next to price for all cards */}
-                                {qty > 0 && (
-                                  <div style={{
-                                    width: 20, height: 20,
-                                    background: "#A4005D",
-                                    borderRadius: "50%",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: 10, fontWeight: 800, color: "#fff",
-                                    boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
-                                    animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
+                                    fontSize: 9, color: "#aaa", margin: "0 0 1px 0",
                                     fontFamily: "'DM Sans', sans-serif",
-                                    flexShrink: 0,
-                                  }}>{qty}</div>
+                                    fontWeight: 500, letterSpacing: "0.08em",
+                                    textTransform: "uppercase",
+                                  }}>from</p>
                                 )}
+                                <p style={{
+                                  fontFamily: "'Cormorant Garamond', serif",
+                                  fontSize: 18, fontWeight: 700, color: "#A4005D",
+                                  margin: 0, lineHeight: 1,
+                                }}>₹{fromPrice}</p>
                               </div>
 
                               <button
