@@ -1,4 +1,5 @@
 const TWILIO_API_BASE_URL = "https://api.twilio.com/2010-04-01";
+const TWILIO_STUDIO_API_BASE_URL = "https://studio.twilio.com/v2";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_SUPERVISOR_PHONE = "+917972895563";
 
@@ -130,15 +131,35 @@ const buildVoiceMessage = ({ roomNumber, items, note, action = "created" }) => {
 
   let intro;
   if (action === "cancelled") {
-    intro = `Housekeeping update. Room ${room} no longer needs the previously requested items.`;
+    intro = itemSummary
+      ? `Housekeeping update from room ${room}. Request for ${itemSummary} is no longer needed.`
+      : `Housekeeping update from room ${room}. Previous housekeeping request is no longer needed.`;
   } else {
     intro = itemSummary
-      ? `Housekeeping request. Room ${room} needs ${itemSummary}.`
-      : `Housekeeping request. Room ${room} needs service.`;
+      ? `Housekeeping request from room ${room} for ${itemSummary}.`
+      : `Housekeeping request from room ${room}. Service is needed.`;
   }
 
   const notePart = cleanNote ? ` Note: ${cleanNote}.` : "";
   return `${intro}${notePart} Please check the housekeeping dashboard.`;
+};
+
+const buildStudioParameters = ({ roomNumber, items, note, action = "created" }) => {
+  const room = toTrimmedString(roomNumber);
+  const cleanNote = toTrimmedString(note);
+  const itemSummary = buildItemSummary(items);
+  const voiceMessage = buildVoiceMessage({ roomNumber, items, note, action });
+
+  return {
+    action,
+    roomNumber: room || undefined,
+    room: room || undefined,
+    note: cleanNote || undefined,
+    itemSummary: itemSummary || undefined,
+    items: itemSummary || undefined,
+    voiceMessage,
+    message: voiceMessage,
+  };
 };
 
 const parseResponseJson = async (response) => {
@@ -184,6 +205,7 @@ export const triggerHousekeepingSupervisorCall = async ({
   }
 
   const endpoint = `${TWILIO_API_BASE_URL}/Accounts/${encodeURIComponent(accountSid)}/Calls.json`;
+  const studioFlowSid = toTrimmedString(process.env.TWILIO_STUDIO_FLOW_SID);
   const timeoutMs = toPositiveInt(process.env.TWILIO_REQUEST_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
   const twimlUrl = toTrimmedString(process.env.TWILIO_HOUSEKEEPING_URL);
 
@@ -194,11 +216,17 @@ export const triggerHousekeepingSupervisorCall = async ({
     language
   )}\">${escapeXml(message)}</Say></Response>`;
 
-  const body = new URLSearchParams({
-    To: toNumber,
-    From: fromNumber,
-    ...(twimlUrl ? { Url: twimlUrl } : { Twiml: twiml }),
-  });
+  const body = studioFlowSid
+    ? new URLSearchParams({
+        To: toNumber,
+        From: fromNumber,
+        Parameters: JSON.stringify(buildStudioParameters({ roomNumber, items, note, action })),
+      })
+    : new URLSearchParams({
+        To: toNumber,
+        From: fromNumber,
+        ...(twimlUrl ? { Url: twimlUrl } : { Twiml: twiml }),
+      });
 
   const authHeader = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
 
@@ -206,6 +234,10 @@ export const triggerHousekeepingSupervisorCall = async ({
   const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const endpoint = studioFlowSid
+      ? `${TWILIO_STUDIO_API_BASE_URL}/Flows/${encodeURIComponent(studioFlowSid)}/Executions`
+      : `${TWILIO_API_BASE_URL}/Accounts/${encodeURIComponent(accountSid)}/Calls.json`;
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
@@ -223,10 +255,23 @@ export const triggerHousekeepingSupervisorCall = async ({
         attempted: true,
         alerted: false,
         reason: "api_error",
+        mode: studioFlowSid ? "studio_flow" : "call_api",
         statusCode: response.status,
         message:
           toTrimmedString(responseBody?.message) ||
-          `Twilio call API failed with status ${response.status}`,
+          `Twilio ${studioFlowSid ? "Studio Flow" : "call"} API failed with status ${response.status}`,
+      };
+    }
+
+    if (studioFlowSid) {
+      return {
+        attempted: true,
+        alerted: true,
+        reason: "ok",
+        mode: "studio_flow",
+        flowSid: studioFlowSid,
+        to: toNumber,
+        executionSid: toTrimmedString(responseBody?.sid),
       };
     }
 
@@ -234,6 +279,7 @@ export const triggerHousekeepingSupervisorCall = async ({
       attempted: true,
       alerted: true,
       reason: "ok",
+      mode: "call_api",
       to: toNumber,
       callSid: toTrimmedString(responseBody?.sid),
     };
@@ -243,6 +289,7 @@ export const triggerHousekeepingSupervisorCall = async ({
       attempted: true,
       alerted: false,
       reason: isAbort ? "timeout" : "network_error",
+      mode: studioFlowSid ? "studio_flow" : "call_api",
       message: error?.message || "Unknown Twilio call error",
     };
   } finally {
