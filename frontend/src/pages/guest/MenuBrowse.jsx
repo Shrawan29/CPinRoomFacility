@@ -659,13 +659,15 @@ export default function MenuBrowse() {
                         }}
                         style={{ animationDelay: `${Math.min(i, 7) * 50}ms` }}
                       >
-                        <div style={{ display: "flex", alignItems: "stretch", minHeight: 110 }}>
+                        {/* IMAGE — square thumbnail, only when image URL exists */}
+                        <div style={{ display: "flex", alignItems: "stretch" }}>
 
-                          {/* IMAGE — only rendered when an image URL is available */}
                           {hasImage && (
                             <div style={{
-                              width: 110, flexShrink: 0,
+                              width: 100, flexShrink: 0,
                               position: "relative", overflow: "hidden",
+                              aspectRatio: "1 / 1",
+                              alignSelf: "stretch",
                             }}>
                               <img
                                 src={imageSrc}
@@ -673,52 +675,21 @@ export default function MenuBrowse() {
                                 onError={() => setImageErrors((prev) => ({ ...prev, [item._id]: true }))}
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                               />
-                              {qty > 0 && (
-                                <div style={{
-                                  position: "absolute", top: 8, left: 8,
-                                  width: 24, height: 24,
-                                  background: "#A4005D",
-                                  borderRadius: "50%",
-                                  display: "flex", alignItems: "center", justifyContent: "center",
-                                  fontSize: 11, fontWeight: 800, color: "#fff",
-                                  boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
-                                  animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
-                                  fontFamily: "'DM Sans', sans-serif",
-                                }}>{qty}</div>
-                              )}
                             </div>
                           )}
 
                           {/* CONTENT — expands full width when no image */}
                           <div style={{
-                            flex: 1, padding: "14px 14px 12px",
+                            flex: 1, padding: "12px 14px",
                             display: "flex", flexDirection: "column",
                             justifyContent: "space-between", minWidth: 0,
-                            position: "relative",
                           }}>
-                            {/* qty badge for no-image cards */}
-                            {!hasImage && qty > 0 && (
-                              <div style={{
-                                position: "absolute", top: 12, right: 12,
-                                width: 22, height: 22,
-                                background: "#A4005D",
-                                borderRadius: "50%",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 10, fontWeight: 800, color: "#fff",
-                                boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
-                                animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
-                                fontFamily: "'DM Sans', sans-serif",
-                              }}>{qty}</div>
-                            )}
-
                             <div>
                               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6, marginBottom: 4 }}>
                                 <p style={{
                                   fontFamily: "'Cormorant Garamond', serif",
                                   fontSize: 17, fontWeight: 600, color: "#1A1008",
                                   margin: 0, lineHeight: 1.2, flex: 1,
-                                  // leave room for the badge on no-image cards
-                                  paddingRight: (!hasImage && qty > 0) ? 28 : 0,
                                 }}>{item.name}</p>
 
                                 {item.isVeg !== undefined && (
@@ -750,20 +721,36 @@ export default function MenuBrowse() {
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <div>
-                                {options.length > 0 && (
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <div>
+                                  {options.length > 0 && (
+                                    <p style={{
+                                      fontSize: 9, color: "#aaa", margin: "0 0 1px 0",
+                                      fontFamily: "'DM Sans', sans-serif",
+                                      fontWeight: 500, letterSpacing: "0.08em",
+                                      textTransform: "uppercase",
+                                    }}>from</p>
+                                  )}
                                   <p style={{
-                                    fontSize: 9, color: "#aaa", margin: "0 0 1px 0",
+                                    fontFamily: "'Cormorant Garamond', serif",
+                                    fontSize: 18, fontWeight: 700, color: "#A4005D",
+                                    margin: 0, lineHeight: 1,
+                                  }}>₹{fromPrice}</p>
+                                </div>
+                                {/* qty badge — shown inline next to price for all cards */}
+                                {qty > 0 && (
+                                  <div style={{
+                                    width: 20, height: 20,
+                                    background: "#A4005D",
+                                    borderRadius: "50%",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: 10, fontWeight: 800, color: "#fff",
+                                    boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
+                                    animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
                                     fontFamily: "'DM Sans', sans-serif",
-                                    fontWeight: 500, letterSpacing: "0.08em",
-                                    textTransform: "uppercase",
-                                  }}>from</p>
+                                    flexShrink: 0,
+                                  }}>{qty}</div>
                                 )}
-                                <p style={{
-                                  fontFamily: "'Cormorant Garamond', serif",
-                                  fontSize: 18, fontWeight: 700, color: "#A4005D",
-                                  margin: 0, lineHeight: 1,
-                                }}>₹{fromPrice}</p>
                               </div>
 
                               <button
@@ -787,7 +774,7 @@ export default function MenuBrowse() {
                               </button>
                             </div>
                           </div>
-                        </div>
+                        </div>{/* end flex row */}
 
                         {qty > 0 && (
                           <div style={{
@@ -876,59 +863,97 @@ export default function MenuBrowse() {
               animation: "slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both",
               paddingBottom: "env(safe-area-inset-bottom, 16px)",
             }}>
-              {/* Hero image — shown for all items in the sheet; PlaceholderDish used when no real image */}
-              <div style={{
-                width: "100%", height: 200,
-                position: "relative", overflow: "hidden",
-                borderRadius: "24px 24px 0 0",
-              }}>
-                {activeImageSrc ? (
+              {/* Hero — real image banner when available, plain header when not */}
+              {activeImageSrc ? (
+                <div style={{
+                  width: "100%",
+                  aspectRatio: "16 / 9",
+                  position: "relative", overflow: "hidden",
+                  borderRadius: "24px 24px 0 0",
+                }}>
                   <img
                     src={activeImageSrc}
                     alt={activeItem.name}
                     onError={() => setImageErrors((prev) => ({ ...prev, [activeItem._id]: true }))}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                   />
-                ) : (
-                  <PlaceholderDish category={activeItem.category} name={activeItem.name} />
-                )}
-                <div style={{
-                  position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
-                  background: "linear-gradient(to top, rgba(245,237,224,0.95), transparent)",
-                }} />
-                <button
-                  onClick={closeItemDetails}
-                  style={{
-                    position: "absolute", top: 14, right: 14,
-                    width: 34, height: 34, borderRadius: "50%",
-                    background: "rgba(0,0,0,0.35)",
-                    border: "none", color: "#fff", fontSize: 14,
-                    cursor: "pointer", backdropFilter: "blur(8px)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >✕</button>
-                {activeItem.isVeg !== undefined && (
                   <div style={{
-                    position: "absolute", top: 14, left: 14,
-                    background: "rgba(255,255,255,0.92)",
-                    borderRadius: 8, padding: "4px 8px",
-                    display: "flex", alignItems: "center", gap: 5,
-                    backdropFilter: "blur(8px)",
-                  }}>
+                    position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
+                    background: "linear-gradient(to top, rgba(245,237,224,0.95), transparent)",
+                  }} />
+                  <button
+                    onClick={closeItemDetails}
+                    style={{
+                      position: "absolute", top: 14, right: 14,
+                      width: 34, height: 34, borderRadius: "50%",
+                      background: "rgba(0,0,0,0.35)",
+                      border: "none", color: "#fff", fontSize: 14,
+                      cursor: "pointer", backdropFilter: "blur(8px)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}
+                  >✕</button>
+                  {activeItem.isVeg !== undefined && (
                     <div style={{
-                      width: 8, height: 8, borderRadius: "50%",
-                      background: activeItem.isVeg ? "#22c55e" : "#ef4444",
-                    }} />
-                    <span style={{
-                      fontSize: 10, fontWeight: 700, color: "#1A1008",
-                      fontFamily: "'DM Sans', sans-serif",
-                      letterSpacing: "0.06em", textTransform: "uppercase",
-                    }}>{activeItem.isVeg ? "Veg" : "Non-Veg"}</span>
+                      position: "absolute", top: 14, left: 14,
+                      background: "rgba(255,255,255,0.92)",
+                      borderRadius: 8, padding: "4px 8px",
+                      display: "flex", alignItems: "center", gap: 5,
+                      backdropFilter: "blur(8px)",
+                    }}>
+                      <div style={{
+                        width: 8, height: 8, borderRadius: "50%",
+                        background: activeItem.isVeg ? "#22c55e" : "#ef4444",
+                      }} />
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: "#1A1008",
+                        fontFamily: "'DM Sans', sans-serif",
+                        letterSpacing: "0.06em", textTransform: "uppercase",
+                      }}>{activeItem.isVeg ? "Veg" : "Non-Veg"}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* No image: compact drag-handle + close row */
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "16px 20px 0",
+                  borderRadius: "24px 24px 0 0",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(164,0,93,0.2)" }} />
+                    {activeItem.isVeg !== undefined && (
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 5,
+                        background: "rgba(164,0,93,0.07)",
+                        borderRadius: 8, padding: "4px 8px",
+                      }}>
+                        <div style={{
+                          width: 8, height: 8, borderRadius: "50%",
+                          background: activeItem.isVeg ? "#22c55e" : "#ef4444",
+                        }} />
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: "#1A1008",
+                          fontFamily: "'DM Sans', sans-serif",
+                          letterSpacing: "0.06em", textTransform: "uppercase",
+                        }}>{activeItem.isVeg ? "Veg" : "Non-Veg"}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                  <button
+                    onClick={closeItemDetails}
+                    style={{
+                      width: 34, height: 34, borderRadius: "50%",
+                      background: "rgba(164,0,93,0.08)",
+                      border: "none", color: "#A4005D", fontSize: 13,
+                      cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontWeight: 700,
+                    }}
+                  >✕</button>
+                </div>
+              )}
 
-              <div style={{ padding: "4px 20px 24px" }}>
+              <div style={{ padding: activeImageSrc ? "4px 20px 24px" : "12px 20px 24px" }}>
                 <div style={{ marginBottom: 16 }}>
                   <h3 style={{
                     fontFamily: "'Cormorant Garamond', serif",
