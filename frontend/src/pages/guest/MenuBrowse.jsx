@@ -257,7 +257,7 @@ export default function MenuBrowse() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap');
 
         * { box-sizing: border-box; }
 
@@ -719,7 +719,7 @@ export default function MenuBrowse() {
 
                                 <p style={{
                                   fontFamily: "'Playfair Display', serif",
-                                  fontSize: 16, fontWeight: 600, color: "#1A1008",
+                                  fontSize: 16, fontWeight: 400, color: "#1A1008",
                                   margin: 0, lineHeight: 1.25, flex: 1,
                                   paddingRight: qty > 0 ? 26 : 0,
                                 }}>{item.name}</p>
