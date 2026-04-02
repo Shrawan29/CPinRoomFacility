@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import ServiceRequest from "../models/ServiceRequest.js";
 import HotelInfo from "../models/HotelInfo.js";
+import { triggerHousekeepingSupervisorCall } from "../services/housekeepingVoiceAlert.service.js";
 
 const resolveHotelId = async () => {
   let hotel = await HotelInfo.findOne().sort({ updatedAt: -1, createdAt: -1 }).select("_id");
@@ -87,9 +88,26 @@ export const createHousekeepingRequest = async (req, res) => {
       status: "pending",
     });
 
+    // Keep request creation reliable: alert failures should not block saving the request.
+    const voiceAlert = await triggerHousekeepingSupervisorCall({
+      roomNumber,
+      items,
+      note,
+      action: "created",
+    });
+
+    if (voiceAlert.attempted && !voiceAlert.alerted) {
+      console.warn(
+        `[Housekeeping] Voice alert failed for room ${roomNumber}: ${voiceAlert.reason} ${
+          voiceAlert.message || ""
+        }`.trim()
+      );
+    }
+
     return res.status(201).json({
       message: "Housekeeping request created",
       request: created,
+      voiceAlert,
     });
   } catch (error) {
     console.error("Create housekeeping request error:", error);
