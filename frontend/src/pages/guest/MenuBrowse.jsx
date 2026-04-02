@@ -38,7 +38,7 @@ const normalizeItemAddons = (item) => {
     .filter((addon) => addon.name && Number.isFinite(addon.price) && addon.price >= 0);
 };
 
-// Warm gradient placeholders by category
+// Warm gradient placeholders by category (used only in the detail sheet hero)
 const categoryGradients = {
   ALL:       "linear-gradient(135deg,#c9a96e 0%,#a0522d 100%)",
   Starters:  "linear-gradient(135deg,#d4a853 0%,#8b6520 100%)",
@@ -54,6 +54,7 @@ const categoryIcons = {
   Desserts: "🍮", Beverages: "☕", Breakfast: "🌅", Snacks: "🥨",
 };
 
+// Only used inside the item detail sheet hero when no image is available
 const PlaceholderDish = ({ category, name }) => {
   const grad = categoryGradients[category] || categoryGradients.ALL;
   const initial = (name || "?")[0].toUpperCase();
@@ -660,49 +661,64 @@ export default function MenuBrowse() {
                       >
                         <div style={{ display: "flex", alignItems: "stretch", minHeight: 110 }}>
 
-                          {/* IMAGE / PLACEHOLDER */}
-                          <div style={{
-                            width: 110, flexShrink: 0,
-                            position: "relative", overflow: "hidden",
-                          }}>
-                            {hasImage ? (
+                          {/* IMAGE — only rendered when an image URL is available */}
+                          {hasImage && (
+                            <div style={{
+                              width: 110, flexShrink: 0,
+                              position: "relative", overflow: "hidden",
+                            }}>
                               <img
                                 src={imageSrc}
                                 alt={item.name}
                                 onError={() => setImageErrors((prev) => ({ ...prev, [item._id]: true }))}
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                               />
-                            ) : (
-                              <PlaceholderDish category={item.category} name={item.name} />
-                            )}
+                              {qty > 0 && (
+                                <div style={{
+                                  position: "absolute", top: 8, left: 8,
+                                  width: 24, height: 24,
+                                  background: "#A4005D",
+                                  borderRadius: "50%",
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  fontSize: 11, fontWeight: 800, color: "#fff",
+                                  boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
+                                  animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
+                                  fontFamily: "'DM Sans', sans-serif",
+                                }}>{qty}</div>
+                              )}
+                            </div>
+                          )}
 
-                            {qty > 0 && (
+                          {/* CONTENT — expands full width when no image */}
+                          <div style={{
+                            flex: 1, padding: "14px 14px 12px",
+                            display: "flex", flexDirection: "column",
+                            justifyContent: "space-between", minWidth: 0,
+                            position: "relative",
+                          }}>
+                            {/* qty badge for no-image cards */}
+                            {!hasImage && qty > 0 && (
                               <div style={{
-                                position: "absolute", top: 8, left: 8,
-                                width: 24, height: 24,
+                                position: "absolute", top: 12, right: 12,
+                                width: 22, height: 22,
                                 background: "#A4005D",
                                 borderRadius: "50%",
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 11, fontWeight: 800, color: "#fff",
+                                fontSize: 10, fontWeight: 800, color: "#fff",
                                 boxShadow: "0 2px 8px rgba(164,0,93,0.4)",
                                 animation: "badgePop 0.3s cubic-bezier(0.22,1,0.36,1)",
                                 fontFamily: "'DM Sans', sans-serif",
                               }}>{qty}</div>
                             )}
-                          </div>
 
-                          {/* CONTENT */}
-                          <div style={{
-                            flex: 1, padding: "14px 14px 12px",
-                            display: "flex", flexDirection: "column",
-                            justifyContent: "space-between", minWidth: 0,
-                          }}>
                             <div>
                               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 6, marginBottom: 4 }}>
                                 <p style={{
                                   fontFamily: "'Cormorant Garamond', serif",
                                   fontSize: 17, fontWeight: 600, color: "#1A1008",
                                   margin: 0, lineHeight: 1.2, flex: 1,
+                                  // leave room for the badge on no-image cards
+                                  paddingRight: (!hasImage && qty > 0) ? 28 : 0,
                                 }}>{item.name}</p>
 
                                 {item.isVeg !== undefined && (
@@ -860,7 +876,7 @@ export default function MenuBrowse() {
               animation: "slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both",
               paddingBottom: "env(safe-area-inset-bottom, 16px)",
             }}>
-              {/* Hero image */}
+              {/* Hero image — shown for all items in the sheet; PlaceholderDish used when no real image */}
               <div style={{
                 width: "100%", height: 200,
                 position: "relative", overflow: "hidden",
