@@ -7,6 +7,7 @@ import {
   markHousekeepingRequestInProgress,
 } from "../../../services/housekeeping.service";
 import notificationSound from "../../../assets/notification.mp3";
+import { Link } from "react-router-dom";
 
 const SOUND_STORAGE_KEY = "housekeeping_sound_enabled";
 
@@ -270,6 +271,26 @@ export default function HousekeepingDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            to="/admin/housekeeping/create-login"
+            className="text-sm px-4 py-2 rounded-lg font-semibold"
+            style={{ backgroundColor: "var(--brand)", color: "white" }}
+          >
+            Create Staff Login
+          </Link>
+
+          <Link
+            to="/admin/housekeeping/manage-logins"
+            className="text-sm px-4 py-2 rounded-lg border"
+            style={{
+              backgroundColor: "var(--bg-secondary)",
+              borderColor: "rgba(0,0,0,0.08)",
+              color: "var(--text-primary)",
+            }}
+          >
+            Manage Staff Logins
+          </Link>
+
           <label className="flex items-center gap-2 text-sm text-[var(--text-primary)] select-none">
             <input
               type="checkbox"

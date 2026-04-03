@@ -1,5 +1,5 @@
-const CACHE_NAME = "cp-supervisor-shell-v1";
-const APP_SHELL = ["/", "/logo.png", "/manifest.webmanifest"];
+const CACHE_NAME = "cp-supervisor-shell-v2";
+const APP_SHELL = ["/logo.png", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -23,6 +23,20 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  // Keep HTML fresh so route/menu changes are picked up quickly.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          const cloned = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/")))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
