@@ -28,19 +28,18 @@ const statusStyles = {
 };
 
 const canAssignRole = (role) =>
-  ["SUPER_ADMIN", "DINING_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(
+  ["SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(
     role
   );
 
 const canAcceptRole = (role) =>
-  ["SUPER_ADMIN", "DINING_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(
+  ["SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(
     role
   );
 
 const canInProgressRole = (role) =>
   [
     "SUPER_ADMIN",
-    "DINING_ADMIN",
     "HOUSEKEEPING_ADMIN",
     "HOUSEKEEPING_SUPERVISOR",
     "HOUSEKEEPING_STAFF",
@@ -76,7 +75,7 @@ export default function SupervisorMobileDashboard() {
   const canAccept = canAcceptRole(admin?.role);
   const canInProgress = canInProgressRole(admin?.role);
   const canComplete = canCompleteRole(admin?.role);
-  const isKitchenAdmin = admin?.role === "DINING_ADMIN";
+  const isHousekeepingAdmin = admin?.role === "HOUSEKEEPING_ADMIN";
 
   const playNotification = async () => {
     try {
@@ -228,7 +227,7 @@ export default function SupervisorMobileDashboard() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-lg font-semibold">
-              {isKitchenAdmin ? "Escalated Housekeeping" : "Supervisor Dashboard"}
+              {isHousekeepingAdmin ? "Escalated Housekeeping" : "Supervisor Dashboard"}
             </h1>
             <p className="text-xs opacity-85">{admin?.name || "Housekeeping"}</p>
           </div>
@@ -290,9 +289,9 @@ export default function SupervisorMobileDashboard() {
             </p>
           )}
 
-          {isKitchenAdmin && (
+          {isHousekeepingAdmin && (
             <p className="mt-2 text-xs text-[var(--text-muted)]">
-              Kitchen admin sees requests only after supervisor escalation.
+              Housekeeping admin sees requests only after supervisor escalation.
             </p>
           )}
         </section>

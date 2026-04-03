@@ -59,9 +59,9 @@ const fetchPendingRequest = async (requestId) => {
   return request;
 };
 
-const resolveKitchenAdminEscalationPhone = async () => {
-  const kitchenAdmin = await Admin.findOne({
-    role: "DINING_ADMIN",
+const resolveHousekeepingAdminEscalationPhone = async () => {
+  const housekeepingAdmin = await Admin.findOne({
+    role: "HOUSEKEEPING_ADMIN",
     isActive: true,
   })
     .sort({ updatedAt: -1, createdAt: -1 })
@@ -69,8 +69,8 @@ const resolveKitchenAdminEscalationPhone = async () => {
     .lean();
 
   const fallback = getEscalationPhone();
-  const kitchenPhone = String(kitchenAdmin?.phone || "").trim();
-  return kitchenPhone || fallback;
+  const housekeepingPhone = String(housekeepingAdmin?.phone || "").trim();
+  return housekeepingPhone || fallback;
 };
 
 const runPrimaryCallAttempt = async (requestId) => {
@@ -107,7 +107,7 @@ const runEscalationCallAttempt = async (requestId) => {
     items: request.items,
     note: request.note,
     action: "escalated",
-    toNumberOverride: await resolveKitchenAdminEscalationPhone(),
+    toNumberOverride: await resolveHousekeepingAdminEscalationPhone(),
   });
 
   const updates = {

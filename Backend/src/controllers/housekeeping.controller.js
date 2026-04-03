@@ -15,7 +15,6 @@ const HOUSEKEEPING_ADMIN_ROLES = new Set([
   "SUPER_ADMIN",
   "HOUSEKEEPING_ADMIN",
   "HOUSEKEEPING_SUPERVISOR",
-  "DINING_ADMIN",
 ]);
 
 const HOUSEKEEPING_TEAM_ROLES = [
@@ -246,7 +245,6 @@ export const listHousekeepingRequests = async (req, res) => {
         "HOUSEKEEPING_ADMIN",
         "HOUSEKEEPING_SUPERVISOR",
         "HOUSEKEEPING_STAFF",
-        "DINING_ADMIN",
       ]);
       if (!allowed.has(req.admin.role)) {
         return res.status(403).json({ message: "Access denied" });
@@ -264,8 +262,8 @@ export const listHousekeepingRequests = async (req, res) => {
         baseQuery.assignedStaffId = req.admin.id;
       }
 
-      if (req.admin.role === "DINING_ADMIN") {
-        // Kitchen admin only sees escalated requests (or requests they already handled).
+      if (req.admin.role === "HOUSEKEEPING_ADMIN") {
+        // Housekeeping admin sees escalated requests (or requests already handled by them).
         baseQuery.$or = [
           { escalatedAt: { $ne: null } },
           { acceptedByAdminId: req.admin.id },
@@ -336,7 +334,7 @@ export const acceptHousekeepingRequest = async (req, res) => {
       ];
     }
 
-    if (req.admin.role === "DINING_ADMIN") {
+    if (req.admin.role === "HOUSEKEEPING_ADMIN") {
       query.escalatedAt = { $ne: null };
     }
 
@@ -443,7 +441,7 @@ export const assignHousekeepingRequest = async (req, res) => {
       status: { $in: ["pending", "accepted", "in_progress"] },
     };
 
-    if (req.admin.role === "DINING_ADMIN") {
+    if (req.admin.role === "HOUSEKEEPING_ADMIN") {
       updateQuery.$or = [
         { escalatedAt: { $ne: null } },
         { acceptedByAdminId: req.admin.id },
@@ -489,7 +487,6 @@ export const markHousekeepingRequestInProgress = async (req, res) => {
       "HOUSEKEEPING_ADMIN",
       "HOUSEKEEPING_SUPERVISOR",
       "HOUSEKEEPING_STAFF",
-      "DINING_ADMIN",
     ]);
     if (!allowedRoles.has(req.admin.role)) {
       return res.status(403).json({ message: "Access denied" });
@@ -510,7 +507,7 @@ export const markHousekeepingRequestInProgress = async (req, res) => {
       query.assignedStaffId = req.admin.id;
     }
 
-    if (req.admin.role === "DINING_ADMIN") {
+    if (req.admin.role === "HOUSEKEEPING_ADMIN") {
       query.$or = [
         { escalatedAt: { $ne: null } },
         { acceptedByAdminId: req.admin.id },
@@ -557,7 +554,6 @@ export const completeHousekeepingRequest = async (req, res) => {
       "HOUSEKEEPING_ADMIN",
       "HOUSEKEEPING_SUPERVISOR",
       "HOUSEKEEPING_STAFF",
-      "DINING_ADMIN",
     ]);
     if (!allowedRoles.has(req.admin.role)) {
       return res.status(403).json({ message: "Access denied" });
@@ -583,7 +579,7 @@ export const completeHousekeepingRequest = async (req, res) => {
       query.assignedStaffId = req.admin.id;
     }
 
-    if (req.admin.role === "DINING_ADMIN") {
+    if (req.admin.role === "HOUSEKEEPING_ADMIN") {
       query.$or = [
         { escalatedAt: { $ne: null } },
         { acceptedByAdminId: req.admin.id },
@@ -642,7 +638,6 @@ export const getHousekeepingTeam = async (req, res) => {
       "HOUSEKEEPING_ADMIN",
       "HOUSEKEEPING_SUPERVISOR",
       "HOUSEKEEPING_STAFF",
-      "DINING_ADMIN",
     ]);
 
     if (!allowed.has(req.admin?.role)) {

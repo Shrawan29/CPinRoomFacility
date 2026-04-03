@@ -8,14 +8,14 @@ const SUPER_ADMIN_MANAGED_ROLES = [
   "HOUSEKEEPING_STAFF",
 ];
 
-const DINING_ADMIN_MANAGED_ROLES = [
+const HOUSEKEEPING_ADMIN_MANAGED_ROLES = [
   "HOUSEKEEPING_SUPERVISOR",
   "HOUSEKEEPING_STAFF",
 ];
 
 const getManageableRoles = (requesterRole) => {
-  if (requesterRole === "DINING_ADMIN") {
-    return DINING_ADMIN_MANAGED_ROLES;
+  if (requesterRole === "HOUSEKEEPING_ADMIN") {
+    return HOUSEKEEPING_ADMIN_MANAGED_ROLES;
   }
 
   return SUPER_ADMIN_MANAGED_ROLES;
@@ -26,15 +26,15 @@ const canManageAdmin = (requesterRole, targetRole) => {
     return targetRole !== "SUPER_ADMIN";
   }
 
-  if (requesterRole === "DINING_ADMIN") {
-    return DINING_ADMIN_MANAGED_ROLES.includes(targetRole);
+  if (requesterRole === "HOUSEKEEPING_ADMIN") {
+    return HOUSEKEEPING_ADMIN_MANAGED_ROLES.includes(targetRole);
   }
 
   return false;
 };
 
 /**
- * SUPER_ADMIN / DINING_ADMIN → Create ADMIN
+ * SUPER_ADMIN / HOUSEKEEPING_ADMIN → Create ADMIN
  */
 export const createAdmin = async (req, res) => {
   try {
@@ -93,7 +93,7 @@ export const createAdmin = async (req, res) => {
 };
 
 /**
- * SUPER_ADMIN / DINING_ADMIN → List ADMINs
+ * SUPER_ADMIN / HOUSEKEEPING_ADMIN → List ADMINs
  */
 export const listAdmins = async (req, res) => {
   const manageableRoles = getManageableRoles(req.admin?.role);
@@ -106,7 +106,7 @@ export const listAdmins = async (req, res) => {
 };
 
 /**
- * SUPER_ADMIN / DINING_ADMIN → Deactivate ADMIN
+ * SUPER_ADMIN / HOUSEKEEPING_ADMIN → Deactivate ADMIN
  */
 export const deactivateAdmin = async (req, res) => {
   const { id } = req.params;

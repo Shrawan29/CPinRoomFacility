@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 import api from "../../../services/api";
@@ -228,18 +227,6 @@ export default function KitchenDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin/housekeeping/supervisor"
-            className="text-sm px-4 py-2 rounded-lg border"
-            style={{
-              backgroundColor: "var(--bg-secondary)",
-              borderColor: "rgba(0,0,0,0.08)",
-              color: "var(--text-primary)",
-            }}
-          >
-            Escalated Housekeeping
-          </Link>
-
           <label className="flex items-center gap-2 text-sm text-[--text-primary] select-none">
             <input
               type="checkbox"
