@@ -1,5 +1,5 @@
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import LoginWrapper from "./routes/LoginWrapper";
 
 // Super Admin
@@ -156,25 +156,6 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN", "HOUSEKEEPING_ADMIN"]}>
             <AdminList />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Legacy URL redirects */}
-      <Route
-        path="/admin/kitchen/create-login"
-        element={
-          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "HOUSEKEEPING_ADMIN"]}>
-            <Navigate to="/admin/housekeeping/create-login" replace />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/kitchen/manage-logins"
-        element={
-          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "HOUSEKEEPING_ADMIN"]}>
-            <Navigate to="/admin/housekeeping/manage-logins" replace />
           </ProtectedRoute>
         }
       />
