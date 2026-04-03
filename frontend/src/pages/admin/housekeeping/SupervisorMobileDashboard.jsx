@@ -202,10 +202,20 @@ export default function SupervisorMobileDashboard() {
     }
   };
 
-  const handleAssign = async (requestId) => {
-    const assignedStaffId = assignmentDrafts[requestId] || null;
-    await runAction(`assign-${requestId}`, async () => {
-      await assignHousekeepingRequest(requestId, { assignedStaffId });
+  const handleAssignAcceptAndStart = async (request) => {
+    const requestId = request._id;
+    const assignedStaffId =
+      assignmentDrafts[requestId] ?? request.assignedStaffId?._id ?? "";
+
+    await runAction(`start-${requestId}`, async () => {
+      if (canAssign) {
+        await assignHousekeepingRequest(requestId, {
+          assignedStaffId: assignedStaffId || null,
+        });
+      }
+
+      await acceptHousekeepingRequest(requestId);
+      await markHousekeepingRequestInProgress(requestId);
     });
   };
 
@@ -313,8 +323,7 @@ export default function SupervisorMobileDashboard() {
         ) : (
           requests.map((request) => {
             const statusClass = statusStyles[request.status] || "bg-gray-100 text-gray-700";
-            const assignBusy = actionBusyKey === `assign-${request._id}`;
-            const acceptBusy = actionBusyKey === `accept-${request._id}`;
+            const startBusy = actionBusyKey === `start-${request._id}`;
             const progressBusy = actionBusyKey === `progress-${request._id}`;
             const completeBusy = actionBusyKey === `complete-${request._id}`;
 
@@ -354,10 +363,10 @@ export default function SupervisorMobileDashboard() {
                   <div>Accepted By: {request.acceptedByAdminId?.name || "-"}</div>
                 </div>
 
-                {canAssign && request.status !== "completed" && (
+                {request.status === "pending" && canAccept && (
                   <div className="mt-3 rounded-xl border border-black/10 bg-white p-3">
                     <label className="mb-1 block text-xs font-medium text-[var(--text-primary)]">
-                      Assign housekeeping staff
+                      Assigned To
                     </label>
                     <div className="flex items-center gap-2">
                       <select
@@ -380,32 +389,20 @@ export default function SupervisorMobileDashboard() {
 
                       <button
                         type="button"
-                        onClick={() => handleAssign(request._id)}
-                        disabled={assignBusy}
+                        onClick={() => handleAssignAcceptAndStart(request)}
+                        disabled={startBusy}
                         className="rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
                       >
-                        {assignBusy ? "Saving..." : "Assign"}
+                        {startBusy ? "Starting..." : "Assign + Accept"}
                       </button>
                     </div>
+                    <p className="mt-2 text-[11px] text-[var(--text-muted)]">
+                      Clicking this will assign, accept, and move request to in-progress.
+                    </p>
                   </div>
                 )}
 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {request.status === "pending" && canAccept && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        runAction(`accept-${request._id}`, async () => {
-                          await acceptHousekeepingRequest(request._id);
-                        })
-                      }
-                      disabled={acceptBusy}
-                      className="rounded-lg bg-[var(--brand)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
-                    >
-                      {acceptBusy ? "Accepting..." : "Accept"}
-                    </button>
-                  )}
-
                   {request.status === "accepted" && canInProgress && (
                     <button
                       type="button"
@@ -417,11 +414,11 @@ export default function SupervisorMobileDashboard() {
                       disabled={progressBusy}
                       className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
                     >
-                      {progressBusy ? "Updating..." : "Mark In Progress"}
+                      {progressBusy ? "Updating..." : "Start Now"}
                     </button>
                   )}
 
-                  {["accepted", "in_progress"].includes(request.status) && canComplete && (
+                  {request.status === "in_progress" && canComplete && (
                     <button
                       type="button"
                       onClick={() =>
