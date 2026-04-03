@@ -13,7 +13,20 @@ import { useAdminAuth } from "../../../context/AdminAuthContext";
 
 export default function AdminList() {
 
-  const { token, loading: authLoading } = useAdminAuth();
+  const { admin, token, loading: authLoading } = useAdminAuth();
+  const isKitchenAdmin = admin?.role === "DINING_ADMIN";
+  const editableRoleOptions = isKitchenAdmin
+    ? [
+        { value: "HOUSEKEEPING_SUPERVISOR", label: "Housekeeping Supervisor" },
+        { value: "HOUSEKEEPING_STAFF", label: "Housekeeping Staff" },
+      ]
+    : [
+        { value: "DINING_ADMIN", label: "Kitchen Admin" },
+        { value: "HOUSEKEEPING_ADMIN", label: "Housekeeping Admin" },
+        { value: "HOUSEKEEPING_SUPERVISOR", label: "Housekeeping Supervisor" },
+        { value: "HOUSEKEEPING_STAFF", label: "Housekeeping Staff" },
+      ];
+
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -141,10 +154,12 @@ export default function AdminList() {
         {/* Page Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
-            Manage Admins
+            {isKitchenAdmin ? "Manage Supervisor & Staff Logins" : "Manage Admins"}
           </h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            View and manage all admin accounts
+            {isKitchenAdmin
+              ? "Kitchen admin can edit, activate, deactivate, and delete supervisor/staff logins"
+              : "View and manage all admin accounts"}
           </p>
         </div>
 
@@ -214,11 +229,15 @@ export default function AdminList() {
                             px-3 py-1 rounded-full text-xs font-medium
                             ${admin.role === "SUPER_ADMIN"
                                 ? "bg-purple-100 text-purple-700"
+                                : admin.role === "HOUSEKEEPING_SUPERVISOR"
+                                ? "bg-blue-100 text-blue-700"
+                                : admin.role === "HOUSEKEEPING_STAFF"
+                                ? "bg-emerald-100 text-emerald-700"
                                 : "bg-orange-100 text-orange-700"
                               }
                           `}
                           >
-                            {admin.role.replace("_", " ")}
+                            {admin.role.replaceAll("_", " ")}
                           </span>
                         </td>
 
@@ -296,6 +315,7 @@ export default function AdminList() {
                 onChange={(e) =>
                   setEditingAdmin({ ...editingAdmin, phone: e.target.value })
                 }
+                className="w-full border rounded px-3 py-2 mb-4"
               />
 
               <label className="block mb-2 text-sm">Role</label>
@@ -306,7 +326,11 @@ export default function AdminList() {
                 }
                 className="w-full border rounded px-3 py-2 mb-6"
               >
-                <option value="DINING_ADMIN">Kitchen Admin</option>
+                {editableRoleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
 
               <div className="flex justify-end gap-3">

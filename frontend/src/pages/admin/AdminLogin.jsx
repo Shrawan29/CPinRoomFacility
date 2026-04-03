@@ -63,6 +63,11 @@ export default function AdminLogin() {
         navigate("/admin/kitchen/dashboard");
       } else if (data.admin.role === "HOUSEKEEPING_ADMIN") {
         navigate("/admin/housekeeping");
+      } else if (
+        data.admin.role === "HOUSEKEEPING_SUPERVISOR" ||
+        data.admin.role === "HOUSEKEEPING_STAFF"
+      ) {
+        navigate("/admin/housekeeping/supervisor");
       }
     } catch (err) {
       console.error("Login error:", err);

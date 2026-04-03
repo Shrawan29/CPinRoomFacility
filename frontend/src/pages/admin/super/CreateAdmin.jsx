@@ -1,22 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminLayout from "../../../layouts/AdminLayout";
 import { createAdmin } from "../../../services/admin.service";
 import { useAdminAuth } from "../../../context/AdminAuthContext";
 
 export default function CreateAdmin() {
-  const { token, loading: authLoading } = useAdminAuth();
+  const { admin, loading: authLoading } = useAdminAuth();
+
+  const roleOptions =
+    admin?.role === "DINING_ADMIN"
+      ? [
+          { value: "HOUSEKEEPING_SUPERVISOR", label: "Housekeeping Supervisor" },
+          { value: "HOUSEKEEPING_STAFF", label: "Housekeeping Staff" },
+        ]
+      : [
+          { value: "DINING_ADMIN", label: "Kitchen Admin" },
+          { value: "HOUSEKEEPING_ADMIN", label: "Housekeeping Admin" },
+          { value: "HOUSEKEEPING_SUPERVISOR", label: "Housekeeping Supervisor" },
+          { value: "HOUSEKEEPING_STAFF", label: "Housekeeping Staff" },
+        ];
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
-    role: "DINING_ADMIN",
+    role: roleOptions[0].value,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (!roleOptions.some((option) => option.value === form.role)) {
+      setForm((prev) => ({ ...prev, role: roleOptions[0].value }));
+    }
+  }, [admin?.role]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,7 +55,7 @@ export default function CreateAdmin() {
         email: "",
         phone: "",
         password: "",
-        role: "DINING_ADMIN",
+        role: roleOptions[0].value,
       });
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create admin");
@@ -51,12 +70,22 @@ export default function CreateAdmin() {
       {/* Page Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
-          Create New Admin
+          {admin?.role === "DINING_ADMIN"
+            ? "Create Supervisor/Staff Login"
+            : "Create New Admin"}
         </h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">
-          Add a new admin for hotel operations
+          {admin?.role === "DINING_ADMIN"
+            ? "Create login credentials for housekeeping supervisors and staff"
+            : "Add a new admin for hotel operations"}
         </p>
       </div>
+
+      {authLoading && (
+        <div className="mb-4 p-3 rounded bg-[var(--bg-secondary)] text-[var(--text-muted)] text-sm">
+          Loading permissions...
+        </div>
+      )}
 
       {/* Form Card */}
       <div>
@@ -164,12 +193,17 @@ export default function CreateAdmin() {
                     focus:ring-[var(--brand)]
                   "
                 >
-                  <option value="DINING_ADMIN">Kitchen Admin</option>
-                  <option value="HOUSEKEEPING_ADMIN">Housekeeping Admin</option>
+                  {roleOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
 
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  Choose which area this admin can manage
+                  {admin?.role === "DINING_ADMIN"
+                    ? "Kitchen admin can create only supervisor/staff logins"
+                    : "Choose which area this admin can manage"}
                 </p>
               </div>
 

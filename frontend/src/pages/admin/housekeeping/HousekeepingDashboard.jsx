@@ -4,6 +4,7 @@ import {
   acceptHousekeepingRequest,
   completeHousekeepingRequest,
   getHousekeepingRequestsAdmin,
+  markHousekeepingRequestInProgress,
 } from "../../../services/housekeeping.service";
 import notificationSound from "../../../assets/notification.mp3";
 
@@ -24,6 +25,8 @@ const StatusPill = ({ status }) => {
       ? { bg: "#fef3c7", text: "#92400e" }
       : status === "accepted"
       ? { bg: "#dbeafe", text: "#1e40af" }
+      : status === "in_progress"
+      ? { bg: "#ede9fe", text: "#5b21b6" }
       : { bg: "#d1fae5", text: "#065f46" };
 
   return (
@@ -241,6 +244,19 @@ export default function HousekeepingDashboard() {
     }
   };
 
+  const markInProgress = async (id) => {
+    setUpdatingId(id);
+    setError(null);
+    try {
+      await markHousekeepingRequestInProgress(id);
+      await load({ showLoading: false });
+    } catch (e) {
+      setError(e?.response?.data?.message || "Failed to mark in progress");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="flex items-center justify-between gap-3 mb-6">
@@ -249,7 +265,7 @@ export default function HousekeepingDashboard() {
             Housekeeping Requests
           </h1>
           <p className="text-sm text-[var(--text-muted)]">
-            Pending/accepted requests show here; completed requests are in history.
+            Pending, accepted, and in-progress requests show here; completed requests are in history.
           </p>
         </div>
 
@@ -329,6 +345,15 @@ export default function HousekeepingDashboard() {
                 {(r.items || []).map((it) => `${it.quantity} × ${it.name}`).join(", ")}
               </div>
 
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-[var(--text-muted)]">
+                <div>Floor: {r.roomFloor ?? "-"}</div>
+                <div>Call attempts: {r.callAttemptCount ?? 0}</div>
+                <div>Notified: {formatDateTime(r.notifiedAt)}</div>
+                <div>Accepted: {formatDateTime(r.acceptedAt)}</div>
+                <div>Escalated: {formatDateTime(r.escalatedAt)}</div>
+                <div>Accepted by: {r.acceptedByAdminId?.name || "-"}</div>
+              </div>
+
               {r.note ? (
                 <div className="mt-2 text-sm">
                   <span className="font-medium text-[var(--text-primary)]">Note:</span>{" "}
@@ -349,6 +374,17 @@ export default function HousekeepingDashboard() {
                 )}
 
                 {r.status === "accepted" && (
+                  <button
+                    onClick={() => markInProgress(r._id)}
+                    disabled={updatingId === r._id}
+                    className="text-sm px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
+                    style={{ backgroundColor: "#4338ca", color: "white" }}
+                  >
+                    {updatingId === r._id ? "Updating..." : "Mark In Progress"}
+                  </button>
+                )}
+
+                {r.status === "in_progress" && (
                   <button
                     onClick={() => complete(r._id)}
                     disabled={updatingId === r._id}

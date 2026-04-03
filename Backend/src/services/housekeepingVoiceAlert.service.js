@@ -2,6 +2,7 @@ const TWILIO_API_BASE_URL = "https://api.twilio.com/2010-04-01";
 const TWILIO_STUDIO_API_BASE_URL = "https://studio.twilio.com/v2";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_SUPERVISOR_PHONE = "+917972895563";
+const DEFAULT_ESCALATION_PHONE = "+917972895563";
 
 const toTrimmedString = (value) => String(value ?? "").trim();
 
@@ -19,7 +20,7 @@ const toPositiveInt = (value, fallback) => {
   return Math.floor(parsed);
 };
 
-const parseFloorFromRoomNumber = (roomNumber) => {
+export const parseFloorFromRoomNumber = (roomNumber) => {
   const normalized = toTrimmedString(roomNumber);
   if (!normalized) return null;
 
@@ -101,6 +102,14 @@ const resolveSupervisorPhone = (roomNumber) => {
   return fallbackPhone;
 };
 
+export const getSupervisorPhoneForRoom = (roomNumber) => resolveSupervisorPhone(roomNumber);
+
+export const getEscalationPhone = () =>
+  toTrimmedString(process.env.HOUSEKEEPING_ESCALATION_TO) ||
+  toTrimmedString(process.env.HOUSEKEEPING_MANAGER_DEFAULT_TO) ||
+  resolveSupervisorPhone("") ||
+  DEFAULT_ESCALATION_PHONE;
+
 const escapeXml = (value) =>
   String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -134,6 +143,10 @@ const buildVoiceMessage = ({ roomNumber, items, note, action = "created" }) => {
     intro = itemSummary
       ? `Housekeeping update from room ${room}. Request for ${itemSummary} is no longer needed.`
       : `Housekeeping update from room ${room}. Previous housekeeping request is no longer needed.`;
+  } else if (action === "escalated") {
+    intro = itemSummary
+      ? `Escalation alert. No one accepted housekeeping request from room ${room} for ${itemSummary}.`
+      : `Escalation alert. No one accepted housekeeping request from room ${room}.`;
   } else {
     intro = itemSummary
       ? `Housekeeping request from room ${room} for ${itemSummary}.`
@@ -178,6 +191,7 @@ export const triggerHousekeepingSupervisorCall = async ({
   items,
   note,
   action = "created",
+  toNumberOverride,
 }) => {
   if (!toBoolean(process.env.TWILIO_ENABLED, false)) {
     return { attempted: false, alerted: false, reason: "disabled" };
@@ -192,7 +206,7 @@ export const triggerHousekeepingSupervisorCall = async ({
   const fromNumber =
     toTrimmedString(process.env.TWILIO_FROM_NUMBER) ||
     toTrimmedString(process.env.TWILIO_FROM);
-  const toNumber = resolveSupervisorPhone(roomNumber);
+  const toNumber = toTrimmedString(toNumberOverride) || resolveSupervisorPhone(roomNumber);
 
   if (!accountSid || !authToken || !fromNumber || !toNumber) {
     return {

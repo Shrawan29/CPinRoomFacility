@@ -43,6 +43,7 @@ import GuestFointsPage from "./pages/guest/GuestFointsPage";
 
 // Housekeeping admin
 import HousekeepingDashboard from "./pages/admin/housekeeping/HousekeepingDashboard";
+import SupervisorMobileDashboard from "./pages/admin/housekeeping/SupervisorMobileDashboard";
 import ComplaintsAdmin from "./pages/admin/Complaints";
 
 
@@ -141,12 +142,46 @@ function App() {
         }
       />
 
+      <Route
+        path="/admin/kitchen/create-login"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "DINING_ADMIN"]}>
+            <CreateAdmin />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/kitchen/manage-logins"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "DINING_ADMIN"]}>
+            <AdminList />
+          </ProtectedRoute>
+        }
+      />
+
       {/* HOUSEKEEPING */}
       <Route
         path="/admin/housekeeping"
         element={
-          <ProtectedRoute allowedRoles={["HOUSEKEEPING_ADMIN"]}>
+          <ProtectedRoute allowedRoles={["HOUSEKEEPING_ADMIN", "SUPER_ADMIN"]}>
             <HousekeepingDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/housekeeping/supervisor"
+        element={
+          <ProtectedRoute
+            allowedRoles={[
+              "SUPER_ADMIN",
+              "HOUSEKEEPING_ADMIN",
+              "HOUSEKEEPING_SUPERVISOR",
+              "HOUSEKEEPING_STAFF",
+            ]}
+          >
+            <SupervisorMobileDashboard />
           </ProtectedRoute>
         }
       />

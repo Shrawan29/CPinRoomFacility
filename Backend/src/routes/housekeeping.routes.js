@@ -7,12 +7,16 @@ import allowRoles from "../middleware/role.middleware.js";
 
 import {
   acceptHousekeepingRequest,
+  assignHousekeepingRequest,
   completeHousekeepingRequest,
   createHousekeepingRequest,
+  getHousekeepingTeam,
   listHousekeepingRequests,
+  markHousekeepingRequestInProgress,
 } from "../controllers/housekeeping.controller.js";
 
 import {
+  validateAssignmentPayload,
   validateCreateHousekeepingRequest,
   validateStatusQuery,
 } from "../validators/housekeeping.validator.js";
@@ -25,18 +29,43 @@ router.post("/request", guestAuth, validateCreateHousekeepingRequest, createHous
 // Guest OR Housekeeping Admin: list requests (scoped automatically)
 router.get("/", housekeepingAuth, validateStatusQuery, listHousekeepingRequests);
 
-// Housekeeping Admin: accept / complete
+// Housekeeping team directory for assignment actions
+router.get(
+  "/team",
+  adminAuth,
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "HOUSEKEEPING_STAFF"),
+  getHousekeepingTeam
+);
+
+// Housekeeping: accept
 router.patch(
   "/:id/accept",
   adminAuth,
-  allowRoles("HOUSEKEEPING_ADMIN"),
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"),
   acceptHousekeepingRequest
+);
+
+// Housekeeping: assign supervisor/staff
+router.patch(
+  "/:id/assign",
+  adminAuth,
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"),
+  validateAssignmentPayload,
+  assignHousekeepingRequest
+);
+
+// Housekeeping: mark in-progress
+router.patch(
+  "/:id/in-progress",
+  adminAuth,
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "HOUSEKEEPING_STAFF"),
+  markHousekeepingRequestInProgress
 );
 
 router.patch(
   "/:id/complete",
   adminAuth,
-  allowRoles("HOUSEKEEPING_ADMIN"),
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "HOUSEKEEPING_STAFF"),
   completeHousekeepingRequest
 );
 

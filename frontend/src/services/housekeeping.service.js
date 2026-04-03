@@ -83,9 +83,39 @@ export const getHousekeepingRequestsAdmin = async ({ status } = {}) => {
   return res.data;
 };
 
+export const getHousekeepingTeam = async () => {
+  const token = getAdminToken();
+  const res = await adminClient.get("/api/housekeeping/team", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
 export const acceptHousekeepingRequest = async (id) => {
   const token = getAdminToken();
   const res = await adminClient.patch(`/api/housekeeping/${id}/accept`, null, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const assignHousekeepingRequest = async (id, payload) => {
+  const token = getAdminToken();
+  const res = await adminClient.patch(`/api/housekeeping/${id}/assign`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const markHousekeepingRequestInProgress = async (id) => {
+  const token = getAdminToken();
+  const res = await adminClient.patch(`/api/housekeeping/${id}/in-progress`, null, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

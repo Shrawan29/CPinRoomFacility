@@ -25,10 +25,21 @@ export default function AdminSidebar() {
   const diningAdminMenu = [
     { label: "Orders", path: "/admin/kitchen/dashboard" },
     { label: "Menu", path: "/admin/kitchen/menu" },
+    { label: "Create Staff Login", path: "/admin/kitchen/create-login" },
+    { label: "Manage Staff Logins", path: "/admin/kitchen/manage-logins" },
   ];
 
   const housekeepingAdminMenu = [
     { label: "Housekeeping", path: "/admin/housekeeping" },
+    { label: "Supervisor Mobile", path: "/admin/housekeeping/supervisor" },
+  ];
+
+  const housekeepingSupervisorMenu = [
+    { label: "Supervisor Dashboard", path: "/admin/housekeeping/supervisor" },
+  ];
+
+  const housekeepingStaffMenu = [
+    { label: "My Tasks", path: "/admin/housekeeping/supervisor" },
   ];
 
   /* ---------------- SELECT MENU ---------------- */
@@ -38,6 +49,10 @@ export default function AdminSidebar() {
       ? superAdminMenu
       : role === "HOUSEKEEPING_ADMIN"
       ? housekeepingAdminMenu
+      : role === "HOUSEKEEPING_SUPERVISOR"
+      ? housekeepingSupervisorMenu
+      : role === "HOUSEKEEPING_STAFF"
+      ? housekeepingStaffMenu
       : diningAdminMenu;
 
   return (

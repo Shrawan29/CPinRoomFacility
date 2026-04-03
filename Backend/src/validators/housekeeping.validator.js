@@ -97,12 +97,46 @@ export const validateStatusQuery = (req, res, next) => {
   const { status } = req.query;
   if (!status) return next();
 
-  const allowed = new Set(["pending", "accepted", "completed", "active"]);
+  const allowed = new Set(["pending", "accepted", "in_progress", "completed", "active"]);
   if (!allowed.has(String(status))) {
     return res.status(400).json({
       message: "Validation failed",
       errors: [{ field: "status", message: "Invalid status filter" }],
     });
   }
+  return next();
+};
+
+export const validateAssignmentPayload = (req, res, next) => {
+  const { assignedStaffId, assignedSupervisorId } = req.body || {};
+
+  if (assignedStaffId === undefined && assignedSupervisorId === undefined) {
+    return res.status(400).json({
+      message: "Validation failed",
+      errors: [{ field: "body", message: "Provide assignedStaffId and/or assignedSupervisorId" }],
+    });
+  }
+
+  const isValidOptionalId = (value) =>
+    value === null || value === "" || (typeof value === "string" && /^[a-f\d]{24}$/i.test(value));
+
+  const errors = [];
+  if (assignedStaffId !== undefined && !isValidOptionalId(assignedStaffId)) {
+    errors.push({ field: "assignedStaffId", message: "assignedStaffId must be a valid id or null" });
+  }
+  if (assignedSupervisorId !== undefined && !isValidOptionalId(assignedSupervisorId)) {
+    errors.push({
+      field: "assignedSupervisorId",
+      message: "assignedSupervisorId must be a valid id or null",
+    });
+  }
+
+  if (errors.length) {
+    return res.status(400).json({
+      message: "Validation failed",
+      errors,
+    });
+  }
+
   return next();
 };

@@ -4,6 +4,7 @@ import cors from "cors";
 
 import connectDB from "./config/db.js";
 import { initializeEventScheduler } from "./services/eventScheduler.service.js";
+import { initializeHousekeepingEscalationScheduler } from "./services/housekeepingEscalationScheduler.service.js";
 import dataSyncService from "./services/dataSync.service.js";
 
 // routes
@@ -63,6 +64,9 @@ setInterval(async () => {
 
 // Initialize event scheduler when server starts
 initializeEventScheduler();
+
+// Initialize housekeeping escalation scheduler when server starts
+initializeHousekeepingEscalationScheduler();
 
 // Initialize data sync service when server starts
 dataSyncService.initialize();

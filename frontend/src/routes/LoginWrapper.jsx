@@ -21,6 +21,9 @@ export default function LoginWrapper() {
     if (admin.role === "HOUSEKEEPING_ADMIN") {
       return <Navigate to="/admin/housekeeping" replace />;
     }
+    if (admin.role === "HOUSEKEEPING_SUPERVISOR" || admin.role === "HOUSEKEEPING_STAFF") {
+      return <Navigate to="/admin/housekeeping/supervisor" replace />;
+    }
   }
 
   // Not logged in → show login page

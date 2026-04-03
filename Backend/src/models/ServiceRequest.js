@@ -64,9 +64,74 @@ const serviceRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "completed"],
+      enum: ["pending", "accepted", "in_progress", "completed"],
       default: "pending",
       index: true,
+    },
+
+    roomFloor: {
+      type: Number,
+      min: 0,
+      index: true,
+    },
+
+    assignedSupervisorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      index: true,
+    },
+
+    assignedStaffId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+
+    assignedByAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+
+    acceptedByAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+
+    completedByAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+
+    notifiedAt: {
+      type: Date,
+      index: true,
+    },
+
+    assignedAt: {
+      type: Date,
+    },
+
+    acceptedAt: {
+      type: Date,
+      index: true,
+    },
+
+    inProgressAt: {
+      type: Date,
+    },
+
+    completedAt: {
+      type: Date,
+    },
+
+    escalatedAt: {
+      type: Date,
+      index: true,
+    },
+
+    callAttemptCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     // When set, MongoDB TTL will delete the request at this time.
@@ -80,6 +145,7 @@ const serviceRequestSchema = new mongoose.Schema(
 
 serviceRequestSchema.index({ hotelId: 1, roomNumber: 1, createdAt: 1 });
 serviceRequestSchema.index({ hotelId: 1, status: 1, createdAt: -1 });
+serviceRequestSchema.index({ hotelId: 1, assignedSupervisorId: 1, status: 1, createdAt: -1 });
 serviceRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const ServiceRequest = mongoose.model("ServiceRequest", serviceRequestSchema);
