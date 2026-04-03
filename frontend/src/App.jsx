@@ -176,6 +176,7 @@ function App() {
           <ProtectedRoute
             allowedRoles={[
               "SUPER_ADMIN",
+              "DINING_ADMIN",
               "HOUSEKEEPING_ADMIN",
               "HOUSEKEEPING_SUPERVISOR",
               "HOUSEKEEPING_STAFF",

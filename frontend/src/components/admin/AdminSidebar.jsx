@@ -27,6 +27,7 @@ export default function AdminSidebar() {
     { label: "Menu", path: "/admin/kitchen/menu" },
     { label: "Create Staff Login", path: "/admin/kitchen/create-login" },
     { label: "Manage Staff Logins", path: "/admin/kitchen/manage-logins" },
+    { label: "Escalated Housekeeping", path: "/admin/housekeeping/supervisor" },
   ];
 
   const housekeepingAdminMenu = [

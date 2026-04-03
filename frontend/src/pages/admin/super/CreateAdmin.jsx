@@ -30,6 +30,13 @@ export default function CreateAdmin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [createdCredentials, setCreatedCredentials] = useState(null);
+  const [copyFeedback, setCopyFeedback] = useState("");
+
+  const supervisorAppLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/admin/housekeeping/supervisor`
+      : "/admin/housekeeping/supervisor";
 
   useEffect(() => {
     if (!roleOptions.some((option) => option.value === form.role)) {
@@ -41,15 +48,61 @@ export default function CreateAdmin() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const generatePassword = () => {
+    const random = Math.random().toString(36).slice(-6);
+    const generated = `CP@${random}9`;
+    setForm((prev) => ({ ...prev, password: generated }));
+  };
+
+  const generateLoginId = () => {
+    const cleanName = String(form.name || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ".")
+      .replace(/^\.+|\.+$/g, "")
+      .slice(0, 24);
+
+    const rolePrefix = form.role === "HOUSEKEEPING_SUPERVISOR" ? "sup" : "staff";
+    const suffix = String(Date.now()).slice(-4);
+    const generated = `${cleanName || rolePrefix}.${rolePrefix}${suffix}@cpstaff.local`;
+
+    setForm((prev) => ({ ...prev, email: generated }));
+  };
+
+  const copyText = async (value, label) => {
+    try {
+      if (!value) return;
+      await navigator.clipboard.writeText(value);
+      setCopyFeedback(`${label} copied`);
+      setTimeout(() => setCopyFeedback(""), 1800);
+    } catch {
+      setCopyFeedback(`Unable to copy ${label.toLowerCase()}`);
+      setTimeout(() => setCopyFeedback(""), 1800);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setCopyFeedback("");
     setLoading(true);
 
     try {
-      await createAdmin(form);
-      setSuccess("Admin created successfully");
+      const payload = {
+        ...form,
+        email: String(form.email || "").trim().toLowerCase(),
+        phone: String(form.phone || "").trim(),
+      };
+
+      await createAdmin(payload);
+      setSuccess("Login generated successfully");
+      setCreatedCredentials({
+        role: payload.role,
+        loginId: payload.email,
+        password: payload.password,
+        appLink: supervisorAppLink,
+      });
+
       setForm({
         name: "",
         email: "",
@@ -104,6 +157,60 @@ export default function CreateAdmin() {
             </div>
           )}
 
+          {createdCredentials && (
+            <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-900">
+              <p className="font-semibold mb-2">Created Login Credentials</p>
+              <p>
+                Role: <span className="font-medium">{createdCredentials.role.replaceAll("_", " ")}</span>
+              </p>
+              <p>
+                Login ID: <span className="font-mono">{createdCredentials.loginId}</span>
+              </p>
+              <p>
+                Password: <span className="font-mono">{createdCredentials.password}</span>
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    copyText(
+                      `Login ID: ${createdCredentials.loginId}\nPassword: ${createdCredentials.password}`,
+                      "Credentials"
+                    )
+                  }
+                  className="px-3 py-2 rounded-lg border border-green-300 bg-white text-xs font-semibold"
+                >
+                  Copy Credentials
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => copyText(createdCredentials.appLink, "App link")}
+                  className="px-3 py-2 rounded-lg border border-green-300 bg-white text-xs font-semibold"
+                >
+                  Copy App Link
+                </button>
+              </div>
+
+              <p className="mt-3 mb-1 font-medium">Phone Download/Login Link</p>
+              <a
+                href={createdCredentials.appLink}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs break-all underline"
+              >
+                {createdCredentials.appLink}
+              </a>
+
+              <p className="mt-2 text-xs text-green-800">
+                Share this link with supervisor/staff. They can login and install the app using Add to Home screen.
+              </p>
+
+              {copyFeedback && <p className="mt-2 text-xs font-medium">{copyFeedback}</p>}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
 
             {/* Grid */}
@@ -129,15 +236,24 @@ export default function CreateAdmin() {
                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                   Email Address
                 </label>
-                <input
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="admin@hotel.com"
-                  required
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
-                />
+                <div className="flex gap-2">
+                  <input
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="admin@hotel.com"
+                    required
+                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={generateLoginId}
+                    className="px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
 
               {/* Phone */}
@@ -160,15 +276,24 @@ export default function CreateAdmin() {
                 <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                   Password
                 </label>
-                <input
-                  name="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Minimum 8 characters"
-                  required
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
-                />
+                <div className="flex gap-2">
+                  <input
+                    name="password"
+                    type="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="Minimum 8 characters"
+                    required
+                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="px-3 py-2 rounded-xl border border-gray-300 text-xs font-semibold bg-white"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
 
               {/* Role — Full Width */}

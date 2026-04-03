@@ -80,6 +80,8 @@ export const createAdmin = async (req, res) => {
         id: admin._id,
         name: admin.name,
         email: admin.email,
+        loginId: admin.email,
+        phone: admin.phone,
         role: admin.role,
       },
     });

@@ -1,4 +1,5 @@
 import ServiceRequest from "../models/ServiceRequest.js";
+import Admin from "../models/Admin.js";
 import {
   getEscalationPhone,
   triggerHousekeepingSupervisorCall,
@@ -58,6 +59,20 @@ const fetchPendingRequest = async (requestId) => {
   return request;
 };
 
+const resolveKitchenAdminEscalationPhone = async () => {
+  const kitchenAdmin = await Admin.findOne({
+    role: "DINING_ADMIN",
+    isActive: true,
+  })
+    .sort({ updatedAt: -1, createdAt: -1 })
+    .select("phone")
+    .lean();
+
+  const fallback = getEscalationPhone();
+  const kitchenPhone = String(kitchenAdmin?.phone || "").trim();
+  return kitchenPhone || fallback;
+};
+
 const runPrimaryCallAttempt = async (requestId) => {
   const request = await fetchPendingRequest(requestId);
   if (!request) {
@@ -92,7 +107,7 @@ const runEscalationCallAttempt = async (requestId) => {
     items: request.items,
     note: request.note,
     action: "escalated",
-    toNumberOverride: getEscalationPhone(),
+    toNumberOverride: await resolveKitchenAdminEscalationPhone(),
   });
 
   const updates = {

@@ -33,7 +33,13 @@ router.get("/", housekeepingAuth, validateStatusQuery, listHousekeepingRequests)
 router.get(
   "/team",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "HOUSEKEEPING_STAFF"),
+  allowRoles(
+    "SUPER_ADMIN",
+    "HOUSEKEEPING_ADMIN",
+    "HOUSEKEEPING_SUPERVISOR",
+    "HOUSEKEEPING_STAFF",
+    "DINING_ADMIN"
+  ),
   getHousekeepingTeam
 );
 
@@ -41,7 +47,7 @@ router.get(
 router.patch(
   "/:id/accept",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"),
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "DINING_ADMIN"),
   acceptHousekeepingRequest
 );
 
@@ -49,7 +55,7 @@ router.patch(
 router.patch(
   "/:id/assign",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"),
+  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "DINING_ADMIN"),
   validateAssignmentPayload,
   assignHousekeepingRequest
 );
@@ -58,14 +64,26 @@ router.patch(
 router.patch(
   "/:id/in-progress",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "HOUSEKEEPING_STAFF"),
+  allowRoles(
+    "SUPER_ADMIN",
+    "HOUSEKEEPING_ADMIN",
+    "HOUSEKEEPING_SUPERVISOR",
+    "HOUSEKEEPING_STAFF",
+    "DINING_ADMIN"
+  ),
   markHousekeepingRequestInProgress
 );
 
 router.patch(
   "/:id/complete",
   adminAuth,
-  allowRoles("SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR", "HOUSEKEEPING_STAFF"),
+  allowRoles(
+    "SUPER_ADMIN",
+    "HOUSEKEEPING_ADMIN",
+    "HOUSEKEEPING_SUPERVISOR",
+    "HOUSEKEEPING_STAFF",
+    "DINING_ADMIN"
+  ),
   completeHousekeepingRequest
 );
 

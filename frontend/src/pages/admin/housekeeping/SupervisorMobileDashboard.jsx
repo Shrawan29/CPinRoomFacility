@@ -28,14 +28,19 @@ const statusStyles = {
 };
 
 const canAssignRole = (role) =>
-  ["SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(role);
+  ["SUPER_ADMIN", "DINING_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(
+    role
+  );
 
 const canAcceptRole = (role) =>
-  ["SUPER_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(role);
+  ["SUPER_ADMIN", "DINING_ADMIN", "HOUSEKEEPING_ADMIN", "HOUSEKEEPING_SUPERVISOR"].includes(
+    role
+  );
 
 const canInProgressRole = (role) =>
   [
     "SUPER_ADMIN",
+    "DINING_ADMIN",
     "HOUSEKEEPING_ADMIN",
     "HOUSEKEEPING_SUPERVISOR",
     "HOUSEKEEPING_STAFF",
@@ -71,6 +76,7 @@ export default function SupervisorMobileDashboard() {
   const canAccept = canAcceptRole(admin?.role);
   const canInProgress = canInProgressRole(admin?.role);
   const canComplete = canCompleteRole(admin?.role);
+  const isKitchenAdmin = admin?.role === "DINING_ADMIN";
 
   const playNotification = async () => {
     try {
@@ -221,7 +227,9 @@ export default function SupervisorMobileDashboard() {
       <header className="sticky top-0 z-20 bg-[var(--brand)] text-white px-4 py-3 shadow-md">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold">Supervisor Dashboard</h1>
+            <h1 className="text-lg font-semibold">
+              {isKitchenAdmin ? "Escalated Housekeeping" : "Supervisor Dashboard"}
+            </h1>
             <p className="text-xs opacity-85">{admin?.name || "Housekeeping"}</p>
           </div>
           <button
@@ -279,6 +287,12 @@ export default function SupervisorMobileDashboard() {
           {!installPromptEvent && (
             <p className="mt-2 text-xs text-[var(--text-muted)]">
               If install is unavailable, open browser menu and choose Add to Home screen.
+            </p>
+          )}
+
+          {isKitchenAdmin && (
+            <p className="mt-2 text-xs text-[var(--text-muted)]">
+              Kitchen admin sees requests only after supervisor escalation.
             </p>
           )}
         </section>
