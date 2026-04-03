@@ -14,8 +14,8 @@ import { useAdminAuth } from "../../../context/AdminAuthContext";
 export default function AdminList() {
 
   const { admin, token, loading: authLoading } = useAdminAuth();
-  const isKitchenAdmin = admin?.role === "DINING_ADMIN";
-  const editableRoleOptions = isKitchenAdmin
+  const isHousekeepingAdmin = admin?.role === "HOUSEKEEPING_ADMIN";
+  const editableRoleOptions = isHousekeepingAdmin
     ? [
         { value: "HOUSEKEEPING_SUPERVISOR", label: "Housekeeping Supervisor" },
         { value: "HOUSEKEEPING_STAFF", label: "Housekeeping Staff" },
@@ -154,11 +154,11 @@ export default function AdminList() {
         {/* Page Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
-            {isKitchenAdmin ? "Manage Supervisor & Staff Logins" : "Manage Admins"}
+            {isHousekeepingAdmin ? "Manage Supervisor & Staff Logins" : "Manage Admins"}
           </h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">
-            {isKitchenAdmin
-              ? "Kitchen admin can edit, activate, deactivate, and delete supervisor/staff logins"
+            {isHousekeepingAdmin
+              ? "Housekeeping admin can edit, activate, deactivate, and delete supervisor/staff logins"
               : "View and manage all admin accounts"}
           </p>
         </div>

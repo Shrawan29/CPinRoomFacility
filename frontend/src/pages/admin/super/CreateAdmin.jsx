@@ -7,7 +7,7 @@ export default function CreateAdmin() {
   const { admin, loading: authLoading } = useAdminAuth();
 
   const roleOptions =
-    admin?.role === "DINING_ADMIN"
+    admin?.role === "HOUSEKEEPING_ADMIN"
       ? [
           { value: "HOUSEKEEPING_SUPERVISOR", label: "Housekeeping Supervisor" },
           { value: "HOUSEKEEPING_STAFF", label: "Housekeeping Staff" },
@@ -123,12 +123,12 @@ export default function CreateAdmin() {
       {/* Page Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-[var(--text-primary)]">
-          {admin?.role === "DINING_ADMIN"
+          {admin?.role === "HOUSEKEEPING_ADMIN"
             ? "Create Supervisor/Staff Login"
             : "Create New Admin"}
         </h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">
-          {admin?.role === "DINING_ADMIN"
+          {admin?.role === "HOUSEKEEPING_ADMIN"
             ? "Create login credentials for housekeeping supervisors and staff"
             : "Add a new admin for hotel operations"}
         </p>
@@ -326,8 +326,8 @@ export default function CreateAdmin() {
                 </select>
 
                 <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {admin?.role === "DINING_ADMIN"
-                    ? "Kitchen admin can create only supervisor/staff logins"
+                  {admin?.role === "HOUSEKEEPING_ADMIN"
+                    ? "Housekeeping admin can create only supervisor/staff logins"
                     : "Choose which area this admin can manage"}
                 </p>
               </div>
